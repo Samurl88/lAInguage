@@ -1283,6 +1283,27 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNReanimated (3.12.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNScreens (3.32.0):
     - DoubleConversion
     - glog
@@ -1377,6 +1398,7 @@ DEPENDENCIES:
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBDatabase (from `../node_modules/@react-native-firebase/database`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - VisionCamera (from `../node_modules/react-native-vision-camera`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -1519,6 +1541,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/database"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNReanimated:
+    :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   VisionCamera:
@@ -1599,10 +1623,11 @@ SPEC CHECKSUMS:
   RNFBAuth: 58a7a5591755a4f078cfa03e29a60be009a93931
   RNFBDatabase: 78900cdabc4b87385e052bd3f3c4195690ee6ecd
   RNGestureHandler: 5538c370587d7e757667b9283ca867dd7635f154
+  RNReanimated: be44c56aefb04cd83dfe6dcfaff5b909ef627a1d
   RNScreens: fd2722bcc59f36a629205af8cc7b48e4bc0d09f5
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   VisionCamera: 2c4cb89c573c5d54d1191e433bd224998d3b14b7
-  Yoga: 9ad2c02dbd9811bb5a35fe23081cb0f5d5a3f9dd
+  Yoga: 45564236f670899c9739b1581a12b00ead5d391f
 
 PODFILE CHECKSUM: 395d5be07245c6747db0592440544cf5d9d3c6b7
 

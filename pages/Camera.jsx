@@ -9,69 +9,23 @@ import {
 } from "react-native-gesture-handler";
 import { Canvas, Path } from "@shopify/react-native-skia";
 
+import camerabtn from '../assets/camerabtn.png'
 
 
-// interface IPath {
-//   segments: String[];
-//   color?: string;
-// }
 
 export default function CameraPage() {
   const [paths, setPaths] = useState([]);
-  // const [photo, setPhot]
-  // const configuration: Configuration = {
-  //   // For this example only the sticker, text, and brush tool are enabled.
-  //   tools: [Tool.STICKER, Tool.TEXT, Tool.BRUSH],
 
-  //   // For this example only stickers suitable for annotations are enabled.
-  //   sticker: {
-  //     categories: [
-  //       {
-  //         identifier: "annotation_stickers",
-  //         name: "Annotation",
 
-  //       },
-  //     ],
-  //   },
-  // };
 
   const camera = useRef(null);
   const [cameraOpen, setCameraOpen] = useState(true);
   const [image, setImage] = useState(null);
-  // const processImageForOCR = async (imageUri) => {
-  //   try {
-  //     const processedImage = await FirebaseMLVision.cloudDocumentTextRecognizerProcessImage(
-  //       imageUri
-  //     );
-  //     const recognizedText = processedImage.text;
-  //     console.log(recognizedText)
-  //     return recognizedText;
-  //   } catch (error) {
-  //     console.error('Error processing image for OCR:', error);
-  //   }
-  // };
   const device = useCameraDevice('back')
   const { hasPermission, requestPermission } = useCameraPermission()
 
 
-  // async function highlightPhoto(photo) {
-  //   try {
-  //     // Open the photo editor and handle the export as well as any occuring errors.
-  //     const result = await PESDK.openEditor(photo, configuration);
-
-  //     // highlight-events
-  //     if (result != null) {
-  //       // The user exported a new photo successfully and the newly generated photo is located at `result.image`.
-  //       console.log(result.image);
-  //     } else {
-  //       // The user tapped on the cancel button within the editor.
-  //       return;
-  //     }
-  //   } catch (error) {
-  //     // There was an error generating the photo.
-  //     console.log(error);
-  //   }
-  // }
+ 
   const [tGestureStart, setTGestureStart] = useState(null);
   const [tGestureMove, setTGestureMove] = useState(null);
   const [tGestureUpdate, setTGestureUpdate] = useState(null);
@@ -106,13 +60,21 @@ export default function CameraPage() {
   if (hasPermission)
     return (
       <SafeAreaView style={styles.backgroundContainer}>
-        {cameraOpen ? <Camera
+        {cameraOpen ? 
+        <>
+        <Camera
           ref={camera}
           style={StyleSheet.absoluteFill}
           device={device}
           isActive={true}
           photo={true}
-        /> :
+        >
+        </Camera> 
+          <View style={{flex: 1, }}>
+            <Image source={camerabtn} style={{height: 100, width: 100}}/>
+          </View>
+        </>
+        :
           <GestureHandlerRootView style={{ flex: 1 }}>
             <GestureDetector gesture={pan}>
               <View style={styles.drawingContainer}>
