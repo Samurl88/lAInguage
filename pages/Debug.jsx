@@ -4,7 +4,8 @@ import React, {useState, useEffect} from 'react'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import Config from "react-native-config"
 
-
+import auth from '@react-native-firebase/auth';
+import database from "@react-native-firebase/database"
 
 export default function DebugPage({navigation}) {
 
@@ -12,10 +13,7 @@ export default function DebugPage({navigation}) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" }});
 
   const [response, setResponse] = useState(null)
-  useEffect(() => {
-    
-  }, [])
-  
+
 
   const define = async (word, language) => {
 
@@ -37,11 +35,41 @@ export default function DebugPage({navigation}) {
     // console.log(JSON.parse(text));
   }
 
+  const addWord = (word) => {
+    console.log('word')
+    const uid = auth().currentUser.uid;
+    database()
+      .ref(`/${uid}/words`)
+      .set({
+        englishWord: "Teddy",
+        translatedWord: "Perro",
+        definition: "The best dog",
+        translatedDefinition: "El perro favorito"
+      })
+      .then(() => console.log("ofbjuewv"))
+    console.log("ergobj")
+
+    // console.log(database().ref("notes").set({work: "please"}))
+    // database()
+    // .ref('/')
+    // .set({
+    //   name: 'Ada Lovelace',
+    //   age: 31,
+    // })
+    // .then(() => console.log('Data set.'));
+
+    // database()
+    // .ref('/').once('teddy').then(snapshot => {console.log(snapshot.val())})
+    }
+
   return (
     <SafeAreaView>
       <Text>DebugPage</Text>
       <Pressable onPress={() => {define("Slowly", "Spanish")}}>
         <Text>Define a word!</Text>
+      </Pressable>
+      <Pressable onPress={() => {addWord("word")}}>
+        <Text style={{fontSize: 100}}>Add to database</Text>
       </Pressable>
       <Pressable onPress={() => {navigation.navigate("Home")}}>
         <Text>Go to home</Text>
