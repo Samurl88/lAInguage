@@ -1,5 +1,6 @@
 import { View, Text, SafeAreaView, Pressable } from 'react-native'
-import React from 'react'
+
+import React, {useState, useEffect} from 'react'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import Config from "react-native-config"
 
@@ -9,6 +10,11 @@ export default function DebugPage({navigation}) {
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" }});
+
+  const [response, setResponse] = useState(null)
+  useEffect(() => {
+    
+  }, [])
   
 
   const define = async (word, language) => {
@@ -27,7 +33,8 @@ export default function DebugPage({navigation}) {
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
-    console.log(JSON.parse(text));
+    setResponse(text)
+    // console.log(JSON.parse(text));
   }
 
   return (
@@ -39,6 +46,7 @@ export default function DebugPage({navigation}) {
       <Pressable onPress={() => {navigation.navigate("Home")}}>
         <Text>Go to home</Text>
       </Pressable>
+      <Text>{response}</Text>
     </SafeAreaView>
   )
 }
