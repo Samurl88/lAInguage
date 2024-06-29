@@ -1,10 +1,13 @@
-import { View, Text } from 'react-native'
+import { View, Text, Pressable, SafeAreaView } from 'react-native'
 import React from 'react'
 
-export default function HomePage() {
+export default function HomePage({ navigation }) {
   return (
-    <View>
+    <SafeAreaView>
       <Text>HomePage</Text>
-    </View>
+      <Pressable onPress={() => {navigation.navigate("Debug")}}>
+        <Text>Go to debug</Text>
+      </Pressable>
+    </SafeAreaView>
   )
 }
