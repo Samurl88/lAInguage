@@ -36,7 +36,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false, }}>
-        {user
+        {true
           ? <>
             <Stack.Screen name="Home" component={HomePage} />
             <Stack.Screen name="Debug" component={DebugPage} />
