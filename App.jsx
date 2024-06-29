@@ -9,7 +9,6 @@ import CameraPage from "./pages/Camera"
 import SignUp from './pages/SignUp';
 
 import auth from '@react-native-firebase/auth';
-// import { FirebaseMLVision } from "@react-native-firebase/ml-vision"
 
 const Stack = createStackNavigator();
 
@@ -17,7 +16,7 @@ export default function App() {
 
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState(true);
+  const [user, setUser] = useState();
 
   // Handle user state changes
   function onAuthStateChanged(user) {
