@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.7)",
     position: "absolute",
     zIndex: 100,
-    top: screenHeight * 0.1,
+    top: screenHeight * 0.07,
     justifyContent: "center",
     alignSelf: "center",
     flexDirection: "row",
