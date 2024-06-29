@@ -11,6 +11,7 @@ import { Canvas, Path } from "@shopify/react-native-skia";
 
 import camerabtn from '../assets/camerabtn.png'
 
+import { runOnJS } from 'react-native-reanimated';
 
 
 export default function CameraPage() {
@@ -39,15 +40,15 @@ export default function CameraPage() {
         color: "yellow",
       };
       newPaths[paths.length].segments.push(`M ${g.x} ${g.y}`);
-      setPaths(newPaths);
-      setTGestureStart(`${Math.round(g.x)}, ${Math.round(g.y)}`);
+      runOnJS(setPaths)(newPaths);
+      runOnJS(setTGestureStart)(`${Math.round(g.x)}, ${Math.round(g.y)}`);
     })
     .onUpdate((g) => {
       const index = paths.length - 1;
       const newPaths = [...paths];
       if (newPaths?.[index]?.segments) {
         newPaths[index].segments.push(`L ${g.x} ${g.y}`);
-        setPaths(newPaths);
+        runOnJS(setPaths)(newPaths);
       }
     }).minDistance(1)
   useEffect(() => {
