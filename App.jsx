@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View, } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomePage from "./pages/Home"
@@ -9,11 +9,12 @@ import CameraPage from "./pages/Camera"
 import SignUp from './pages/SignUp';
 
 import auth from '@react-native-firebase/auth';
-
+// import { FirebaseMLVision } from "@react-native-firebase/ml-vision"
 
 const Stack = createStackNavigator();
 
 export default function App() {
+
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -31,12 +32,12 @@ export default function App() {
   }, []);
 
   if (initializing) return null;
-  
+
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false, }}>
-        {user 
+        {true
           ? <>
             <Stack.Screen name="Home" component={HomePage} />
             <Stack.Screen name="Debug" component={DebugPage} />
