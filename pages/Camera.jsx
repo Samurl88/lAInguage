@@ -1,9 +1,25 @@
 import { View, Text, SafeAreaView, StyleSheet, Button, Image } from 'react-native'
-
+import { Configuration, PESDK, Tool } from "react-native-photoeditorsdk";
 import { useCameraDevice, useCameraPermission, Camera } from 'react-native-vision-camera'
 import React, { useEffect, useRef, useState } from 'react'
 
 export default function CameraPage() {
+  const configuration: Configuration = {
+    // For this example only the sticker, text, and brush tool are enabled.
+    tools: [Tool.STICKER, Tool.TEXT, Tool.BRUSH],
+
+    // For this example only stickers suitable for annotations are enabled.
+    sticker: {
+      categories: [
+        {
+          identifier: "annotation_stickers",
+          name: "Annotation",
+
+        },
+      ],
+    },
+  };
+
   const camera = useRef(null);
   const [cameraOpen, setCameraOpen] = useState(true);
   const [image, setImage] = useState(null);
