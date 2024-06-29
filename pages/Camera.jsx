@@ -1,9 +1,11 @@
 import { View, Text, SafeAreaView, StyleSheet, Button } from 'react-native'
 import { Configuration, PESDK, Tool } from "react-native-photoeditorsdk";
 import { useCameraDevice, useCameraPermission, Camera } from 'react-native-vision-camera'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import { useImage, Image } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
+import Config from "react-native-config"
 import {
   Gesture,
   GestureDetector,
@@ -18,9 +20,61 @@ import { runOnJS } from 'react-native-reanimated';
 
 // yarn ios--simulator "iPhone 15 Pro"
 export default function CameraPage() {
+  const genAI = new GoogleGenerativeAI(Config.API_KEY);
+
+  const safetySetting = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+  ];
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
   const [paths, setPaths] = useState([]);
   const canvasRef = useCanvasRef();
 
+
+  const define = async (imageData) => {
+
+    console.log(Config.API_KEY)
+
+    const prompt = `
+    Given this image.
+    Language: "Mandarin"
+    For the highlighted word in the image and the above language, provide its English definition, its translation in the provided language, and its definition in the provided language. Use this JSON schema:
+    { "englishDefinition": "string", 
+      "translatedWord": "string",
+      "translatedDefinition": "string"
+    }`
+
+    const result = await model.generateContent([prompt, { inlineData: { data: imageData, mimeType: 'image/png' } }]);
+    const response = result.response;
+    const text = JSON.parse(response.text());
+    console.log(text)
+    console.log("response")
+    // setEnglishWord(word)
+    // setEnglishDefinition(text.englishDefinition)
+    // setTranslatedWord(text.translatedWord)
+    // setTranslatedDefinition(text.translatedDefinition)
+
+    // setResponse(JSON.stringify(text))
+  }
 
   const camera = useRef(null);
   const [cameraOpen, setCameraOpen] = useState(true);
@@ -33,8 +87,8 @@ export default function CameraPage() {
     console.log("sup")
     const image = await canvasRef.current.makeImageSnapshotAsync();
     const bytes = image.encodeToBase64();
-    console.log(bytes)
-
+    // console.log(bytes)
+    define(bytes);
   };
 
   const [tGestureStart, setTGestureStart] = useState(null);
@@ -95,7 +149,7 @@ export default function CameraPage() {
 
                 <Canvas style={styles.canvas} ref={canvasRef}>
                   {/* {testImg ? */}
-                  <Image image={loadedImage} fit="cover" x={0} y={0} width={300} height={500} />
+                  <Image image={loadedImage} fit="cover" width={300} height={500} style={styles.img} />
                   {/* // : <></>} */}
                   {paths.map((p, index) => (
                     <Path

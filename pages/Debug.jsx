@@ -1,13 +1,13 @@
 import { View, Text, SafeAreaView, Pressable, StyleSheet } from 'react-native'
 
-import React, {useState, useEffect} from 'react'
-import { GoogleGenerativeAI , HarmBlockThreshold, HarmCategory} from '@google/generative-ai'
+import React, { useState, useEffect } from 'react'
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
 import Config from "react-native-config"
 
 import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database"
 
-export default function DebugPage({navigation}) {
+export default function DebugPage({ navigation }) {
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
 
@@ -34,7 +34,7 @@ export default function DebugPage({navigation}) {
     },
   ];
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" }},);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
   const [response, setResponse] = useState(null)
   const [englishWord, setEnglishWord] = useState(null)
@@ -63,7 +63,7 @@ export default function DebugPage({navigation}) {
     setEnglishDefinition(text.englishDefinition)
     setTranslatedWord(text.translatedWord)
     setTranslatedDefinition(text.translatedDefinition)
-    
+
     setResponse(JSON.stringify(text))
   }
 
@@ -71,25 +71,26 @@ export default function DebugPage({navigation}) {
     const uid = auth().currentUser.uid;
     database()
       .ref(`/${uid}/words`)
-      .update({[englishWord]: {
-        translatedWord: translatedWord,
-        definition: englishDefinition,
-        translatedDefinition: translatedDefinition
-      }
+      .update({
+        [englishWord]: {
+          translatedWord: translatedWord,
+          definition: englishDefinition,
+          translatedDefinition: translatedDefinition
+        }
       })
       .then(() => console.log("Done!"))
-    }
+  }
 
   return (
-    <SafeAreaView style={{alignItems: "center", }}>
+    <SafeAreaView style={{ alignItems: "center", }}>
       <Text>DebugPage</Text>
-      <Pressable style={styles.debugButton} onPress={() => {define("Pizza", "Spanish")}}>
+      <Pressable style={styles.debugButton} onPress={() => { define("Pizza", "Spanish") }}>
         <Text>Define a word!</Text>
       </Pressable>
-      <Pressable style={styles.debugButton} onPress={() => {addWord("word")}}>
+      <Pressable style={styles.debugButton} onPress={() => { addWord("word") }}>
         <Text>Add to database</Text>
       </Pressable>
-      <Pressable style={styles.debugButton} onPress={() => {navigation.navigate("Home")}}>
+      <Pressable style={styles.debugButton} onPress={() => { navigation.navigate("Home") }}>
         <Text>Go to home</Text>
       </Pressable>
       <Text>{response}</Text>
