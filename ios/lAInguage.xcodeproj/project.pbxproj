@@ -11,9 +11,10 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		5A394BCFAAB3A73242955003 /* libPods-lAInguage-lAInguageTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B3E7ED6FEC9E8A16DEAB192 /* libPods-lAInguage-lAInguageTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		A45069C385CC8B4609693464 /* libPods-lAInguage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 002795E2C487CB76986DE2A6 /* libPods-lAInguage.a */; };
-		CA6B8D658FA8DFF35EA52A2E /* libPods-lAInguage-lAInguageTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23BF8234EA5340839921A55A /* libPods-lAInguage-lAInguageTests.a */; };
+		CA6B8D658FA8DFF35EA52A2E /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 		F1A4284FCA41654EEC1B9798 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5B584E997B68A066EDDCC00D /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -39,11 +40,11 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = lAInguage/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = lAInguage/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = lAInguage/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		23BF8234EA5340839921A55A /* libPods-lAInguage-lAInguageTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-lAInguage-lAInguageTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B3E7ED6FEC9E8A16DEAB192 /* libPods-lAInguage-lAInguageTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-lAInguage-lAInguageTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B584E997B68A066EDDCC00D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = lAInguage/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		71B0EFC48F4A394177588700 /* Pods-lAInguage.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lAInguage.release.xcconfig"; path = "Target Support Files/Pods-lAInguage/Pods-lAInguage.release.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = lAInguage/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8E3A506D65D91163BD609D10 /* Pods-lAInguage-lAInguageTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lAInguage-lAInguageTests.debug.xcconfig"; path = "Target Support Files/Pods-lAInguage-lAInguageTests/Pods-lAInguage-lAInguageTests.debug.xcconfig"; sourceTree = "<group>"; };
+		E47EFA9C226209C74E04C9FB /* Pods-lAInguage.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lAInguage.release.xcconfig"; path = "Target Support Files/Pods-lAInguage/Pods-lAInguage.release.xcconfig"; sourceTree = "<group>"; };
 		E5068EDA963BBD33B9D2321A /* Pods-lAInguage-lAInguageTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lAInguage-lAInguageTests.release.xcconfig"; path = "Target Support Files/Pods-lAInguage-lAInguageTests/Pods-lAInguage-lAInguageTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F8ACCCB208425CB3053DB4B9 /* Pods-lAInguage.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lAInguage.debug.xcconfig"; path = "Target Support Files/Pods-lAInguage/Pods-lAInguage.debug.xcconfig"; sourceTree = "<group>"; };
@@ -54,7 +55,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CA6B8D658FA8DFF35EA52A2E /* libPods-lAInguage-lAInguageTests.a in Frameworks */,
+				CA6B8D658FA8DFF35EA52A2E /* BuildFile in Frameworks */,
+				5A394BCFAAB3A73242955003 /* libPods-lAInguage-lAInguageTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,7 +108,7 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				002795E2C487CB76986DE2A6 /* libPods-lAInguage.a */,
-				23BF8234EA5340839921A55A /* libPods-lAInguage-lAInguageTests.a */,
+				1B3E7ED6FEC9E8A16DEAB192 /* libPods-lAInguage-lAInguageTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -146,9 +148,9 @@
 			isa = PBXGroup;
 			children = (
 				F8ACCCB208425CB3053DB4B9 /* Pods-lAInguage.debug.xcconfig */,
-				71B0EFC48F4A394177588700 /* Pods-lAInguage.release.xcconfig */,
 				8E3A506D65D91163BD609D10 /* Pods-lAInguage-lAInguageTests.debug.xcconfig */,
 				E5068EDA963BBD33B9D2321A /* Pods-lAInguage-lAInguageTests.release.xcconfig */,
+				E47EFA9C226209C74E04C9FB /* Pods-lAInguage.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -472,7 +474,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = BV5CMK55B8;
+				DEVELOPMENT_TEAM = 4FQMZNQJKK;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = lAInguage/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -485,7 +487,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sanakama.lAInguage;
 				PRODUCT_NAME = lAInguage;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -495,12 +497,12 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 71B0EFC48F4A394177588700 /* Pods-lAInguage.release.xcconfig */;
+			baseConfigurationReference = E47EFA9C226209C74E04C9FB /* Pods-lAInguage.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = BV5CMK55B8;
+				DEVELOPMENT_TEAM = 4FQMZNQJKK;
 				INFOPLIST_FILE = lAInguage/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -512,7 +514,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sanakama.lAInguage;
 				PRODUCT_NAME = lAInguage;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

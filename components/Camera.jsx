@@ -18,6 +18,6 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 
-function Camera(){
-    
+function Camera() {
+
 }

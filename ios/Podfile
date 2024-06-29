@@ -38,3 +38,4 @@ target 'lAInguage' do
     )
   end
 end
+pod 'RNFBApp', :path => '../node_modules/@react-native-firebase/app'
