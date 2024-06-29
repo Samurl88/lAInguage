@@ -7,8 +7,17 @@ import {
   GestureDetector,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
+import { Canvas, Path } from "@shopify/react-native-skia";
+
+
+
+// interface IPath {
+//   segments: String[];
+//   color?: string;
+// }
 
 export default function CameraPage() {
+  const [paths, setPaths] = useState([]);
   // const [photo, setPhot]
   // const configuration: Configuration = {
   //   // For this example only the sticker, text, and brush tool are enabled.
@@ -70,94 +79,23 @@ export default function CameraPage() {
 
   const pan = Gesture.Pan()
     .onStart((g) => {
-      // Start gesture looks like this 
-      // {
-      //   "absoluteX": 178,
-      //   "absoluteY": 484,
-      //   "handlerTag": 2,
-      //   "numberOfPointers": 1,
-      //   "oldState": 2,
-      //   "state": 4,
-      //   "target": 115,
-      //   "translationX": -4.3333282470703125,
-      //   "translationY": 0,
-      //   "velocityX": -172.0102558333448,
-      //   "velocityY": 0,
-      //   "x": 178,
-      //   "y": 484,
-      // }
+      const newPaths = [...paths];
+      newPaths[paths.length] = {
+        segments: [],
+        color: "yellow",
+      };
+      newPaths[paths.length].segments.push(`M ${g.x} ${g.y}`);
+      setPaths(newPaths);
       setTGestureStart(`${Math.round(g.x)}, ${Math.round(g.y)}`);
     })
-    .onTouchesMove((g) => {
-      // Move gesture looks like this
-      // {
-      //   "allTouches": Array [
-      //     {
-      //       "absoluteX": 123.33332824707031,
-      //       "absoluteY": 449,
-      //       "id": 0,
-      //       "x": 123.33332824707031,
-      //       "y": 449,
-      //     },
-      //   ],
-      //   "changedTouches": Array [
-      //    {
-      //       "absoluteX": 123.33332824707031,
-      //       "absoluteY": 449,
-      //       "id": 0,
-      //       "x": 123.33332824707031,
-      //       "y": 449,
-      //     },
-      //   ],
-      //   "eventType": 2,
-      //   "handlerTag": 2,
-      //   "numberOfTouches": 1,
-      //   "state": 4,
-      //   "target": 115,
-      // }
-      setTGestureMove(
-        `${Math.round(g.changedTouches[0].x)}, ${Math.round(
-          g.changedTouches[0].y
-        )}`
-      );
-    })
     .onUpdate((g) => {
-      // Update gesture looks like
-      // {
-      //   "absoluteX": 229,
-      //   "absoluteY": 400.3333282470703,
-      //   "handlerTag": 2,
-      //   "numberOfPointers": 1,
-      //   "state": 4,
-      //   "target": 115,
-      //   "translationX": 0,
-      //   "translationY": 1.6666717529296875,
-      //   "velocityX": 0,
-      //   "velocityY": 24.111687246989227,
-      //   "x": 229,
-      //   "y": 400.3333282470703,
-      // }
-      setTGestureUpdate(`${Math.round(g.x)}, ${Math.round(g.y)}`);
-    })
-    .onEnd((g) => {
-      // End gesture looks like this
-      // {
-      //   "absoluteX": 213.3333282470703,
-      //   "absoluteY": 542.6666564941406,
-      //   "handlerTag": 2,
-      //   "numberOfPointers": 0,
-      //   "oldState": 4,
-      //   "state": 5,
-      //   "target": 115,
-      //   "translationX": -66,
-      //   "translationY": 172,
-      //   "velocityX": -71.28075141720757,
-      //   "velocityY": 567.0058445795321,
-      //   "x": 213.3333282470703,
-      //   "y": 542.6666564941406,
-      // }
-      setTGestureEnd(`${Math.round(g.x)}, ${Math.round(g.y)}`);
-    });
+      const index = paths.length - 1;
+      const newPaths = [...paths];
+      if (newPaths?.[index]?.segments) {
+        newPaths[index].segments.push(`L ${g.x} ${g.y}`);
+        setPaths(newPaths);
+      }
+    }).minDistance(1)
   useEffect(() => {
     if (!hasPermission)
       requestPermission()
@@ -177,9 +115,25 @@ export default function CameraPage() {
         /> :
           <GestureHandlerRootView style={{ flex: 1 }}>
             <GestureDetector gesture={pan}>
-              <Image source={{
-                uri: image,
-              }} style={styles.image} />
+              <View style={styles.drawingContainer}>
+                <Image source={{
+                  uri: image,
+                }} style={styles.image} />
+
+                <Canvas style={styles.canvas}>
+                  {paths.map((p, index) => (
+                    <Path
+                      key={index}
+                      path={p.segments.join(" ")}
+                      strokeWidth={30}
+                      style="stroke"
+                      color={p.color}
+
+                    />
+                  ))}
+                </Canvas>
+
+              </View>
 
             </GestureDetector>
             <Text
@@ -196,7 +150,10 @@ export default function CameraPage() {
             >{`Gesture ended at:  ${tGestureEnd}`}</Text>
           </GestureHandlerRootView>
         }
-
+        <Button style={styles.clearBtn} title="Clear" onPress={() => {
+          setPaths([]);
+        }}>
+        </Button>
         <Button title="sup" onPress={async () => {
           setCameraOpen(true)
           const photo = await camera.current.takePhoto();
@@ -205,20 +162,43 @@ export default function CameraPage() {
           setImage(photo.path)
           // highlightPhoto(photo.path)
         }}></Button>
-      </SafeAreaView>
+      </SafeAreaView >
 
     )
 }
 
 const styles = StyleSheet.create({
+  clearBtn: {
+
+  },
+  drawingContainer: {
+    flex: 1,
+    position: 'relative',
+  },
   backgroundContainer: {
     backgroundColor: "green",
     flex: 1,
     height: "100%"
   },
   image: {
-    flex: 1, // Add this style to make the image fill its container
-    resizeMode: 'contain', // Ensure the image maintains its aspect ratio
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    resizeMode: 'contain',
+    zIndex: 1,
+  },
+  canvas: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 2,
+    opacity: 0.5
   },
 })
 
