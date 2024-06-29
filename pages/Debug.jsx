@@ -1,7 +1,7 @@
-import { View, Text, SafeAreaView, Pressable } from 'react-native'
+import { View, Text, SafeAreaView, Pressable, StyleSheet } from 'react-native'
 
 import React, {useState, useEffect} from 'react'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenerativeAI , HarmBlockThreshold, HarmCategory} from '@google/generative-ai'
 import Config from "react-native-config"
 
 import auth from '@react-native-firebase/auth';
@@ -10,9 +10,37 @@ import database from "@react-native-firebase/database"
 export default function DebugPage({navigation}) {
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" }});
+
+  const safetySetting = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+  ];
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" }},);
 
   const [response, setResponse] = useState(null)
+  const [englishWord, setEnglishWord] = useState(null)
+  const [englishDefinition, setEnglishDefinition] = useState(null)
+  const [translatedWord, setTranslatedWord] = useState(null)
+  const [translatedDefinition, setTranslatedDefinition] = useState(null)
 
 
   const define = async (word, language) => {
@@ -30,51 +58,52 @@ export default function DebugPage({navigation}) {
 
     const result = await model.generateContent(prompt);
     const response = result.response;
-    const text = response.text();
-    setResponse(text)
-    // console.log(JSON.parse(text));
+    const text = JSON.parse(response.text());
+    setEnglishWord(word)
+    setEnglishDefinition(text.englishDefinition)
+    setTranslatedWord(text.translatedWord)
+    setTranslatedDefinition(text.translatedDefinition)
+    
+    setResponse(JSON.stringify(text))
   }
 
-  const addWord = (word) => {
-    console.log('word')
+  const addWord = () => {
     const uid = auth().currentUser.uid;
     database()
       .ref(`/${uid}/words`)
-      .update({teddy: {
-        translatedWord: "Perro",
-        definition: "The best dog",
-        translatedDefinition: "El perro favorito"
+      .update({[englishWord]: {
+        translatedWord: translatedWord,
+        definition: englishDefinition,
+        translatedDefinition: translatedDefinition
       }
       })
-      .then(() => console.log("ofbjuewv"))
-    console.log("ergobj")
-
-    // console.log(database().ref("notes").set({work: "please"}))
-    // database()
-    // .ref('/')
-    // .set({
-    //   name: 'Ada Lovelace',
-    //   age: 31,
-    // })
-    // .then(() => console.log('Data set.'));
-
-    // database()
-    // .ref('/').once('teddy').then(snapshot => {console.log(snapshot.val())})
+      .then(() => console.log("Done!"))
     }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{alignItems: "center", }}>
       <Text>DebugPage</Text>
-      <Pressable onPress={() => {define("Slowly", "Spanish")}}>
+      <Pressable style={styles.debugButton} onPress={() => {define("Donut", "Spanish")}}>
         <Text>Define a word!</Text>
       </Pressable>
-      <Pressable onPress={() => {addWord("word")}}>
-        <Text style={{fontSize: 100}}>Add to database</Text>
+      <Pressable style={styles.debugButton} onPress={() => {addWord("word")}}>
+        <Text>Add to database</Text>
       </Pressable>
-      <Pressable onPress={() => {navigation.navigate("Home")}}>
+      <Pressable style={styles.debugButton} onPress={() => {navigation.navigate("Home")}}>
         <Text>Go to home</Text>
       </Pressable>
       <Text>{response}</Text>
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  debugButton: {
+    backgroundColor: "#FFCC32",
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    marginBottom: 20,
+    width: "90%"
+  }
+})

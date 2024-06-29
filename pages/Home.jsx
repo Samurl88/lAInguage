@@ -19,6 +19,10 @@ export default function HomePage({ navigation }) {
         <Text>Go to camera</Text>
       </Pressable>
 
+      <Pressable onPress={() => { navigation.navigate("Study") }}>
+        <Text>Go to study</Text>
+      </Pressable>
+
       <Pressable onPress={logOut}>
         <Text>
           Log out
