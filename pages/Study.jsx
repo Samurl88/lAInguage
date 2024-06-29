@@ -1,9 +1,13 @@
-import { View, Text, SafeAreaView, Pressable, StyleSheet } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions } from 'react-native'
+import React, { useRef, useState, useEffect } from 'react'
 import Animated, {useSharedValue, interpolate, useAnimatedStyle, withTiming} from 'react-native-reanimated';
 
 import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database"
+
+
+const screenHeight = Dimensions.get("screen").height;
+const screenWidth = Dimensions.get("screen").width;
 
 export default function StudyPage({ navigation }) {
 
@@ -20,28 +24,51 @@ export default function StudyPage({ navigation }) {
       
       let flashcards = []
       for (const word in words) {
-        flashcards.push({"front": word, "back": words[word]["translatedDefinition"] })
+        flashcards.push({front: word, back: words[word]["translatedDefinition"] })
         console.log(flashcards)
+        console.log("Eedvrg")
+        setFlashcards(flashcards)
       }
 
     })
   }
 
+  useEffect(() => {
+    createFlashcards()
+  }, [])
+  
 
+  const ref = useRef()
 
   return (
     <SafeAreaView style={{justifyContent: "center", alignItems: "center"}}>
       <Text>StudyPage</Text>
       <Pressable style={styles.debugButton} onPress={createFlashcards}>
         <Text>Create flashcards</Text>
-      </Pressable>
-      
-      <Flashcard />
+        </Pressable>
+      {flashcards.length 
+      ? 
+        <FlatList
+        data={flashcards}
+        ref={ref}
+        // onMomentumScrollEnd={updateCurrentSlideIndex}
+        horizontal
+        renderItem={({ item }) => {
+          console.log(item)
+          return(<Flashcard front={item?.front} back={item?.back} />)}}
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(item) => item?.front}
+        style={{ zIndex: 100, }}
+     />
+
+    : null }
+
     </SafeAreaView>
   )
 }
 
-function Flashcard() {
+function Flashcard({ front, back }) {
 
   const spin = useSharedValue(0)
 
@@ -68,18 +95,18 @@ function Flashcard() {
   }, []);
 
   return(
-    <>
+    <View style={{width: screenWidth, justifyContent: "center", alignItems: "center"}}>
         <Animated.View style={[styles.front, frontAnimatedStyle]}>
         <Pressable onPress={() => (spin.value = spin.value ? 0 : 1)} style={{width: "100%", height: "100%", alignItems: "center", justifyContent: "center"}}>
-          <Text>Front View</Text>
+          <Text>{front}</Text>
         </Pressable>
       </Animated.View>
       <Animated.View onPress={() => (spin.value = spin.value ? 0 : 1)} style={[styles.back, backAnimatedStyle]}>
       <Pressable onPress={() => (spin.value = spin.value ? 0 : 1)} style={{width: "100%", height: "100%", alignItems: "center", justifyContent: "center"}}>
-          <Text>Back</Text>
+          <Text>{back}</Text>
         </Pressable>
       </Animated.View>
-    </>
+    </View>
   )
 }
 
@@ -101,7 +128,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backfaceVisibility: "hidden",
-    top: 200,
+    // top: 200,
 
  },
  back: {
@@ -112,7 +139,6 @@ const styles = StyleSheet.create({
     backfaceVisibility: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    position: "absolute",
-    top: 200
+    // top: 200
  },
 })

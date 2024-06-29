@@ -5,7 +5,7 @@ import auth from '@react-native-firebase/auth';
 
 export default function SignUp() {
   
-  const [email, setEmail] = useState("rfeg@gmail.com");
+  const [email, setEmail] = useState("teddyffrrbu@gmail.com");
   const [password, setPassword] = useState("password");
 
   function signUp(email, password) {
