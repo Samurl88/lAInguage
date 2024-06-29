@@ -40,11 +40,11 @@ export default function DebugPage({navigation}) {
     const uid = auth().currentUser.uid;
     database()
       .ref(`/${uid}/words`)
-      .set({
-        englishWord: "Teddy",
+      .update({teddy: {
         translatedWord: "Perro",
         definition: "The best dog",
         translatedDefinition: "El perro favorito"
+      }
       })
       .then(() => console.log("ofbjuewv"))
     console.log("ergobj")

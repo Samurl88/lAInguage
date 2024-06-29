@@ -9,7 +9,6 @@ import CameraPage from "./pages/Camera"
 import SignUp from './pages/SignUp';
 
 import auth from '@react-native-firebase/auth';
-// import { FirebaseMLVision } from "@react-native-firebase/ml-vision"
 
 const Stack = createStackNavigator();
 
