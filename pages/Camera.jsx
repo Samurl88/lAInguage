@@ -212,7 +212,8 @@ export default function CameraPage() {
 
                   <Canvas style={styles.canvas} ref={canvasRef}>
                     {/* {testImg ? */}
-                    <Image image={loadedImage} fit="cover" width={400} height={600} />
+                    <Image source={require('../assets/primogem.png')} style={{ width: 50, height: 50 }} />
+
                     {/* // : <></>} */}
                     {paths.map((p, index) => (
                       <Path
