@@ -74,8 +74,11 @@ export default function Dictionary() {
 function Term({ word, translatedWord, translatedDefinition}) {
     return (
         <View style={styles.termContainer}>
-            <Text style={styles.termTitle}>{word}</Text>
-            <Text style={styles.termSubtitle}>{translatedWord} - {translatedDefinition}</Text>
+            <View style={{flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+                <Text style={styles.termTitle}>{word}</Text>
+                <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+            </View>
+            <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
         </View>
     )
 } 
@@ -102,12 +105,12 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 26,
         padding: 20,
-        width: screenWidth * 0.9
+        width: screenWidth * 0.9,
+        height: screenHeight * 0.2
     },
     termTitle: {
         fontFamily: "NewYorkLarge-Regular",
         fontSize: 20,
-        paddingBottom: 10
     },
     termSubtitle: {
         fontSize: 17,

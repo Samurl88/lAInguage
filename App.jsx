@@ -8,6 +8,8 @@ import StudyPage from "./pages/Study"
 import CameraPage from "./pages/Camera"
 import SignUp from './pages/SignUp';
 import DictionaryPage from './pages/Dictionary';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 
 import auth from '@react-native-firebase/auth';
 
@@ -35,23 +37,25 @@ export default function App() {
 
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false, }}>
-        {user
-          ? <>
-            <Stack.Screen name="Home" component={HomePage} />
-            <Stack.Screen name="Debug" component={DebugPage} />
-            <Stack.Screen name="Camera" component={CameraPage} />
-            <Stack.Screen name="Study" component={StudyPage} />
-            <Stack.Screen name="Dictionary" component={DictionaryPage} />
-          </>
-          : <>
-            <Stack.Screen name="SignUp" component={SignUp} />
-          </>
-        }
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false, }}>
+          {user
+            ? <>
+              <Stack.Screen name="Home" component={HomePage} />
+              <Stack.Screen name="Debug" component={DebugPage} />
+              <Stack.Screen name="Camera" component={CameraPage} />
+              <Stack.Screen name="Study" component={StudyPage} />
+              <Stack.Screen name="Dictionary" component={DictionaryPage} />
+            </>
+            : <>
+              <Stack.Screen name="SignUp" component={SignUp} />
+            </>
+          }
 
-      </Stack.Navigator>
-    </NavigationContainer>
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 
