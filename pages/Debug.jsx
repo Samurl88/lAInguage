@@ -83,7 +83,7 @@ export default function DebugPage({navigation}) {
   return (
     <SafeAreaView style={{alignItems: "center", }}>
       <Text>DebugPage</Text>
-      <Pressable style={styles.debugButton} onPress={() => {define("coincidence", "Spanish")}}>
+      <Pressable style={styles.debugButton} onPress={() => {define("man", "Spanish")}}>
         <Text>Define a word!</Text>
       </Pressable>
       <Pressable style={styles.debugButton} onPress={() => {addWord("word")}}>
