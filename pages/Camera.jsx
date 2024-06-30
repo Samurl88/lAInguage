@@ -252,7 +252,7 @@ export default function CameraPage() {
                 >{`Translated Definition:  ${translatedDefinition}`}</Text>
               </View>
             </GestureHandlerRootView>
-            {/* <Button title="save thing" onPress={saveMarkedUpImage}>
+            <Button title="save thing" onPress={saveMarkedUpImage}>
 
             </Button>
             <Button style={styles.clearBtn} title="Clear" onPress={() => {
@@ -262,7 +262,7 @@ export default function CameraPage() {
             </Button>
             <Button title="Open Camera" onPress={() => {
               setCameraOpen(true);
-            }}></Button> */}
+            }}></Button>
           </>
         }
       </View >
