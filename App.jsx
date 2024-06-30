@@ -7,6 +7,7 @@ import DebugPage from "./pages/Debug"
 import StudyPage from "./pages/Study"
 import CameraPage from "./pages/Camera"
 import SignUp from './pages/SignUp';
+import DictionaryPage from './pages/Dictionary';
 
 import auth from '@react-native-firebase/auth';
 
@@ -42,6 +43,7 @@ export default function App() {
             <Stack.Screen name="Debug" component={DebugPage} />
             <Stack.Screen name="Camera" component={CameraPage} />
             <Stack.Screen name="Study" component={StudyPage} />
+            <Stack.Screen name="Dictionary" component={DictionaryPage} />
           </>
           : <>
             <Stack.Screen name="SignUp" component={SignUp} />

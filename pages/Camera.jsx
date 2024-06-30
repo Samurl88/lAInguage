@@ -68,7 +68,7 @@ export default function CameraPage() {
           translatedWord: translatedWord,
           definition: englishDefinition,
           translatedDefinition: translatedDefinition,
-          score: 1
+          score: 0
         }
       })
       .then(() => console.log("Done!")).catch(error => {
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.7)",
     position: "absolute",
     zIndex: 100,
-    top: screenHeight * 0.1,
+    top: screenHeight * 0.07,
     justifyContent: "center",
     alignSelf: "center",
     flexDirection: "row",
