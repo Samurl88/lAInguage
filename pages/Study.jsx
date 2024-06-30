@@ -1,9 +1,10 @@
 import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
 import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-
+import Config from "react-native-config"
 import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database";
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
@@ -11,6 +12,16 @@ const screenWidth = Dimensions.get("screen").width;
 export default function StudyPage({ navigation }) {
   const [flashcards, setFlashcards] = useState([]);
 
+  async function createMCQs(flashcardData) {
+    const tempData = []
+    for (let i = 0; i < flashcardData.length; i++) {
+      tempData.push({
+        "word": flashcardData.front,
+        "answer": flashcardData.back
+      })
+      console.log(tempData + "sup there my friend")
+    }
+  }
 
   function createFlashcards() {
     let uid = auth().currentUser.uid;
@@ -25,6 +36,7 @@ export default function StudyPage({ navigation }) {
         for (const word in words) {
           flashcards.push({ front: word, back: words[word]["translatedDefinition"], frontFacing: true, score: words[word]["score"] });
         }
+        createMCQs(flashcards)
         setFlashcards(flashcards);
       });
   }
@@ -72,6 +84,33 @@ export default function StudyPage({ navigation }) {
 }
 
 function Flashcard({ front, back, frontFacing, toggleFacing }) {
+  const genAI = new GoogleGenerativeAI(Config.API_KEY);
+
+  const safetySetting = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+  ];
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
+
   const [score, setScore] = useState(0);
 
   function getScore() {
@@ -139,9 +178,13 @@ function Flashcard({ front, back, frontFacing, toggleFacing }) {
     spin.value = spin.value ? 0 : 1;
     toggleFacing();
   };
-  function getMultipleChoiceQuestion() {
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function getMultipleChoiceQuestion() {
     let rawResponse = {
-      "question": "What does Teddy eat?",
+      "question": "What does " + front + " mean?",
       "choices": {
         "A": "dog",
         "B": "chicken",
@@ -149,12 +192,45 @@ function Flashcard({ front, back, frontFacing, toggleFacing }) {
       },
       "correctAnswer": "dog"
     }
+
+
     let result = "";
     result += rawResponse.question;
-    result += "A:" + rawResponse.choices.a
-    result += "B:" + rawResponse.choices.b
-    result += "C:" + rawResponse.choices.c
+    result += "\nA:" + rawResponse.choices.A
+    result += "\nB:" + rawResponse.choices.B
+    result += "\nC:" + rawResponse.choices.C
     return result
+    // return rawResponses
+    // console.log(Config.API_KEY)
+
+    // const prompt = `
+    // This is a question: What does ${front} mean?
+    // This is the correct answer: ${back}
+    // Given this information, generate two wrong but misleading answers to the 
+    // question. Put the correct answer in one of the 
+    // multiple choices as well. Please output your answer in the following schema: 
+    // {
+    //   "question": "originalQuestion",
+    //   "choices: {
+    //     "A": "option",
+    //     "B": "option",
+    //     "C": "option"
+    //   },
+    //   correctAnswer: "letter"
+    // }`
+
+    // const resultResponse = await model.generateContent(prompt);
+    // const response = resultResponse.response;
+    // const rawResponse = JSON.parse(response.text());
+
+
+    // let result = "";
+    // result += rawResponse.question;
+    // result += "\nA:" + rawResponse.choices.A
+    // result += "\nB:" + rawResponse.choices.B
+    // result += "\nC:" + rawResponse.choices.C
+    // return result
+
   }
   return (
     <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
@@ -162,7 +238,7 @@ function Flashcard({ front, back, frontFacing, toggleFacing }) {
         <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
           {
             score == 0 ? <Text style={styles.cardText}>{front}</Text> :
-              <Text>{getMultipleChoiceQuestion()}</Text>
+              <Text style={styles.backText}>{getMultipleChoiceQuestion()}</Text>
           }
 
         </Pressable>
