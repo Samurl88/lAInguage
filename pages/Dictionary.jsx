@@ -1,109 +1,128 @@
-import { View, Text, SafeAreaView, StyleSheet, Dimensions, TextInput } from 'react-native'
+import { View, Text, SafeAreaView, StyleSheet, Dimensions, TextInput, ScrollView } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { SearchBar } from 'react-native-elements';
 import { SFSymbol } from 'react-native-sfsymbols';
-// import { Icon } from "react-native-ui-devkit";
-import database from "@react-native-firebase/database"
-import auth from "@react-native-firebase/auth"
+import database from "@react-native-firebase/database";
+import auth from "@react-native-firebase/auth";
 import { FlatList } from 'react-native-gesture-handler';
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
 export default function Dictionary() {
+    const [words, setWords] = useState([]);
+    const [searchValue, setSearchValue] = useState('');
+    const [filteredFamiliar, setFamiliar] = useState([]);
+    const [filteredUnfamiliar, setUnfamiliar] = useState([]);
+    const [filteredMastered, setMastered] = useState([]);
 
-    const [words, setWords] = useState([])
-
-    const [searchValue, setSearchValue] = useState(null);
-
-    // const filteredWords = words.filter(word =>
-    //     word.word.toLowerCase().includes(searchValue.toLowerCase()) ||
-    //     word.translatedWord.toLowerCase().includes(searchValue.toLowerCase()) ||
-    //     word.translatedDefinition.toLowerCase().includes(searchValue.toLowerCase())
-    // );
     function search() {
-        setWords(words.filter(word =>
-            word.word.toLowerCase().includes(searchValue.toLowerCase()) ||
-            word.translatedWord.toLowerCase().includes(searchValue.toLowerCase()) ||
-            word.translatedDefinition.toLowerCase().includes(searchValue.toLowerCase())
-        ));
+        let tempFamiliar = [];
+        let tempUnfamiliar = [];
+        let tempMastered = [];
+
+        for (let i = 0; i < words.length; i++) {
+            try {
+                if (!searchValue || words[i].word.toLowerCase().includes(searchValue.toLowerCase())) {
+                    if (words[i].score == 0) {
+                        tempUnfamiliar.push(words[i]);
+                    } else if (words[i].score == 1) {
+                        tempFamiliar.push(words[i]);
+                    } else {
+                        tempMastered.push(words[i]);
+                    }
+                }
+            } catch {
+                continue;
+            }
+        }
+        setFamiliar(tempFamiliar);
+        setUnfamiliar(tempUnfamiliar);
+        setMastered(tempMastered);
     }
+
     async function getWords() {
         let uid = auth().currentUser.uid;
-        let option = "translatedDefinition"
         database()
             .ref(`${uid}/words`)
             .once('value')
             .then(snapshot => {
-                let data = snapshot.val()
-
-                let words = []
+                let data = snapshot.val();
+                let words = [];
                 for (const word in data) {
-                    // console.log(data[word])
-                    let obj = data[word]
-                    obj.word = word
-                    words.push(obj)
+                    let obj = data[word];
+                    obj.word = word;
+                    words.push(obj);
                 }
-                setWords(words)
-            })
+                setWords(words);
+                search();  // Trigger the search to initialize filtered lists
+            });
     }
 
     useEffect(() => {
-        getWords()
-    }, [])
+        getWords();
+    }, []);
 
     useEffect(() => {
-        console.log(searchValue)
-    }, [searchValue])
+        search();
+    }, [searchValue, words]);
 
-
-    if (words.length)
-        return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center" }}>
-                <View style={styles.tabBar}>
-                    <SFSymbol name="camera.fill" size={18} color="#2F2C2A" />
-                    <SFSymbol name="doc.on.doc.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
-                    <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
-                </View>
-                <View style={styles.container}>
-
-                    <Text style={styles.title}>Dictionary</Text>
-                    {/* <SearchBar></SearchBar> */}
-                    <View style={styles.searchBar}>
-                        <View style={styles.seachIcon}>
-                            <SFSymbol name="magnifyingglass" size={18} color="grey" />
-                        </View>
-
-                        {/* <Icon style={styles.searchIcon} name="ios-search" size={20} color="#000" /> */}
-                        <TextInput placeholder='Search' style={styles.searchInput} value={searchValue} onChangeText={(text) => {
-                            setSearchValue(text)
-                            search();
-                        }}></TextInput>
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center" }}>
+            <View style={styles.tabBar}>
+                <SFSymbol name="camera.fill" size={18} color="#2F2C2A" />
+                <SFSymbol name="doc.on.doc.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
+                <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
+            </View>
+            <View style={styles.container}>
+                <Text style={styles.title}>Dictionary</Text>
+                <View style={styles.searchBar}>
+                    <View style={styles.seachIcon}>
+                        <SFSymbol name="magnifyingglass" size={18} color="grey" />
                     </View>
-
-                    <View style={{ width: "92%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 10 }}>
-                        <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center" }}>
-                            <View style={{ width: 10, height: 10, backgroundColor: "#77BEE9", borderRadius: 5 }} />
-                            <Text style={styles.category}>Unfamiliar</Text>
-                        </View>
-                        <View style={{ flexDirection: "row", gap: 15 }}>
-                            <Text style={styles.seeAll}>See All</Text>
-                            <SFSymbol name="chevron.right" size={20} color="black" />
-                        </View>
-                    </View>
-                    <FlatList
-                        data={words}
-                        contentContainerStyle={{ gap: 10 }}
-                        renderItem={({ item }) => {
-                            console.log(item)
-                            return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />)
-                        }}
-                        scrollEnabled={false}
+                    <TextInput
+                        placeholder='Search'
+                        style={styles.searchInput}
+                        value={searchValue}
+                        onChangeText={(text) => setSearchValue(text)}
                     />
-                    <Text></Text>
                 </View>
-            </SafeAreaView>
-        )
+                <ScrollView style={styles.scrollingContainer}>
+                    {filteredUnfamiliar.length > 0 && (
+                        <CategorySection title="Unfamiliar" color="#77BEE9" data={filteredUnfamiliar} />
+                    )}
+                    {filteredFamiliar.length > 0 && (
+                        <CategorySection title="Familiar" color="green" data={filteredFamiliar} />
+                    )}
+                    {filteredMastered.length > 0 && (
+                        <CategorySection title="Mastered" color="#FFD12D" data={filteredMastered} />
+                    )}
+                </ScrollView>
+            </View>
+        </SafeAreaView>
+    );
+}
+
+function CategorySection({ title, color, data }) {
+    return (
+        <>
+            <View style={{ width: "92%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 10 }}>
+                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
+                    <Text style={styles.category}>{title}</Text>
+                </View>
+                <View style={{ flexDirection: "row", gap: 15 }}>
+                    <Text style={styles.seeAll}>See All</Text>
+                    <SFSymbol name="chevron.right" size={20} color="black" />
+                </View>
+            </View>
+            <FlatList
+                data={data}
+                contentContainerStyle={{ gap: 10 }}
+                renderItem={({ item }) => <Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />}
+                scrollEnabled={false}
+            />
+        </>
+    );
 }
 
 function Term({ word, translatedWord, translatedDefinition }) {
@@ -112,10 +131,13 @@ function Term({ word, translatedWord, translatedDefinition }) {
             <Text style={styles.termTitle}>{word}</Text>
             <Text style={styles.termSubtitle}>{translatedWord} - {translatedDefinition}</Text>
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
+    scrollingContainer: {
+        height: screenHeight * 0.79
+    },
     seachIcon: {
         position: "relative",
         alignSelf: "left",
@@ -127,7 +149,6 @@ const styles = StyleSheet.create({
         width: "90%",
         height: 30,
         borderRadius: 10,
-
     },
     searchInput: {
         paddingLeft: 30,
@@ -180,4 +201,4 @@ const styles = StyleSheet.create({
         paddingLeft: 25,
         paddingRight: 25
     },
-})
+});
