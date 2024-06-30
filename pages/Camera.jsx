@@ -1,6 +1,7 @@
 import { View, Text, SafeAreaView, StyleSheet, Button, Dimensions, Pressable } from 'react-native'
 import { Configuration, PESDK, Tool } from "react-native-photoeditorsdk";
 import { useCameraDevice, useCameraPermission, Camera } from 'react-native-vision-camera'
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import React, { useEffect, useRef, useState } from 'react'
 import { useImage, Image } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
@@ -13,6 +14,7 @@ import {
 import { Canvas, Path, useCanvasRef, Picture } from "@shopify/react-native-skia";
 import { runOnJS } from 'react-native-reanimated';
 import { SFSymbol } from 'react-native-sfsymbols';
+import Config from 'react-native-config';
 
 
 const screenHeight = Dimensions.get("screen").height;
@@ -21,6 +23,85 @@ const screenWidth = Dimensions.get("screen").width;
 import Svg, { Circle } from "react-native-svg"
 // yarn ios--simulator "iPhone 15 Pro"
 export default function CameraPage() {
+
+  const genAI = new GoogleGenerativeAI(Config.API_KEY);
+  const [englishWord, setEnglishWord] = useState(null)
+  const [englishDefinition, setEnglishDefinition] = useState(null)
+  const [translatedWord, setTranslatedWord] = useState(null)
+  const [translatedDefinition, setTranslatedDefinition] = useState(null)
+  const [loading, setLoading] = useState(null)
+
+  const safetySetting = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+  ];
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
+
+  const addWord = (englishWord, englishDefinition, translatedWord, translatedDefinition) => {
+    const uid = auth().currentUser.uid;
+    database()
+      .ref(`/${uid}/words`)
+      .update({
+        [englishWord]: {
+          translatedWord: translatedWord,
+          definition: englishDefinition,
+          translatedDefinition: translatedDefinition,
+          score: 1
+        }
+      })
+      .then(() => console.log("Done!")).catch(error => {
+        console.error("Failed to add word to database:", error);
+      });
+  }
+
+  const define = async (imageData) => {
+
+    console.log(Config.API_KEY)
+
+    const prompt = `
+    Given this image.
+    Language: "Spanish"
+    For the highlighted word in the image and the above language, provide its English definition, its translation in the provided language, and its definition in the provided language. Use this JSON schema:
+    { "originalWord": "string",
+      "englishDefinition": "string", 
+      "translatedWord": "string",
+      "translatedDefinition": "string"
+    }`
+
+    const result = await model.generateContent([prompt, { inlineData: { data: imageData, mimeType: 'image/png' } }]);
+    const response = result.response;
+    const text = JSON.parse(response.text());
+    console.log(text)
+    console.log("response")
+    setEnglishWord(text.originalWord)
+    setEnglishDefinition(text.englishDefinition)
+    setTranslatedWord(text.translatedWord)
+    setTranslatedDefinition(text.translatedDefinition)
+    addWord(text.originalWord, text.englishDefinition, text.translatedWord, text.translatedDefinition);
+
+    // setResponse(JSON.stringify(text))
+  }
+
+
   const [paths, setPaths] = useState([]);
   const canvasRef = useCanvasRef();
 
@@ -36,7 +117,8 @@ export default function CameraPage() {
     console.log("sup")
     const image = await canvasRef.current.makeImageSnapshotAsync();
     const bytes = image.encodeToBase64();
-    console.log(bytes)
+    // console.log(bytes)
+    define(bytes)
 
   };
 
@@ -73,11 +155,12 @@ export default function CameraPage() {
 
   if (hasPermission)
     return (
-      <SafeAreaView style={styles.backgroundContainer}>
+      // <SafeAreaView style={styles.backgroundContainer}>
+      <View style={{backgroundColor: "black", flex: 1}}>
         <View style={styles.tabBar}>
-          <SFSymbol name="camera.fill" size={18} color="#2F2C2A"/>
-          <SFSymbol name="doc.on.doc.fill" size={18} color="#2F2C2A" style={{opacity: 0.21}}/>
-          <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{opacity: 0.21}}/>
+          <SFSymbol name="camera.fill" size={18} color="#2F2C2A" />
+          <SFSymbol name="doc.on.doc.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
+          <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
         </View>
         {cameraOpen ?
           <>
@@ -90,9 +173,9 @@ export default function CameraPage() {
             >
             </Camera>
             <View style={{ flex: 1, }}>
-            <View style={styles.buttonContainer}>
-              <Pressable style={styles.actionButton}>
-                  <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
+              <View style={styles.buttonContainer}>
+                <Pressable style={{ ...styles.actionButton, opacity: 0 }}>
+                  <Text style={styles.languageText}>EN</Text>
                 </Pressable>
                 <Pressable onPress={async () => {
                   setCameraOpen(true)
@@ -114,65 +197,80 @@ export default function CameraPage() {
                   </Svg>
                 </Pressable>
                 <Pressable style={styles.actionButton}>
-                  <Text style={styles.languageText}>EN</Text>
+                  <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
                 </Pressable>
-                </View>
+              </View>
             </View>
           </>
           : <>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <GestureDetector gesture={pan}>
-              <View style={styles.drawingContainer}>
-                {/* <Image source={{
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <GestureDetector gesture={pan}>
+                <View style={styles.drawingContainer}>
+                  {/* <Image source={{
                   uri: image,
                 }} style={styles.image} /> */}
 
-                <Canvas style={styles.canvas} ref={canvasRef}>
-                  {/* {testImg ? */}
-                  <Image image={loadedImage} fit="cover" x={0} y={0} width={300} height={500} />
-                  {/* // : <></>} */}
-                  {paths.map((p, index) => (
-                    <Path
-                      key={index}
-                      path={p.segments.join(" ")}
-                      strokeWidth={30}
-                      style="stroke"
-                      color={p.color}
-                      opacity={0.5}
-                    />
+                  <Canvas style={styles.canvas} ref={canvasRef}>
+                    {/* {testImg ? */}
+                    <Image image={loadedImage} fit="cover" x={0} y={0} width={screenWidth} height={screenHeight} />
+                    {paths.map((p, index) => (
+                      <Path
+                        key={index}
+                        path={p.segments.join(" ")}
+                        strokeWidth={30}
+                        style="stroke"
+                        color={p.color}
+                        opacity={0.5}
+                      />
+                    ))}
+                  </Canvas>
+                  <View style={{ ...StyleSheet.absoluteFill, position: "absolute", zIndex: 100 }}>
+                    <Pressable onPress={() => {
+                      setPaths([]);
+                      console.log(loadedImage)
+                    }}>
+                      <Text style={{ fontSize: 20, position: "absolute", top: screenHeight * 0.08, color: "white", paddingLeft: 20, textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>Clear</Text>
+                    </Pressable>
+                    <Pressable onPress={() => {
+                      setCameraOpen(true);
+                    }}>
+                      <Text style={{ fontSize: 20, position: "absolute", top: screenHeight * 0.08, color: "white", right: 0, paddingRight: 20, textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>Retake</Text>
+                    </Pressable>
+                    <View style={styles.buttonContainer}>
+                      <Pressable onPress={() => { saveMarkedUpImage }} style={styles.bigActionButton}>
+                        <SFSymbol name="checkmark" size={32} color="black" />
+                      </Pressable>
+                    </View>
+                    <Text style={{ fontSize: 18, position: "absolute", top: screenHeight * 0.75, alignSelf: "center", color: "white", textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>Highlight text to define in Spanish.</Text>
+                  </View>
+                </View>
 
-                  ))}
+              </GestureDetector>
+              {/* <Text
+                style={{ color: "white", fontSize: 24 }}
+              >{`Gesture started at:  ${tGestureStart}`}</Text>
+              <Text
+                style={{ color: "white", fontSize: 24 }}
+              >{`Gesture moved to:  ${tGestureMove}`}</Text>
+              <Text
+                style={{ color: "white", fontSize: 24 }}
+              >{`Gesture updated to:  ${tGestureUpdate}`}</Text>
+              <Text
+                style={{ color: "white", fontSize: 24 }}
+              >{`Gesture ended at:  ${tGestureEnd}`}</Text> */}
+            </GestureHandlerRootView>
+            {/* <Button title="save thing" onPress={saveMarkedUpImage}>
 
-                  {/* <Picture image={loadedImage}></Picture> */}
-                </Canvas>
-                {/* {loadedImage ? <Text>stuff {String(loadedImage)}</Text> : <Text>Idk error i guess</Text>} */}
-              </View>
-
-            </GestureDetector>
-            <Text
-              style={{ color: "white", fontSize: 24 }}
-            >{`Gesture started at:  ${tGestureStart}`}</Text>
-            <Text
-              style={{ color: "white", fontSize: 24 }}
-            >{`Gesture moved to:  ${tGestureMove}`}</Text>
-            <Text
-              style={{ color: "white", fontSize: 24 }}
-            >{`Gesture updated to:  ${tGestureUpdate}`}</Text>
-            <Text
-              style={{ color: "white", fontSize: 24 }}
-            >{`Gesture ended at:  ${tGestureEnd}`}</Text>
-          </GestureHandlerRootView>
-          <Button title="save thing" onPress={saveMarkedUpImage}>
-
-          </Button>
-          <Button style={styles.clearBtn} title="Clear" onPress={() => {
-            setPaths([]);
-            console.log(loadedImage)
-          }}>
-          </Button>
+            </Button>
+            <Button style={styles.clearBtn} title="Clear" onPress={() => {
+              setPaths([]);
+              console.log(loadedImage)
+            }}>
+            </Button> */}
           </>
         }
-      </SafeAreaView >
+        {/* // </SafeAreaView > */}
+      </View>
 
     )
 }
@@ -237,6 +335,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#2F2C2A",
     borderRadius: 25,
+  },
+  bigActionButton: {
+    width: 80,
+    height: 80,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F0E8DD",
+    borderRadius: 40,
   },
   buttonContainer: {
     position: "absolute",
