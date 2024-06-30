@@ -45,10 +45,10 @@ export default function App() {
           {user
             ? <>
               <Stack.Screen name="Home" component={HomePage} />
-              <Stack.Screen name="Debug" component={DebugPage} />
+              {/* <Stack.Screen name="Debug" component={DebugPage} />
               <Stack.Screen name="Camera" component={CameraPage} />
               <Stack.Screen name="Study" component={StudyPage} />
-              <Stack.Screen name="Dictionary" component={DictionaryPage} />
+              <Stack.Screen name="Dictionary" component={DictionaryPage} /> */}
             </>
             : <>
               <Stack.Screen name="SignUp" component={SignUp} />

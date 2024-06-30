@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions } from 'react-native'
+import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react'
 import Animated, {useSharedValue, interpolate, useAnimatedStyle, withTiming} from 'react-native-reanimated';
 
@@ -42,6 +42,7 @@ export default function StudyPage({ navigation }) {
 
   return (
     <SafeAreaView style={{justifyContent: "center", alignItems: "center"}}>
+
       <Text>StudyPage</Text>
       <Pressable style={styles.debugButton} onPress={createFlashcards}>
         <Text>Create flashcards</Text>
@@ -63,7 +64,6 @@ export default function StudyPage({ navigation }) {
      />
 
     : null }
-
     </SafeAreaView>
   )
 }

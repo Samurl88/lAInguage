@@ -204,16 +204,11 @@ export default function CameraPage() {
       <>
         <View style={{ backgroundColor: "black", flex: 1 }}>
 
-          <View style={styles.tabBar}>
-            <SFSymbol name="camera.fill" size={18} color="#2F2C2A" />
-            <SFSymbol name="doc.on.doc.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
-            <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
-          </View>
           {cameraOpen ?
             <>
               <Camera
                 ref={camera}
-                style={StyleSheet.absoluteFill}
+                style={{ width: screenWidth, height: screenHeight, position: "absolute"}}
                 device={device}
                 isActive={true}
                 photo={true}
@@ -305,7 +300,9 @@ export default function CameraPage() {
           index={-1}
           backgroundStyle={{ backgroundColor: "#F5EEE5" }}
           enablePanDownToClose={true}
-          onChange={index => setCurrentPosition(index)}
+          onChange={index => {
+              setCurrentPosition(index)
+            }}
         >
           <BottomSheetView style={styles.contentContainer}>
             <Text style={styles.title}>Definitions</Text>
@@ -422,12 +419,11 @@ const styles = StyleSheet.create({
   },
   canvas: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    width: screenWidth,
+    height: screenHeight,
     position: 'absolute',
     top: 0,
     left: 0,
-    zIndex: 2,
   },
   languageText: {
     fontFamily: 'SFProRounded-Bold',

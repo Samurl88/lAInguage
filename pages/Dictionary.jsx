@@ -82,11 +82,11 @@ export default function Dictionary() {
     // if (initialized)
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center" }}>
-            <View style={styles.tabBar}>
+            {/* <View style={styles.tabBar}>
                 <SFSymbol name="camera.fill" size={18} color="#2F2C2A" />
                 <SFSymbol name="doc.on.doc.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
                 <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
-            </View>
+            </View> */}
             <View style={styles.container}>
                 <Text style={styles.title}>Dictionary</Text>
                 <View style={styles.searchBar}>
