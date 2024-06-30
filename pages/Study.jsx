@@ -10,77 +10,10 @@ const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
 export default function StudyPage({ navigation }) {
-  const [flashcards, setFlashcards] = useState([]);
+  const [flashcards, setFlashcards] = useState(null);
+  const [MCQs, setMCQs] = useState([])
 
-  async function createMCQs(flashcardData) {
-    for (let i = 0; i < flashcardData.length; i++) {
-      console.log(flashcardData[i]);
-    }
-  }
-
-  function createFlashcards() {
-    let uid = auth().currentUser.uid;
-    let option = "translatedDefinition";
-    database()
-      .ref(`${uid}/words`)
-      .once('value')
-      .then(snapshot => {
-        let words = snapshot.val();
-
-        let flashcards = [];
-        for (const word in words) {
-          flashcards.push({ front: word, back: words[word]["translatedDefinition"], frontFacing: true, score: words[word]["score"] });
-        }
-        createMCQs(flashcards)
-        setFlashcards(flashcards);
-      });
-  }
-
-  useEffect(() => {
-    createFlashcards();
-  }, []);
-
-  const ref = useRef();
-
-  return (
-    <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
-      <Image source={{ uri: "https://static.wikia.nocookie.net/gensin-impact/images/d/d4/Item_Primogem.png/revision/latest?cb=20201117071158" }} style={{ width: 35, height: 35, position: "absolute", top: 70, left: 30 }} />
-      <Text style={{ position: "absolute", top: 75, fontSize: 22, left: 60 }}>4</Text>
-      <Text style={styles.title}>Practice</Text>
-      <Image source={{ uri: "https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png" }} style={{ width: 35, height: 35, position: "absolute", top: 70, right: 30 }} />
-
-      {flashcards.length ? (
-        <FlatList
-          data={flashcards}
-          ref={ref}
-          horizontal
-          renderItem={({ item, index }) => (
-            <Flashcard
-              key={item.front}
-              front={item.front}
-              back={item.back}
-              frontFacing={item.frontFacing}
-              toggleFacing={() => {
-                const newFlashcards = [...flashcards];
-                newFlashcards[index].frontFacing = !newFlashcards[index].frontFacing;
-                setFlashcards(newFlashcards);
-              }}
-              score={item.score}
-            />
-          )}
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.front}
-          style={{ zIndex: 100 }}
-        />
-      ) : null}
-    </SafeAreaView>
-  );
-}
-
-function Flashcard({ front, back, frontFacing, toggleFacing }) {
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
-
   const safetySetting = [
     {
       category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -103,9 +36,131 @@ function Flashcard({ front, back, frontFacing, toggleFacing }) {
       threshold: HarmBlockThreshold.BLOCK_NONE,
     },
   ];
-
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
+
+  async function createMCQs(mcqs) {
+    const words = mcqs.map(item => item.front);
+    const prompt = `
+    Words: ${words}
+    Question: "What does (word) mean?"
+    Given this information, generate two wrong but misleading answers to the 
+    question. Put the correct answer in one of the multiple choices as well. Please output your answer in the following schema, continuing until all words have been included:
+    { "(word1)": 
+      {
+        "question": "What does (word) mean?",
+        "choices: {
+          "A": "option",
+          "B": "option",
+          "C": "option"
+        },
+        correctAnswer: "letter",
+      },
+      "(word2)":
+      {
+        "question": "What does (word) mean?",
+        "choices: {
+          "A": "option",
+          "B": "option",
+          "C": "option"
+        },
+        correctAnswer: "letter",
+      },
+      ...
+    }`
+    console.log(Config.API_KEY)
+
+    const resultResponse = await model.generateContent(prompt);
+    const response = resultResponse.response;
+    const mcqJSON = JSON.parse(response.text());
+    setMCQs(mcqJSON)
+  }
+
+  function sortTerms() {
+    let uid = auth().currentUser.uid;
+    database()
+      .ref(`${uid}/words`)
+      .once('value')
+      .then(snapshot => {
+        let words = snapshot.val();
+      
+        let flashcards = [];
+        let mcqs = []
+
+        for (const word in words) {
+          let score = words[word]["score"]
+          let card = { front: word, back: words[word]["translatedDefinition"], frontFacing: true, score: words[word]["score"] };
+          if (score == 2) {
+            card.type = "frq"
+          } else if (score == 1) {
+            card.type = "mcq"
+            mcqs.push(card)
+          } else {
+            card.type = "flashcard"
+          }
+          flashcards.push(card)
+        }
+        createMCQs(mcqs);
+        setFlashcards(flashcards);
+      });
+  }
+
+  useEffect(() => {
+    sortTerms();
+  }, []);
+
+  useEffect(() => {
+    console.log(flashcards)
+  }, [flashcards])
+
+  const ref = useRef();
+
+
+  
+if (flashcards)
+  return (
+    <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
+      <Image source={{ uri: "https://static.wikia.nocookie.net/gensin-impact/images/d/d4/Item_Primogem.png/revision/latest?cb=20201117071158" }} style={{ width: 35, height: 35, position: "absolute", top: 70, left: 30 }} />
+      <Text style={{ position: "absolute", top: 75, fontSize: 22, left: 60 }}>4</Text>
+      <Text style={styles.title}>Practice</Text>
+      {/* <Pressable onPress={() => {
+        auth.signOut();
+      }}>
+        <Image source={{ uri: "https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png" }} style={{ width: 35, height: 35, position: "absolute", top: 70, right: 30 }} />
+      </Pressable> */}
+
+        <FlatList
+          data={flashcards}
+          ref={ref}
+          horizontal
+          renderItem={({ item, index }) => (
+            <Flashcard
+              key={item.front}
+              front={item.front}
+              back={item.back}
+              frontFacing={item.frontFacing}
+              toggleFacing={() => {
+                const newFlashcards = [...flashcards];
+                newFlashcards[index].frontFacing = !newFlashcards[index].frontFacing;
+                setFlashcards(newFlashcards);
+              }}
+              score={item.score}
+              type={item.type}
+            />
+          )}
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.front}
+          style={{ zIndex: 100 }}
+        />
+
+    </SafeAreaView>
+  );
+}
+
+
+function Flashcard({ front, back, frontFacing, toggleFacing, type }) {
+  // console.log(front)
   const [score, setScore] = useState(0);
 
   function getScore() {
@@ -147,6 +202,7 @@ function Flashcard({ front, back, frontFacing, toggleFacing }) {
   }
   const spin = useSharedValue(frontFacing ? 0 : 1);
 
+
   const frontAnimatedStyle = useAnimatedStyle(() => {
     const spinVal = interpolate(spin.value, [0, 1], [0, 180]);
     return {
@@ -177,72 +233,36 @@ function Flashcard({ front, back, frontFacing, toggleFacing }) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function getMultipleChoiceQuestion() {
-    let rawResponse = {
-      "question": "What does " + front + " mean?",
-      "choices": {
-        "A": "dog",
-        "B": "chicken",
-        "C": "bacon"
-      },
-      "correctAnswer": "dog"
-    }
-
-
-    let result = "";
-    result += rawResponse.question;
-    result += "\nA:" + rawResponse.choices.A
-    result += "\nB:" + rawResponse.choices.B
-    result += "\nC:" + rawResponse.choices.C
-    return result
-    // return rawResponses
-    // console.log(Config.API_KEY)
-
-    // const prompt = `
-    // This is a question: What does ${front} mean?
-    // This is the correct answer: ${back}
-    // Given this information, generate two wrong but misleading answers to the 
-    // question. Put the correct answer in one of the 
-    // multiple choices as well. Please output your answer in the following schema: 
-    // {
-    //   "question": "originalQuestion",
-    //   "choices: {
-    //     "A": "option",
-    //     "B": "option",
-    //     "C": "option"
-    //   },
-    //   correctAnswer: "letter"
-    // }`
-
-    // const resultResponse = await model.generateContent(prompt);
-    // const response = resultResponse.response;
-    // const rawResponse = JSON.parse(response.text());
-
-
-    // let result = "";
-    // result += rawResponse.question;
-    // result += "\nA:" + rawResponse.choices.A
-    // result += "\nB:" + rawResponse.choices.B
-    // result += "\nC:" + rawResponse.choices.C
-    // return result
-
-  }
+  console.log(type)
   return (
     <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
-      <Animated.View style={[styles.front, frontAnimatedStyle]}>
-        <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
-          {
-            score == 0 ? <Text style={styles.cardText}>{front}</Text> :
-              <Text style={styles.backText}>{getMultipleChoiceQuestion()}</Text>
-          }
+      { type == "flashcard" 
+      && <>
+          <Animated.View style={[styles.front, frontAnimatedStyle]}>
+            <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+              {
+                score == 0 ? <Text style={styles.cardText}>{front}</Text> :
+                  <Text style={styles.backText}>{front}</Text>
+              }
+            </Pressable>
+          </Animated.View>
+          <Animated.View style={[styles.back, backAnimatedStyle]}>
+            <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+              <Text style={styles.backText}>{back}</Text>
+            </Pressable>
+          </Animated.View>
+      </>
+        }
+      { type == "mcq" 
+      && <>
+          <Animated.View style={styles.back}>
+            <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+              <Text style={styles.backText}>{back}</Text>
+            </Pressable>
+          </Animated.View>
+      </>
+      }
 
-        </Pressable>
-      </Animated.View>
-      <Animated.View style={[styles.back, backAnimatedStyle]}>
-        <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
-          <Text style={styles.backText}>{back}</Text>
-        </Pressable>
-      </Animated.View>
       <Image source={require("./graph.png")} style={styles.graph}></Image>
 
       {!frontFacing && (

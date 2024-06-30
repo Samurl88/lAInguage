@@ -434,7 +434,7 @@ export default function CameraPage({language}) {
 
     const prompt = `
     Given this image.
-    Language: "Spanish"
+    Language: ${language}
     For the highlighted word in the image and the above language, determine the root word (ex. leaving -> leave). Provide its English definition (in 12 words or less), its translation in the provided language, and its definition in the provided language (in 12 words or less). 
     Everything must be in lowercase. Use this JSON schema:
     { "englishWord": "string",
