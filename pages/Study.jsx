@@ -1,44 +1,39 @@
-import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image } from 'react-native'
-import React, { useRef, useState, useEffect } from 'react'
+import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
 import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 import auth from '@react-native-firebase/auth';
-import database from "@react-native-firebase/database"
-
+import database from "@react-native-firebase/database";
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
 export default function StudyPage({ navigation }) {
+  const [flashcards, setFlashcards] = useState([]);
 
-  const [flashcards, setFlashcards] = useState([])
 
   function createFlashcards() {
     let uid = auth().currentUser.uid;
-    let option = "translatedDefinition"
+    let option = "translatedDefinition";
     database()
       .ref(`${uid}/words`)
       .once('value')
       .then(snapshot => {
-        let words = snapshot.val()
+        let words = snapshot.val();
 
-        let flashcards = []
+        let flashcards = [];
         for (const word in words) {
-          flashcards.push({ front: word, back: words[word]["translatedDefinition"] })
-          console.log(flashcards)
-          console.log("Eedvrg")
-          setFlashcards(flashcards)
+          flashcards.push({ front: word, back: words[word]["translatedDefinition"], frontFacing: true, score: words[word]["score"] });
         }
-
-      })
+        setFlashcards(flashcards);
+      });
   }
 
   useEffect(() => {
-    createFlashcards()
-  }, [])
+    createFlashcards();
+  }, []);
 
-
-  const ref = useRef()
+  const ref = useRef();
 
   return (
     <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
@@ -46,36 +41,77 @@ export default function StudyPage({ navigation }) {
       <Text style={{ position: "absolute", top: 75, fontSize: 22, left: 60 }}>4</Text>
       <Text style={styles.title}>Practice</Text>
       <Image source={{ uri: "https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png" }} style={{ width: 35, height: 35, position: "absolute", top: 70, right: 30 }} />
-      {/* <Pressable style={styles.debugButton} onPress={createFlashcards}>
-        <Text>Create flashcards</Text>
-      </Pressable> */}
 
-      {flashcards.length
-        ?
+      {flashcards.length ? (
         <FlatList
           data={flashcards}
           ref={ref}
-          // onMomentumScrollEnd={updateCurrentSlideIndex}
           horizontal
-          renderItem={({ item }) => {
-            console.log(item)
-            return (<Flashcard front={item?.front} back={item?.back} />)
-          }}
+          renderItem={({ item, index }) => (
+            <Flashcard
+              key={item.front}
+              front={item.front}
+              back={item.back}
+              frontFacing={item.frontFacing}
+              toggleFacing={() => {
+                const newFlashcards = [...flashcards];
+                newFlashcards[index].frontFacing = !newFlashcards[index].frontFacing;
+                setFlashcards(newFlashcards);
+              }}
+              score={item.score}
+            />
+          )}
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item?.front}
+          keyExtractor={(item) => item.front}
           style={{ zIndex: 100 }}
         />
-
-        : null}
-
+      ) : null}
     </SafeAreaView>
-  )
+  );
 }
 
-function Flashcard({ front, back }) {
+function Flashcard({ front, back, frontFacing, toggleFacing }) {
+  const [score, setScore] = useState(0);
 
-  const spin = useSharedValue(0)
+  function getScore() {
+    let uid = auth().currentUser.uid;
+    database()
+      .ref(`${uid}/words/${front}`)
+      .once('value')
+      .then(snapshot => {
+        let word = snapshot.val();
+        let currentScore = word["score"] || 0;
+
+        setScore(currentScore)
+        console.log(currentScore)
+      })
+      .catch(error => {
+        console.error("Error reading score: ", error);
+      });
+  }
+  useEffect(() => {
+    getScore();
+  }, [])
+
+  function correct() {
+    let uid = auth().currentUser.uid;
+    database()
+      .ref(`${uid}/words/${front}`)
+      .once('value')
+      .then(snapshot => {
+        let word = snapshot.val();
+        let currentScore = word["score"] || 0;
+        let newScore = currentScore + 1;
+
+        // Update the score in Firebase
+        database().ref(`${uid}/words/${front}`).update({ score: newScore });
+      })
+      .catch(error => {
+        console.error("Error updating score: ", error);
+      });
+  }
+  const spin = useSharedValue(frontFacing ? 0 : 1);
 
   const frontAnimatedStyle = useAnimatedStyle(() => {
     const spinVal = interpolate(spin.value, [0, 1], [0, 180]);
@@ -99,23 +135,80 @@ function Flashcard({ front, back }) {
     };
   }, []);
 
+  const handlePress = () => {
+    spin.value = spin.value ? 0 : 1;
+    toggleFacing();
+  };
+  function getMultipleChoiceQuestion() {
+    let rawResponse = {
+      "question": "What does Teddy eat?",
+      "choices": {
+        "A": "dog",
+        "B": "chicken",
+        "C": "bacon"
+      },
+      "correctAnswer": "dog"
+    }
+    let result = "";
+    result += rawResponse.question;
+    result += "A:" + rawResponse.choices.a
+    result += "B:" + rawResponse.choices.b
+    result += "C:" + rawResponse.choices.c
+    return result
+  }
   return (
     <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
       <Animated.View style={[styles.front, frontAnimatedStyle]}>
-        <Pressable onPress={() => (spin.value = spin.value ? 0 : 1)} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
-          <Text style={styles.cardText}>{front}</Text>
+        <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+          {
+            score == 0 ? <Text style={styles.cardText}>{front}</Text> :
+              <Text>{getMultipleChoiceQuestion()}</Text>
+          }
+
         </Pressable>
       </Animated.View>
-      <Animated.View onPress={() => (spin.value = spin.value ? 0 : 1)} style={[styles.back, backAnimatedStyle]}>
-        <Pressable onPress={() => (spin.value = spin.value ? 0 : 1)} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+      <Animated.View style={[styles.back, backAnimatedStyle]}>
+        <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
           <Text style={styles.backText}>{back}</Text>
         </Pressable>
       </Animated.View>
+      <Image source={require("./graph.png")} style={styles.graph}></Image>
+
+      {!frontFacing && (
+        <>
+          <Pressable style={styles.correctBtn} onPress={() => {
+            correct();
+          }}>
+            <Image source={require("./checkmark.png")}></Image>
+          </Pressable>
+          <Pressable style={styles.wrongBtn} onPress={() => {
+            // if (score > 0) {
+
+            // }
+          }}>
+            <Image source={require("./wrong.png")}></Image>
+          </Pressable>
+        </>
+      )}
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
+  graph: {
+    position: "relative",
+    top: 30
+  },
+  correctBtn: {
+    position: "absolute",
+    bottom: 30,
+    left: 140
+  },
+  wrongBtn: {
+    position: "absolute",
+    bottom: 30,
+    right: 140
+  },
   cardText: {
     fontSize: 70
   },
@@ -157,7 +250,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "75%",
     height: "60%",
-
-    // top: 200
   },
-})
+});
