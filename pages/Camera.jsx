@@ -97,7 +97,7 @@ export default function CameraPage() {
           translatedWord: translatedWord,
           definition: englishDefinition,
           translatedDefinition: translatedDefinition,
-          score: 1
+          score: 0
         }
       })
       .then(() => console.log("Done!")).catch(error => {
@@ -119,8 +119,9 @@ export default function CameraPage() {
     const prompt = `
     Given this image.
     Language: "Spanish"
-    For the highlighted word in the image and the above language, provide its English definition (in 12 words or less), its translation in the provided language, and its definition in the provided language (in 12 words or less). Use this JSON schema:
-    { "originalWord": "string",
+    For the highlighted word in the image and the above language, determine the root word (ex. leaving -> leave). Provide its English definition (in 12 words or less), its translation in the provided language, and its definition in the provided language (in 12 words or less). 
+    Everything must be in lowercase. Use this JSON schema:
+    { "englishWord": "string",
       "englishDefinition": "string", 
       "translatedWord": "string",
       "translatedDefinition": "string"
@@ -131,11 +132,11 @@ export default function CameraPage() {
     const text = JSON.parse(response.text());
     console.log(text)
     console.log("response")
-    setEnglishWord(text.originalWord)
+    setEnglishWord(text.englishWord)
     setEnglishDefinition(text.englishDefinition)
     setTranslatedWord(text.translatedWord)
     setTranslatedDefinition(text.translatedDefinition)
-    addWord(text.originalWord, text.englishDefinition, text.translatedWord, text.translatedDefinition);
+    addWord(text.englishWord, text.englishDefinition, text.translatedWord, text.translatedDefinition);
     openTextSheet();
     setLoading(false)
 
@@ -317,7 +318,7 @@ export default function CameraPage() {
               }}
               ListHeaderComponent={
                 currentPosition !== -1 ?
-                <Animated.View entering={FadeIn.duration(1000)} style={{ ...styles.termContainer, alignSelf: "center",}}>
+                <Animated.View entering={FadeIn.duration(750)} style={{ ...styles.termContainer, alignSelf: "center",}}>
                   <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
                     <Text style={styles.termTitle}>{englishWord}</Text>
                     <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />

@@ -10,12 +10,15 @@ const screenWidth = Dimensions.get("screen").width;
 
 export default function Dictionary() {
     const [words, setWords] = useState([]);
-    const [searchValue, setSearchValue] = useState('');
-    const [filteredFamiliar, setFamiliar] = useState([]);
-    const [filteredUnfamiliar, setUnfamiliar] = useState([]);
-    const [filteredMastered, setMastered] = useState([]);
+    const [searchValue, setSearchValue] = useState(null);
+    const [filteredFamiliar, setFamiliar] = useState(null);
+    const [filteredUnfamiliar, setUnfamiliar] = useState(null);
+    const [filteredMastered, setMastered] = useState(null);
 
-    function search() {
+    const [initialized, setInitialized] = useState(false)
+
+    function search(words) {
+        console.log("WORDS" + words.length)
         let tempFamiliar = [];
         let tempUnfamiliar = [];
         let tempMastered = [];
@@ -24,6 +27,7 @@ export default function Dictionary() {
             try {
                 if (!searchValue || words[i].word.toLowerCase().includes(searchValue.toLowerCase())) {
                     if (words[i].score == 0) {
+                        console.log(words[i])
                         tempUnfamiliar.push(words[i]);
                     } else if (words[i].score == 1) {
                         tempFamiliar.push(words[i]);
@@ -54,7 +58,7 @@ export default function Dictionary() {
                     words.push(obj);
                 }
                 setWords(words);
-                search();  // Trigger the search to initialize filtered lists
+                search(words);  // Trigger the search to initialize filtered lists
             });
     }
 
@@ -63,9 +67,19 @@ export default function Dictionary() {
     }, []);
 
     useEffect(() => {
-        search();
-    }, [searchValue, words]);
+        if (searchValue || searchValue == "")
+        search(words);
+    }, [searchValue]);
 
+    // useEffect(() => {
+    //     if (filteredFamiliar && filteredUnfamiliar && filteredMastered) {
+    //         setInitialized(true)
+    //         console.log(filteredFamiliar, filteredUnfamiliar, filteredMastered)
+    //     }
+    // }, [filteredFamiliar, filteredUnfamiliar, filteredMastered])
+    
+
+    // if (initialized)
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center" }}>
             <View style={styles.tabBar}>
@@ -86,14 +100,14 @@ export default function Dictionary() {
                         onChangeText={(text) => setSearchValue(text)}
                     />
                 </View>
-                <ScrollView style={styles.scrollingContainer}>
-                    {filteredUnfamiliar.length > 0 && (
+                <ScrollView style={styles.scrollingContainer} contentContainerStyle={{paddingBottom: 40}}>
+                    {filteredUnfamiliar?.length > 0 && (
                         <CategorySection title="Unfamiliar" color="#77BEE9" data={filteredUnfamiliar} />
                     )}
-                    {filteredFamiliar.length > 0 && (
+                    {filteredFamiliar?.length > 0 && (
                         <CategorySection title="Familiar" color="green" data={filteredFamiliar} />
                     )}
-                    {filteredMastered.length > 0 && (
+                    {filteredMastered?.length > 0 && (
                         <CategorySection title="Mastered" color="#FFD12D" data={filteredMastered} />
                     )}
                 </ScrollView>
@@ -104,24 +118,21 @@ export default function Dictionary() {
 
 function CategorySection({ title, color, data }) {
     return (
-        <>
+        <View style={{paddingBottom: 10, alignItems: "center"}}>
             <View style={{ width: "92%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 10 }}>
-                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center" }}>
+                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", paddingTop: 20 }}>
                     <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
                     <Text style={styles.category}>{title}</Text>
-                </View>
-                <View style={{ flexDirection: "row", gap: 15 }}>
-                    <Text style={styles.seeAll}>See All</Text>
-                    <SFSymbol name="chevron.right" size={20} color="black" />
                 </View>
             </View>
             <FlatList
                 data={data}
-                contentContainerStyle={{ gap: 10 }}
+                contentContainerStyle={{ gap: 10,}}
                 renderItem={({ item }) => <Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />}
                 scrollEnabled={false}
+            
             />
-        </>
+        </View>
     );
 }
 
@@ -139,23 +150,27 @@ function Term({ word, translatedWord, translatedDefinition }) {
 
 const styles = StyleSheet.create({
     scrollingContainer: {
-        height: screenHeight * 0.79
+        height: screenHeight * 0.79,
+        width: screenWidth,
     },
     seachIcon: {
         position: "relative",
         alignSelf: "left",
-        left: 15,
+        left: 20,
         top: 15
     },
     searchBar: {
-        backgroundColor: "#D3D3D3",
+        backgroundColor: "rgba(118, 118, 128, 0.12)",
         width: "90%",
-        height: 30,
+        height: 35,
         borderRadius: 10,
+        width: screenWidth * 0.9,
+        justifyContent: "center"
     },
     searchInput: {
-        paddingLeft: 30,
-        fontSize: 22
+        paddingLeft: 40,
+        fontSize: 22,
+
     },
     container: {
         position: "absolute",

@@ -9,7 +9,9 @@ import CameraPage from "./pages/Camera"
 import SignUp from './pages/SignUp';
 import DictionaryPage from './pages/Dictionary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();//Ignore all log notifications
 
 import auth from '@react-native-firebase/auth';
 
