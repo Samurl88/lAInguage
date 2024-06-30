@@ -8,19 +8,32 @@ import CameraPage from './Camera';
 import StudyPage from './Study';
 import Animated, { SlideInDown, SlideInRight, SlideInUp, SlideOutRight, SlideOutUp } from 'react-native-reanimated';
 
+import database from '@react-native-firebase/database';
+
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
 export default function HomePage({ navigation }) {
-  // const [image, setImage] = useState(null);
-
   const [cameraPage, setCameraPage] = useState(false)
   const [studyPage, setStudyPage] = useState(true)
   const [dictionaryPage, setDictionaryPage] = useState(false)
 
-  
+  const [userLanguage, setUserLanguage] = useState(null)
+
+  useEffect(() => {
+    let uid = auth().currentUser.uid;
+    database()
+    .ref(`${uid}/`)
+    .once('value')
+    .then(snapshot => {
+      let data = snapshot.val()
+
+      let lang = data.language
+      // console.log(lang)
+      setUserLanguage(lang)
+      })}, [])
 
   function logOut() {
     auth()
@@ -29,13 +42,15 @@ export default function HomePage({ navigation }) {
   const bottomSheetRef = useRef(null)
 
 
-  logOut()
+  // logOut()
 
   function openTextSheet() {
     bottomSheetRef.current.snapToIndex(0);
   }
   
 
+
+  if (userLanguage)
   return (
     <View style={{flex: 1}}>
       <View style={styles.tabBar}>
@@ -64,17 +79,17 @@ export default function HomePage({ navigation }) {
 
       {cameraPage &&
         <Animated.View entering={SlideInDown} exiting={SlideOutUp} style={{ flex: 1 }}>
-          <CameraPage />
+          <CameraPage language={userLanguage} />
         </Animated.View>
       }
       {studyPage &&
         <Animated.View entering={SlideInDown} exiting={SlideOutUp} style={{ flex: 1 }}>
-        <StudyPage />
+        <StudyPage language={userLanguage} />
         </Animated.View>
       }
       {dictionaryPage &&
         <Animated.View entering={SlideInDown} exiting={SlideOutUp} style={{ flex: 1 }}>
-        <Dictionary />
+        <Dictionary language={userLanguage} />
         </Animated.View>
       }
     </View>
