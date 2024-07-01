@@ -293,6 +293,42 @@ const translations = {
       "portuguese": "Não exatamente!",
       "hindi": "अभी नहीं!"
     },
+    "email": {
+        "spanish": "correo electrónico",
+        "chinese": "电子邮件",
+        "tagalog": "email",
+        "vietnamese": "email",
+        "arabic": "البريد الإلكتروني",
+        "french": "email",
+        "korean": "이메일",
+        "russian": "электронная почта",
+        "portuguese": "e-mail",
+        "hindi": "ईमेल"
+      },
+      "password": {
+        "spanish": "contraseña",
+        "chinese": "密码",
+        "tagalog": "password",
+        "vietnamese": "mật khẩu",
+        "arabic": "كلمة المرور",
+        "french": "mot de passe",
+        "korean": "비밀번호",
+        "russian": "пароль",
+        "portuguese": "senha",
+        "hindi": "पासवर्ड"
+      },
+      "create_account": {
+        "spanish": "crear cuenta",
+        "chinese": "创建账户",
+        "tagalog": "gumawa ng account",
+        "vietnamese": "tạo tài khoản",
+        "arabic": "إنشاء حساب",
+        "french": "créer un compte",
+        "korean": "계정 생성",
+        "russian": "создать аккаунт",
+        "portuguese": "criar conta",
+        "hindi": "खाता बनाएं"
+      },
     "positive_statements": {
       "spanish": ["¡Excelente!", "¡Sigue así!", "¡Fantástico!", "¡Impresionante!", "¡Muy bien!", "¡Estupendo!", "¡Buen trabajo!", "¡Maravilloso!", "¡Perfecto!", "¡Lo estás haciendo genial!"],
       "chinese": ["很好！", "继续保持！", "太棒了！", "令人印象深刻！", "非常好！", "优秀！", "好工作！", "精彩！", "完美！", "你做得很好！"],
@@ -328,6 +364,18 @@ const translations = {
       "russian": "увидеть все",
       "portuguese": "ver tudo",
       "hindi": "सभी देखें"
+    },
+    "sign_up": {
+        "spanish": "registrarse",
+    "chinese": "注册",
+    "tagalog": "mag-sign up",
+    "vietnamese": "đăng ký",
+    "arabic": "سجل",
+    "french": "s'inscrire",
+    "korean": "가입하기",
+    "russian": "зарегистрироваться",
+    "portuguese": "inscrever-se",
+    "hindi": "साइन अप करें"
     }
   }
 
@@ -410,20 +458,20 @@ export default function SignUpScreen() {
                 />
             </View>
             <View style={styles.container}>
-                <Text style={styles.title}>Sign Up</Text>
+                <Text style={styles.title}>{translations.sign_up[chosenLanguage] || "Sign Up" }</Text>
                 <View style={{ position: "absolute", top: screenHeight * 0.15, width: "100%" }}>
                     <View style={{ ...styles.inputContainer, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
                         <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
                             <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
-                                <Text style={styles.inputLabel}>Email</Text>
+                                <Text style={styles.inputLabel}>{translations.email[chosenLanguage] || "Email"}</Text>
                             </View>
                             <TextInput value={email} style={styles.input} placeholder='email@example.com' onChangeText={(text) => setEmail(text)} autoCapitalize='none' />
                         </View>
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
-                                <Text style={styles.inputLabel}>Password</Text>
+                                <Text style={styles.inputLabel}>{translations.password[chosenLanguage] || "Password"}</Text>
                             </View>
-                            <TextInput value={password} style={styles.input} placeholder='password' secureTextEntry={true} onChangeText={(text) => setPassword(text)} autoCapitalize='none' />
+                            <TextInput value={password} style={styles.input} placeholder={translations.password[chosenLanguage] || "Password"} secureTextEntry={true} onChangeText={(text) => setPassword(text)} autoCapitalize='none' />
                         </View>
                     </View>
                     <Text style={styles.error}>{error}</Text>
@@ -432,20 +480,20 @@ export default function SignUpScreen() {
                 {email && password
                     ? <Pressable onPress={async () => { register() }}
                         style={styles.infoButton}>
-                        <Text style={styles.infoButtonText}>Create Account!</Text>
+                        <Text style={styles.infoButtonText}>{translations.create_account[chosenLanguage] || "Create Account"}</Text>
                     </Pressable>
                     : <Pressable style={styles.infoButton}>
-                        <Text style={styles.infoButtonDisabledText}>Create Account!</Text>
+                        <Text style={styles.infoButtonDisabledText}>{translations.create_account[chosenLanguage] || "Create Account"}</Text>
                     </Pressable>
                 }
 
 
             </View>
 
-            <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
+            {/* <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
                 <Text style={styles.swapPage}>Already have an account? </Text>
                 <Pressable onPress={() => { setSignUp(false) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>Log in here!</Text></Pressable>
-            </View>
+            </View> */}
         </SafeAreaView>
     );
 

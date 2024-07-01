@@ -16,8 +16,8 @@ const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
 export default function HomePage({ navigation }) {
-  const [cameraPage, setCameraPage] = useState(false)
-  const [studyPage, setStudyPage] = useState(true)
+  const [cameraPage, setCameraPage] = useState(true)
+  const [studyPage, setStudyPage] = useState(false)
   const [dictionaryPage, setDictionaryPage] = useState(false)
 
   const [userLanguage, setUserLanguage] = useState(null)
@@ -52,7 +52,7 @@ export default function HomePage({ navigation }) {
 
   if (userLanguage)
   return (
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, backgroundColor: "#F0E8DD"}}>
       <View style={styles.tabBar}>
         <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }} onPress={() => {
           setCameraPage(true)
