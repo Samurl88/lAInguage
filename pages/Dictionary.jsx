@@ -401,11 +401,6 @@ export default function Dictionary({ language }) {
     // if (initialized)
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center" }}>
-            {/* <View style={styles.tabBar}>
-                <SFSymbol name="camera.fill" size={18} color="#2F2C2A" />
-                <SFSymbol name="doc.on.doc.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
-                <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: 0.21 }} />
-            </View> */}
             <View style={styles.container}>
                 <Text style={styles.title}>{translations.dictionary[language] || "Dictionary"}</Text>
                 <View style={styles.searchBar}>
@@ -459,10 +454,10 @@ function Term({ word, translatedWord, translatedDefinition }) {
     return (
         <View style={styles.termContainer}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-          <Text style={styles.termTitle}>{word}</Text>
+          <Text style={styles.termTitle}>{translatedWord}</Text>
           <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
         </View>
-        <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
+        <Text style={styles.termSubtitle}>{word} · {translatedDefinition}</Text>
       </View>
     );
 }
@@ -493,7 +488,7 @@ const styles = StyleSheet.create({
     },
     container: {
         position: "absolute",
-        top: screenHeight * 0.13,
+        top: screenHeight * 0.15,
         alignItems: "center"
     },
     title: {

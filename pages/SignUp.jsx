@@ -490,10 +490,10 @@ export default function SignUpScreen() {
 
             </View>
 
-            {/* <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
+            <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
                 <Text style={styles.swapPage}>Already have an account? </Text>
                 <Pressable onPress={() => { setSignUp(false) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>Log in here!</Text></Pressable>
-            </View> */}
+            </View>
         </SafeAreaView>
     );
 

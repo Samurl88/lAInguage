@@ -8,11 +8,7 @@ import CameraPage from './Camera';
 import StudyPage from './Study';
 import Animated, { FadeOut, FadeOutDown, FadeOutLeft, FadeOutRight, SlideInDown, SlideInLeft, SlideInRight, SlideInUp, SlideOutLeft, SlideOutRight, SlideOutUp, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
-
-
 import database from '@react-native-firebase/database';
-
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
@@ -133,6 +129,7 @@ export default function HomePage({ navigation }) {
           {!cameraPage
             ? <Animated.View key={"rightone"} style={{opacity: edgeOpacity}}>
               <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center",}} onPress={() => {
+                logOut()
               }}>
                 <SFSymbol name="person.crop.circle" size={25} color="#2F2C2A" />
               </Pressable>
@@ -142,7 +139,7 @@ export default function HomePage({ navigation }) {
 
         </Animated.View>
 
-        {cameraPage &&
+        {cameraPage && false &&
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
             <CameraPage language={userLanguage} />
           </Animated.View>
@@ -170,13 +167,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     borderRadius: 60,
-    paddingLeft: 10,
-    paddingRight: 10,
+
   },
   tabBarIcons: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+
   }
 })
 

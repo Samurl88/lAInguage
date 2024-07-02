@@ -373,8 +373,8 @@ export default function CameraPage({language}) {
 
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
-  const [englishWord, setEnglishWord] = useState(null)
-  const [englishDefinition, setEnglishDefinition] = useState(null)
+  const [originalWord, setOriginalWord] = useState(null)
+  const [originalDefinition, setOriginalDefinition] = useState(null)
   const [translatedWord, setTranslatedWord] = useState(null)
   const [translatedDefinition, setTranslatedDefinition] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -404,14 +404,14 @@ export default function CameraPage({language}) {
 
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
-  const addWord = (englishWord, englishDefinition, translatedWord, translatedDefinition) => {
+  const addWord = (originalWord, originalDefinition, translatedWord, translatedDefinition) => {
     const uid = auth().currentUser.uid;
     database()
       .ref(`/${uid}/words`)
       .update({
-        [englishWord]: {
+        [originalWord]: {
           translatedWord: translatedWord,
-          definition: englishDefinition,
+          definition: originalDefinition,
           translatedDefinition: translatedDefinition,
           score: 0
         }
@@ -433,12 +433,12 @@ export default function CameraPage({language}) {
     console.log(Config.API_KEY)
 
     const prompt = `
-    Given this image.
-    Language: ${language}
-    For the highlighted word in the image and the above language, determine the root word (ex. leaving -> leave). Provide its English definition (in 12 words or less), its translation in the provided language, and its definition in the provided language (in 12 words or less). 
-    Everything must be in lowercase. Use this JSON schema:
-    { "englishWord": "string",
-      "englishDefinition": "string", 
+    Determine the root word of the highlighted word in the image (ex. leaving -> leave).
+    Provide the word and definition in the original language of the word; additionally, provide the word and definition in ${language}. 
+    Definitions should be 12 words or less. Everything must be lowercase.
+    Use this JSON schema:
+    { "originalWord": "string",
+      "originalDefinition": "string", 
       "translatedWord": "string",
       "translatedDefinition": "string"
     }`
@@ -448,11 +448,11 @@ export default function CameraPage({language}) {
     const text = JSON.parse(response.text());
     console.log(text)
     console.log("response")
-    setEnglishWord(text.englishWord)
-    setEnglishDefinition(text.englishDefinition)
+    setOriginalWord(text.originalWord)
+    setOriginalDefinition(text.originalDefinition)
     setTranslatedWord(text.translatedWord)
     setTranslatedDefinition(text.translatedDefinition)
-    addWord(text.englishWord, text.englishDefinition, text.translatedWord, text.translatedDefinition);
+    addWord(text.originalWord, text.originalDefinition, text.translatedWord, text.translatedDefinition);
     openTextSheet();
     setLoading(false)
 
@@ -633,14 +633,14 @@ export default function CameraPage({language}) {
                 currentPosition !== -1 ?
                 <Animated.View entering={FadeIn.duration(750)} style={{ ...styles.termContainer, alignSelf: "center",}}>
                   <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-                    <Text style={styles.termTitle}>{englishWord}</Text>
+                    <Text style={styles.termTitle}>{originalWord}</Text>
                     <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
                   </View>
                   <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
                 </Animated.View>
                 : <View style={{ ...styles.termContainer, alignSelf: "center", opacity: 0}}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-                  <Text style={styles.termTitle}>{englishWord}</Text>
+                  <Text style={styles.termTitle}>{originalWord}</Text>
                   <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
                 </View>
                 <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>

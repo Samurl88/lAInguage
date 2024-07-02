@@ -10,8 +10,8 @@ import SignUp from './pages/SignUp';
 import DictionaryPage from './pages/Dictionary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LogBox } from 'react-native';
-LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
-LogBox.ignoreAllLogs();//Ignore all log notifications
+LogBox.ignoreLogs(['Warning: ...']);
+LogBox.ignoreAllLogs(); 
 
 import auth from '@react-native-firebase/auth';
 
@@ -26,7 +26,7 @@ export default function App() {
   // Handle user state changes
   function onAuthStateChanged(user) {
     setUser(user);
-    console.log(user)
+    // console.log(user)
     if (initializing) setInitializing(false);
   }
 

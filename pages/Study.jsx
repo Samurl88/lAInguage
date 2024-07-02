@@ -6,6 +6,7 @@ import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database";
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
+import { SFSymbol } from 'react-native-sfsymbols';
 
 
 const screenHeight = Dimensions.get("screen").height;
@@ -15,15 +16,15 @@ export default function StudyPage({ navigation }) {
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
 
-
+  // Loading animation
   const rotate = useSharedValue("0deg")
-
   useEffect(() => {
     if (!flashcards && !MCQs)
       rotate.value = withRepeat(withTiming("360deg", { duration: 1000, }), -1)
 
   }, [flashcards, MCQs])
 
+  // Initializing model
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
   const safetySetting = [
     {
@@ -49,6 +50,10 @@ export default function StudyPage({ navigation }) {
   ];
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
+
+  // Creating question flatlist
+  const ref = useRef();
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const goNextSlide = () => {
     const nextSlideIndex = currentSlideIndex + 1;
     if (nextSlideIndex != flashcards.length) {
@@ -57,15 +62,13 @@ export default function StudyPage({ navigation }) {
       setCurrentSlideIndex(nextSlideIndex);
     }
   }
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
-
   const updateCurrentSlideIndex = e => {
     const contentOffsetX = e.nativeEvent.contentOffset.x;
     const currentIndex = Math.round(contentOffsetX / screenWidth);
     setCurrentSlideIndex(currentIndex)
   }
 
+  // Generating all MCQs
   async function createMCQs(mcqs) {
     const words = mcqs.map(item => item.front);
     const prompt = `
@@ -95,15 +98,19 @@ export default function StudyPage({ navigation }) {
       },
       ...
     }`
-    console.log(Config.API_KEY)
-
-    const resultResponse = await model.generateContent(prompt);
-    const response = resultResponse.response;
-    const mcqJSON = JSON.parse(response.text());
-    setMCQs(mcqJSON)
-    console.log(mcqJSON)
+    if (words.length) {
+      const resultResponse = await model.generateContent(prompt);
+      const response = resultResponse.response;
+      const mcqJSON = JSON.parse(response.text());
+      setMCQs(mcqJSON)
+      console.log(mcqJSON)
+    } else {
+      setMCQs([])
+      console.log("No MCQs!")
+    }
   }
 
+  // Sorts terms into flashcard, MCQ, and FRQ
   function sortTerms() {
     let uid = auth().currentUser.uid;
     database()
@@ -137,55 +144,44 @@ export default function StudyPage({ navigation }) {
     sortTerms();
   }, []);
 
-  useEffect(() => {
-    console.log(flashcards)
-  }, [flashcards])
 
-  const ref = useRef();
-
-
-
+  // Renders questions (if terms are done sorting and MCQs have been generated, if applicable)
   if (flashcards && MCQs)
     return (
       <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Practice</Text>
+          <FlatList
+            data={flashcards}
+            ref={ref}
+            horizontal
+            renderItem={({ item, index }) => (
+              <Flashcard
+                mcqs={MCQs}
+                key={item.front}
+                front={item.front}
+                back={item.back}
+                frontFacing={item.frontFacing}
+                toggleFacing={() => {
+                  const newFlashcards = [...flashcards];
+                  newFlashcards[index].frontFacing = !newFlashcards[index].frontFacing;
+                  setFlashcards(newFlashcards);
+                }}
+                score={item.score}
+                type={item.type}
+                goNextSlide={goNextSlide}
+              />
+            )}
+            pagingEnabled
+            onMomentumScrollEnd={updateCurrentSlideIndex}
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.front}
+            style={{ zIndex: 100 }}
+            scrollEnabled={false}
+          />
+        </View>
 
-        <Text style={styles.title}>Practice</Text>
-        {/* <Pressable onPress={() => {
-        auth.signOut();
-      }}>
-        <Image source={{ uri: "https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png" }} style={{ width: 35, height: 35, position: "absolute", top: 70, right: 30 }} />
-      </Pressable> */}
-
-        <FlatList
-          data={flashcards}
-          ref={ref}
-          horizontal
-          renderItem={({ item, index }) => (
-            <Flashcard
-              mcqs={MCQs}
-              key={item.front}
-              front={item.front}
-              back={item.back}
-              frontFacing={item.frontFacing}
-              toggleFacing={() => {
-                const newFlashcards = [...flashcards];
-                newFlashcards[index].frontFacing = !newFlashcards[index].frontFacing;
-                setFlashcards(newFlashcards);
-              }}
-              score={item.score}
-              type={item.type}
-              goNextSlide={goNextSlide}
-            />
-          )}
-          pagingEnabled
-          onMomentumScrollEnd={updateCurrentSlideIndex}
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.front}
-          style={{ zIndex: 100 }}
-          scrollEnabled={false}
-        />
-
-      </SafeAreaView>
+      </SafeAreaView >
     );
 
 
@@ -229,17 +225,16 @@ export default function StudyPage({ navigation }) {
               </Defs>
             </Svg>
           </Animated.View>
-          <Text style={{paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray"}}>Generating your session...</Text>
+          <Text style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray" }}>Generating your session...</Text>
         </View>
       </SafeAreaView>
     </>
   )
 }
 
-
 function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextSlide }) {
-  // console.log(front)
   const [score, setScore] = useState(0);
+  const [correct, setCorrect]=  useState(null);
 
   function getScore() {
     let uid = auth().currentUser.uid;
@@ -261,7 +256,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
     getScore();
   }, [])
 
-  function correct() {
+  function addScore() {
     let uid = auth().currentUser.uid;
     database()
       .ref(`${uid}/words/${front}`)
@@ -307,11 +302,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
     spin.value = spin.value ? 0 : 1;
     toggleFacing();
   };
-  function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
 
-  console.log(type)
   return (
     <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
       {type == "flashcard"
@@ -342,8 +333,6 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
                 <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 20, textAlign: "center" }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>B.</Text> {mcqs[front].choices.B}</Text>
                 <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 20, textAlign: "center" }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>C.</Text> {mcqs[front].choices.C}</Text>
               </View>
-
-              {/* <Text style={styles.backText}>{back}</Text> */}
             </Pressable>
           </View>
         </>
@@ -355,34 +344,35 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
               <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 20, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>Write a sentence with the word:</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.13 }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text></Text>
               <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20, width: "100%", fontSize: 18, }} placeholder="Start typing..." multiline blurOnSubmit />
-
-              {/* <Text style={styles.backText}>{back}</Text> */}
             </Pressable>
           </View>
         </>
       }
 
-      <Image source={require("./graph.png")} style={styles.graph}></Image>
+      {/* Progress bar */}
+      <View style={styles.progressBar}>
+        <Image source={require("./graph.png")} style={styles.graph}></Image>
+      </View>
 
+      {/* Bottom buttons */}
       {!frontFacing &&
         type == "flashcard" &&
         (
-          <>
-            <Pressable style={styles.correctBtn} onPress={() => {
-              correct();
+          <View style={styles.btnContainer}>
+            <Pressable style={correct == false ? styles.wrongBtn : styles.defaultBtn} onPress={() => {
+              setCorrect(false)
               goNextSlide()
             }}>
-              <Image source={require("./checkmark.png")}></Image>
+              <SFSymbol name="xmark" size={25} color="white" />
             </Pressable>
-            <Pressable style={styles.wrongBtn} onPress={() => {
-              // if (score > 0) {
+            <Pressable style={correct ? styles.correctBtn : styles.defaultBtn} onPress={() => {
+              // addScore();
+              setCorrect(true)
               goNextSlide()
-
-              // }
             }}>
-              <Image source={require("./wrong.png")}></Image>
+              <SFSymbol name="checkmark" size={25} color="white" />
             </Pressable>
-          </>
+          </View>
         )}
       {
         type == "mcq" &&
@@ -419,19 +409,35 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
 
 
 const styles = StyleSheet.create({
-  graph: {
-    position: "relative",
-    top: 30
+  btnContainer: {
+    position: "absolute",
+    top: screenHeight * 0.67,
+    flexDirection: "row",
+    gap: 20, 
+  },
+  defaultBtn: {
+    backgroundColor: "#2F2C2A",
+    borderRadius: 25,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center"
   },
   correctBtn: {
-    position: "absolute",
-    bottom: 30,
-    left: 140
+    backgroundColor: "#9BDD48",
+    borderRadius: 25,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center"
   },
   wrongBtn: {
-    position: "absolute",
-    bottom: 30,
-    right: 140
+    backgroundColor: "#DD6348",
+    borderRadius: 25,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center"
   },
   cardText: {
     fontSize: 70
@@ -441,9 +447,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: "NewYorkLarge-Semibold",
-    fontSize: 50,
-    position: "absolute",
-    top: 125,
+    fontSize: 34,
   },
   debugButton: {
     backgroundColor: "#FFCC32",
@@ -454,34 +458,44 @@ const styles = StyleSheet.create({
     width: "90%"
   },
   front: {
-    height: 250,
-    width: 350,
     backgroundColor: "#FFFCF7",
     borderRadius: 16,
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
     backfaceVisibility: "hidden",
-    width: "75%",
-    height: "60%",
+    width: screenWidth * 0.8,
+    height: screenHeight * 0.5,
     shadowOffset: 3,
     shadowRadius: 3,
     shadowColor: "black",
-    shadowOpacity: 0.3
+    shadowOpacity: 0.3,
+    top: screenHeight * 0.04
   },
   back: {
-    height: 250,
-    width: 350,
     backgroundColor: "#FFFCF7",
     borderRadius: 16,
     backfaceVisibility: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    width: "75%",
-    height: "60%",
+    width: screenWidth * 0.8,
+    height: screenHeight * 0.5,
     shadowOffset: 3,
     shadowRadius: 3,
     shadowColor: "black",
-    shadowOpacity: 0.3
+    shadowOpacity: 0.3,
+    top: screenHeight * 0.04,
+    position: "absolute"
   },
+  container: {
+    position: "absolute",
+    top: screenHeight * 0.15,
+    alignItems: "center",
+    // backgroundColor: "red",
+    height: "100%",
+  },
+  progressBar: {
+    position: "absolute",
+    top: screenHeight * 0.6
+  }
 });
