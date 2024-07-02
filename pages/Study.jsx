@@ -1,13 +1,12 @@
 import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image, TextInput } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming, withRepeat, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming, withRepeat, Easing, interpolateColor } from 'react-native-reanimated';
 import Config from "react-native-config"
 import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database";
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
 import { SFSymbol } from 'react-native-sfsymbols';
-
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
@@ -234,7 +233,14 @@ export default function StudyPage({ navigation }) {
 
 function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextSlide }) {
   const [score, setScore] = useState(0);
-  const [correct, setCorrect]=  useState(null);
+  const [correct, setCorrect] = useState(null);
+  const [answer, setAnswer] = useState(null)
+
+  useEffect(() => {
+    console.log("HFEowbu" + answer)
+
+  }, [answer])
+
 
   function getScore() {
     let uid = auth().currentUser.uid;
@@ -303,6 +309,19 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
     toggleFacing();
   };
 
+  const progress = useSharedValue(0);
+  const correctColor = useAnimatedStyle(() => {
+    return {
+      backgroundColor: interpolateColor(
+        progress.value,
+        [0, 1],
+        ["#2F2C2A", "#9BDD48"]
+      )
+    }
+  })
+
+
+
   return (
     <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
       {type == "flashcard"
@@ -356,36 +375,64 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
 
       {/* Bottom buttons */}
       {!frontFacing &&
-        type == "flashcard" &&
-        (
-          <View style={styles.btnContainer}>
-            <Pressable style={correct == false ? styles.wrongBtn : styles.defaultBtn} onPress={() => {
-              setCorrect(false)
-              goNextSlide()
-            }}>
-              <SFSymbol name="xmark" size={25} color="white" />
-            </Pressable>
-            <Pressable style={correct ? styles.correctBtn : styles.defaultBtn} onPress={() => {
-              // addScore();
-              setCorrect(true)
-              goNextSlide()
-            }}>
-              <SFSymbol name="checkmark" size={25} color="white" />
-            </Pressable>
-          </View>
-        )}
+        type == "flashcard" && a
+          (
+            <View style={styles.btnContainer}>
+              <Pressable style={correct == false ? styles.wrongBtn : styles.defaultBtn} onPress={() => {
+                setCorrect(false)
+                goNextSlide()
+              }}>
+                <SFSymbol name="xmark" size={25} color="white" />
+              </Pressable>
+              <Pressable style={correct ? styles.correctBtn : styles.defaultBtn} onPress={() => {
+                // addScore();
+                setCorrect(true)
+                goNextSlide()
+              }}>
+                <SFSymbol name="checkmark" size={25} color="white" />
+              </Pressable>
+            </View>
+          )}
       {
         type == "mcq" &&
         (
           <>
-            <View style={{ position: "absolute", top: screenHeight * 0.8, flexDirection: "row", gap: 20 }}>
-              <Pressable onPress={goNextSlide} style={{ width: 50, height: 50, backgroundColor: "#2F2C2A", borderRadius: 25, justifyContent: "center", alignItems: "center" }}>
-                <Text style={{ fontSize: 20, color: "#F0E8DD" }}>A</Text>
-              </Pressable>
-              <Pressable onPress={goNextSlide} style={{ width: 50, height: 50, backgroundColor: "#2F2C2A", borderRadius: 25, justifyContent: "center", alignItems: "center" }}>
+            <View style={styles.btnContainer}>
+              <Animated.View style={[styles.defaultBtn, correctColor]}>
+                <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
+                  setAnswer("A")
+                  // progress.value = withTiming(1 - progress.value, { duration: 1000 });
+                  if (mcqs[front].correctAnswer == "A") {
+                    setCorrect(true)
+                  } else {
+                    setCorrect(false)
+                  }
+                  console.log(mcqs[front].correctAnswer)
+                  // goNextSlide()
+                }}>
+                  <Text style={{ fontSize: 20, color: "#F0E8DD" }}>A</Text>
+                </Pressable>
+              </Animated.View>
+              <Pressable style={correct == false ? styles.wrongBtn : correct & mcqs[front].correctAnswer == "B" ? styles.correctBtn : styles.defaultBtn} onPress={() => {
+                setAnswer("B")
+                if (mcqs[front].correctAnswer == "B") {
+                  setCorrect(true)
+                } else {
+                  setCorrect(false)
+                }
+                // goNextSlide()
+              }}>
                 <Text style={{ fontSize: 20, color: "#F0E8DD" }}>B</Text>
               </Pressable>
-              <Pressable onPress={goNextSlide} style={{ width: 50, height: 50, backgroundColor: "#2F2C2A", borderRadius: 25, justifyContent: "center", alignItems: "center" }}>
+              <Pressable style={correct == false ? styles.wrongBtn : mcqs[front].correctAnswer == "C" ? styles.correctBtn : styles.defaultBtn} onPress={() => {
+                setAnswer("C")
+                if (mcqs[front].correctAnswer == "C") {
+                  setCorrect(true)
+                } else {
+                  setCorrect(false)
+                }
+                // goNextSlide()
+              }}>
                 <Text style={{ fontSize: 20, color: "#F0E8DD" }}>C</Text>
               </Pressable>
             </View>
@@ -413,10 +460,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: screenHeight * 0.67,
     flexDirection: "row",
-    gap: 20, 
+    gap: 20,
   },
   defaultBtn: {
-    backgroundColor: "#2F2C2A",
+    // backgroundColor: "#2F2C2A",
     borderRadius: 25,
     width: 50,
     height: 50,
