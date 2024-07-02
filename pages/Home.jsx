@@ -110,7 +110,7 @@ export default function HomePage({ navigation }) {
               edgeOpacity.value = withTiming(1)
 
             }}>
-              <SFSymbol name="doc.on.doc.fill" size={18} color="#2F2C2A" style={{ opacity: studyPage ? 1 : 0.21 }} />
+              <SFSymbol name="rectangle.portrait.on.rectangle.portrait.angled.fill" size={18} color="#2F2C2A" style={{ opacity: studyPage ? 1 : 0.21 }} />
             </Pressable>
             <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }} onPress={() => {
               setCameraPage(false)
