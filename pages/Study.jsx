@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image, TextInput } from 'react-native';
+import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image, TextInput, ActivityIndicator } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
 import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming, withRepeat, Easing, interpolateColor } from 'react-native-reanimated';
 import Config from "react-native-config"
@@ -255,6 +255,8 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
   const [answer, setAnswer] = useState(null)
 
   const [loading, setLoading] = useState(null);
+  const [FRQcorrect, setFRQcorrect] = useState(null);
+  const [FRQfeedback, setFRQfeedback] = useState(null);
 
 
   // function getScore() {
@@ -366,9 +368,14 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
     const resultResponse = await model.generateContent(prompt);
     const response = resultResponse.response;
     const resultFRQ = JSON.parse(response.text());
+
     console.log(resultFRQ)
 
-    setLoading(false)
+    console.log(resultFRQ.correct)
+    setFRQcorrect(resultFRQ.correct);
+    setFRQfeedback(resultFRQ.feedback);
+    showAnswer.value = withTiming(1, { duration: 250 });
+    setLoading(false);
   }
 
 
@@ -512,14 +519,18 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
         (
           <>
             <View style={styles.btnContainer}>
-              <Animated.View style={[styles.defaultBtn, { backgroundColor: answer ? "#2F2C2A" : "#A6A19D" }]}>
+              <Animated.View style={[styles.defaultBtn, FRQcorrect == true ? correctColor : FRQcorrect === false ? wrongColor : { backgroundColor: answer ? "#2F2C2A" : "#A6A19D" }]}>
                 <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
                   if (answer) {
                     evaluateFRQ()
                     // goNextSlide()
                   }
                 }}>
-                  <SFSymbol name="arrow.up" size={25} color="white" />
+                  { loading
+                  ? <ActivityIndicator />
+                  : <SFSymbol name="arrow.up" size={25} color="white" />
+
+                  }
                 </Pressable>
               </Animated.View>
             </View>
