@@ -11,7 +11,33 @@ import { SFSymbol } from 'react-native-sfsymbols';
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
-export default function StudyPage({ navigation }) {
+// Initializing model
+const genAI = new GoogleGenerativeAI(Config.API_KEY);
+const safetySetting = [
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_NONE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_NONE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_NONE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_NONE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+    threshold: HarmBlockThreshold.BLOCK_NONE,
+  },
+];
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
+
+export default function StudyPage({ language }) {
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
 
@@ -23,31 +49,6 @@ export default function StudyPage({ navigation }) {
 
   }, [flashcards, MCQs])
 
-  // Initializing model
-  const genAI = new GoogleGenerativeAI(Config.API_KEY);
-  const safetySetting = [
-    {
-      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
-    },
-  ];
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
 
   // Creating question flatlist
@@ -144,7 +145,7 @@ export default function StudyPage({ navigation }) {
         const sortedFlashcards = flashcards.sort((a, b) => {
           let x = a.score;
           let y = b.score
-          
+
           if (x > y) return 1
           if (y > x) return -1
           return 0
@@ -185,6 +186,7 @@ export default function StudyPage({ navigation }) {
                 score={item.score}
                 type={item.type}
                 goNextSlide={goNextSlide}
+                language={language}
               />
             )}
             pagingEnabled
@@ -239,7 +241,7 @@ export default function StudyPage({ navigation }) {
                   </Defs>
                 </Svg>
               </Animated.View>
-              <Text style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray" }}>Generating your session...</Text>
+              <Text style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray" }}>Preparing your session...</Text>
             </View>
           </View>
         </View>
@@ -248,30 +250,33 @@ export default function StudyPage({ navigation }) {
   )
 }
 
-function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextSlide }) {
+function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextSlide, language }) {
   const [score, setScore] = useState(0);
   const [answer, setAnswer] = useState(null)
 
+  const [loading, setLoading] = useState(null);
 
-  function getScore() {
-    let uid = auth().currentUser.uid;
-    database()
-      .ref(`${uid}/words/${front}`)
-      .once('value')
-      .then(snapshot => {
-        let word = snapshot.val();
-        let currentScore = word["score"] || 0;
 
-        setScore(currentScore)
-        // console.log(currentScore)
-      })
-      .catch(error => {
-        console.error("Error reading score: ", error);
-      });
-  }
-  useEffect(() => {
-    getScore();
-  }, [])
+  // function getScore() {
+  //   let uid = auth().currentUser.uid;
+  //   database()
+  //     .ref(`${uid}/words/${front}`)
+  //     .once('value')
+  //     .then(snapshot => {
+  //       let word = snapshot.val();
+  //       let currentScore = word["score"] || 0;
+
+  //       setScore(currentScore)
+  //       // console.log(currentScore)
+  //     })
+  //     .catch(error => {
+  //       console.error("Error reading score: ", error);
+  //     });
+  // }
+
+  // useEffect(() => {
+  //   getScore();
+  // }, [])
 
   function addScore() {
     let uid = auth().currentUser.uid;
@@ -290,9 +295,9 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
         console.error("Error updating score: ", error);
       });
   }
+
+  // Animated styles for flashcard flip
   const spin = useSharedValue(frontFacing ? 0 : 1);
-
-
   const frontAnimatedStyle = useAnimatedStyle(() => {
     const spinVal = interpolate(spin.value, [0, 1], [0, 180]);
     return {
@@ -303,7 +308,6 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
       ],
     };
   }, []);
-
   const backAnimatedStyle = useAnimatedStyle(() => {
     const spinVal = interpolate(spin.value, [0, 1], [180, 360]);
     return {
@@ -314,12 +318,10 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
       ],
     };
   }, []);
-
   const handlePress = () => {
     spin.value = spin.value ? 0 : 1;
     toggleFacing();
   };
-
 
   // Interpolate styles for button color changes
   const showAnswer = useSharedValue(0);
@@ -342,12 +344,40 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
     }
   })
 
+
+
+  // For FRQ: evaluate sentence
+  const evaluateFRQ = async () => {
+    setLoading(true);
+    const prompt = `
+    Evaluate whether the following sentence is grammatically correct in the language of the word "${front}". To be correct, the sentence must include the word "${front}" correctly. 
+    
+    Sentence: ${answer}
+
+    Provide feedback if the sentence is not correct. This feedback must be a full sentence written in ${language} 15 words or less. It must explain what is wrong and what would be correct.
+    If the word "${front}" is not used in the sentence, feedback should be "You didn't use "${front}" in the sentence!"
+    Answer in the following schema:
+    {
+      correct: boolean,
+      feedback: string or null
+    }
+    `
+
+    const resultResponse = await model.generateContent(prompt);
+    const response = resultResponse.response;
+    const resultFRQ = JSON.parse(response.text());
+    console.log(resultFRQ)
+
+    setLoading(false)
+  }
+
+
   return (
     <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
       {type == "flashcard"
         && <>
           <Animated.View style={[styles.front, frontAnimatedStyle]}>
-          <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>Quiz yourself:</Text>
+            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>Quiz yourself</Text>
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
               {
                 <Text style={styles.bigCardText}>{front}</Text>
@@ -365,7 +395,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
         && <>
           <View style={styles.back}>
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", padding: 20 }}>
-              <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>Choose the best answer:</Text>
+              <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>Choose the best answer</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.1 }}>What does <Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text> mean?</Text>
               <View style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20 }}>
                 <Text style={styles.smallCardText}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>A.</Text> {mcqs[front].choices.A}</Text>
@@ -380,9 +410,9 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
         && <>
           <View style={styles.back}>
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", padding: 20 }}>
-              <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 20, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>Write a sentence with the word:</Text>
+              <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>Write a sentence with the following word</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.13 }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text></Text>
-              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20, width: "100%", fontSize: 18, }} placeholder="Start typing..." multiline blurOnSubmit />
+              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20, width: "100%", fontSize: 18, }} placeholder="Start typing..." multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
             </Pressable>
           </View>
         </>
@@ -481,8 +511,17 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
         type == "frq" &&
         (
           <>
-            <View style={{ position: "absolute", top: screenHeight * 0.8, flexDirection: "row", gap: 20 }}>
-              <Image source={require("./checkmark.png")}></Image>
+            <View style={styles.btnContainer}>
+              <Animated.View style={[styles.defaultBtn, { backgroundColor: answer ? "#2F2C2A" : "#A6A19D" }]}>
+                <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
+                  if (answer) {
+                    evaluateFRQ()
+                    // goNextSlide()
+                  }
+                }}>
+                  <SFSymbol name="arrow.up" size={25} color="white" />
+                </Pressable>
+              </Animated.View>
             </View>
           </>
         )
@@ -525,13 +564,13 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   bigCardText: {
-    fontFamily: "NewYorkLarge-Regular", 
-    fontSize: 40, 
+    fontFamily: "NewYorkLarge-Regular",
+    fontSize: 40,
     textAlign: "center"
   },
   smallCardText: {
-    fontFamily: "NewYorkLarge-Regular", 
-    fontSize: 20, 
+    fontFamily: "NewYorkLarge-Regular",
+    fontSize: 20,
     textAlign: "center"
   },
   title: {
