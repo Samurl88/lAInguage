@@ -30,6 +30,8 @@ export default function App() {
     if (initializing) setInitializing(false);
   }
 
+  
+
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);

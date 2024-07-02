@@ -601,7 +601,7 @@ export default function CameraPage({language}) {
                           }
                         </Pressable>
                       </View>
-                      <Text style={{ fontSize: 18, position: "absolute", top: screenHeight * 0.75, alignSelf: "center", color: "white", textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.highlight_text_to_translate_to_language[language] || "Highlight text to define in Spanish."}</Text>
+                      <Text style={{ fontSize: 18, position: "absolute", top: screenHeight * 0.75, alignSelf: "center", color: "white", textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.highlight_text_to_translate_to_language[language] || "Highlight text to translate."}</Text>
                     </View>
                   </View>
 

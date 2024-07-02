@@ -1,10 +1,12 @@
 import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image, TextInput } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming, withRepeat, Easing } from 'react-native-reanimated';
 import Config from "react-native-config"
 import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database";
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
+import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
+
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
@@ -12,6 +14,15 @@ const screenWidth = Dimensions.get("screen").width;
 export default function StudyPage({ navigation }) {
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
+
+
+  const rotate = useSharedValue("0deg")
+
+  useEffect(() => {
+    if (!flashcards && !MCQs)
+      rotate.value = withRepeat(withTiming("360deg", { duration: 1000, }), -1)
+
+  }, [flashcards, MCQs])
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
   const safetySetting = [
@@ -137,8 +148,7 @@ export default function StudyPage({ navigation }) {
   if (flashcards && MCQs)
     return (
       <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
-        <Image source={{ uri: "https://static.wikia.nocookie.net/gensin-impact/images/d/d4/Item_Primogem.png/revision/latest?cb=20201117071158" }} style={{ width: 35, height: 35, position: "absolute", top: 70, left: 30 }} />
-        <Text style={{ position: "absolute", top: 75, fontSize: 22, left: 60 }}>4</Text>
+
         <Text style={styles.title}>Practice</Text>
         {/* <Pressable onPress={() => {
         auth.signOut();
@@ -177,6 +187,53 @@ export default function StudyPage({ navigation }) {
 
       </SafeAreaView>
     );
+
+
+
+  // loading
+  return (
+    <>
+      <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
+
+        <Text style={styles.title}>Practice</Text>
+        <View style={styles.back}>
+
+
+          <Animated.View style={{ transform: [{ rotate: rotate }] }}>
+            <Svg
+              width={50}
+              height={50}
+              viewBox="0 0 17 17"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <Path
+                d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
+                fill="url(#paint0_linear_49_1672)"
+              />
+              <Path
+                d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
+              />
+              <Defs>
+                <LinearGradient
+                  id="paint0_linear_49_1672"
+                  x1={2}
+                  y1={2.5}
+                  x2={15}
+                  y2={16}
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <Stop stopColor="#65BAEE" />
+                  <Stop offset={1} stopColor="#FD8DFF" />
+                </LinearGradient>
+              </Defs>
+            </Svg>
+          </Animated.View>
+          <Text style={{paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray"}}>Generating your session...</Text>
+        </View>
+      </SafeAreaView>
+    </>
+  )
 }
 
 
@@ -297,7 +354,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
             <Pressable onPress={handlePress} style={{ width: "100%", height: "100%", alignItems: "center", padding: 20 }}>
               <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 20, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>Write a sentence with the word:</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.13 }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text></Text>
-              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20, width: "100%", fontSize: 18,}} placeholder="Start typing..." multiline blurOnSubmit />
+              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20, width: "100%", fontSize: 18, }} placeholder="Start typing..." multiline blurOnSubmit />
 
               {/* <Text style={styles.backText}>{back}</Text> */}
             </Pressable>
@@ -313,11 +370,13 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
           <>
             <Pressable style={styles.correctBtn} onPress={() => {
               correct();
+              goNextSlide()
             }}>
               <Image source={require("./checkmark.png")}></Image>
             </Pressable>
             <Pressable style={styles.wrongBtn} onPress={() => {
               // if (score > 0) {
+              goNextSlide()
 
               // }
             }}>
@@ -357,6 +416,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   graph: {
@@ -404,6 +464,10 @@ const styles = StyleSheet.create({
     backfaceVisibility: "hidden",
     width: "75%",
     height: "60%",
+    shadowOffset: 3,
+    shadowRadius: 3,
+    shadowColor: "black",
+    shadowOpacity: 0.3
   },
   back: {
     height: 250,
@@ -415,5 +479,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "75%",
     height: "60%",
+    shadowOffset: 3,
+    shadowRadius: 3,
+    shadowColor: "black",
+    shadowOpacity: 0.3
   },
 });
