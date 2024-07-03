@@ -19,19 +19,26 @@ export default function HomePage({ navigation }) {
   const [dictionaryPage, setDictionaryPage] = useState(false)
 
   const [userLanguage, setUserLanguage] = useState(null)
+  const [stars, setStars] = useState(null);
 
   useEffect(() => {
     let uid = auth().currentUser.uid;
-    database()
-      .ref(`${uid}/`)
-      .once('value')
-      .then(snapshot => {
+    const onValueChange = database()
+      .ref(`${uid}/profile`)
+      .on('value', snapshot => {
+        console.log("something changed!")
         let data = snapshot.val()
-
         let lang = data.language
-        // console.log(lang)
         setUserLanguage(lang)
+        
+        let stars = data?.stars ? data.stars : 0
+        setStars(0)
+
+        
+        return () => database().ref(`${uid}/profile`).off('value', onValueChange);
       })
+
+    
   }, [])
 
   function logOut() {
@@ -68,7 +75,7 @@ export default function HomePage({ navigation }) {
 
   const edgeOpacity = useSharedValue(0)
 
-  if (userLanguage)
+  if (userLanguage && stars != null)
     return (
       <View style={{ flex: 1, backgroundColor: "#F0E8DD", }}>
         <Animated.View style={{ ...styles.tabBar, width: tabBarWidth, alignItems: "center", justifyContent: "space-around" }}>
@@ -86,7 +93,7 @@ export default function HomePage({ navigation }) {
                   fill="#2F2C2A"
                 />
               </Svg>
-              <Text style={{ fontSize: 20, }}>4</Text>
+              <Text style={{ fontSize: 20, }}>{stars}</Text>
             </Animated.View>
             : null
           }

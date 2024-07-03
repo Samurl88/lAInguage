@@ -413,9 +413,10 @@ export default function SignUpScreen() {
         .then(() => {
             let uid = auth().currentUser.uid
             database()
-            .ref(`/${uid}/`)
+            .ref(`/${uid}/profile`)
             .update({
-                language: chosenLanguage
+                language: chosenLanguage,
+                stars: 0
             })
             
         })
