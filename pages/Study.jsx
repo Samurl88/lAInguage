@@ -1,6 +1,6 @@
-import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image, TextInput, ActivityIndicator, Button } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming, withRepeat, Easing, interpolateColor, FadeInDown, FadeInUp, FadeIn, LightSpeedInLeft, LightSpeedInRight, SlideInRight, ZoomIn, FadeInRight, FadeOut } from 'react-native-reanimated';
+import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming, withRepeat, Easing, interpolateColor, FadeInDown, FadeInUp, FadeIn, LightSpeedInLeft, LightSpeedInRight, SlideInRight, ZoomIn, FadeInRight, FadeOut, withSpring } from 'react-native-reanimated';
 import Config from "react-native-config"
 import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database";
@@ -45,6 +45,7 @@ export default function StudyPage({ language }) {
   const [MCQs, setMCQs] = useState(null)
   const [numAnswered, setNumAnswered] = useState(0)
   const [complete, setComplete] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   // Loading animation
   const rotate = useSharedValue("0deg")
@@ -166,19 +167,25 @@ export default function StudyPage({ language }) {
     sortTerms();
   }, []);
 
+  useEffect(() => {
+    if (flashcards && MCQs && loading) {
+      setLoading(false)
+    }
+  }, [flashcards, MCQs])
 
 
   function reset() {
+    setLoading(true)
     setFlashcards(null);
     setMCQs(null);
     setNumAnswered(0);
     setComplete(null);
-    sortTerms();
     setCurrentSlideIndex(0)
+    sortTerms();
   }
 
   // Renders questions (if terms are done sorting and MCQs have been generated, if applicable)
-  if (flashcards && MCQs)
+  if (!loading)
     return (
       <>
         <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
@@ -222,33 +229,42 @@ export default function StudyPage({ language }) {
               ListFooterComponent={<FooterFlashcard reset={reset} />}
             />
           </View>
-          <ProgressBar flashcards={flashcards} numAnswered={numAnswered} />
+          <ProgressBar flashcards={flashcards} numAnswered={numAnswered} loading={loading}
+
+          />
         </SafeAreaView >
       </>
     );
 
 
-  function ProgressBar({ flashcards, numAnswered }) {
+  function ProgressBar({ flashcards, numAnswered, loading }) {
     const progressBarWidth = screenWidth * 0.7
 
-    let numTerms = 10;
 
-    let numFlashcard = 0
-    let numMCQ = 0
-    let numFRQ = 0
+        // const width = useSharedValue(100);
 
-    let flashcardProgressWidth = 0
-    let mcqProgressWidth = progressBarWidth - 5
-    let frqProgressWidth = 0
+    // const handlePress = () => {
+    //   width.value = withSpring(width.value + 50);
+    // };
 
-    let currentProgressCoverWidth = progressBarWidth
+    // return (
+    //   <View style={styles.container}>
+    //     <Animated.View
+    //       style={{...styles.box, width: width }}
+    //     />
 
-    if (flashcards !== undefined && numAnswered !== undefined) {
-      numTerms = flashcards.length;
+    //     <Button onPress={handlePress} title="Click me" />
+    //   </View>
+    // );
 
-      numFlashcard = 0
-      numMCQ = 0
-      numFRQ = 0
+    // Progress bar animation 
+    if (flashcards) {
+      // portion progress bar
+      let numTerms = flashcards.length;
+
+      let numFlashcard = 0
+      let numMCQ = 0
+      let numFRQ = 0
       flashcards.forEach((flashcard) => {
         if (flashcard.type == "flashcard")
           numFlashcard++;
@@ -257,71 +273,79 @@ export default function StudyPage({ language }) {
         else
           numFRQ++;
       });
+      const flashcardProgressWidth = (numFlashcard / numTerms) * progressBarWidth - 5;
+      const mcqProgressWidth = (numMCQ / numTerms) * progressBarWidth - 5;
+      const frqProgressWidth = (numFRQ / numTerms) * progressBarWidth;
 
-      flashcardProgressWidth = (numFlashcard / numTerms) * progressBarWidth - 5;
-      mcqProgressWidth = (numMCQ / numTerms) * progressBarWidth - 5;
-      frqProgressWidth = (numFRQ / numTerms) * progressBarWidth;
 
-      currentProgressCoverWidth = ((numTerms - numAnswered) / numTerms) * progressBarWidth
+      const currentProgressCoverWidth = useSharedValue(progressBarWidth)
+          const handlePress = () => {
+      currentProgressCoverWidth.value = withSpring(currentProgressCoverWidth.value - 50);
+    };
+
+      useEffect(() => {
+        if (numAnswered) {
+          // currentProgressCoverWidth.value = withTiming(currentProgressCoverWidth.value - ((1 / numTerms) * progressBarWidth), { duration: 1000 })
+        }
+      }, [numAnswered])
+
+      return (
+        <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10 }}>
+          {/* <Button onPress={handlePress} title="Click me" /> */}
+          <MaskedView
+            style={{ borderRadius: 10 }}
+            maskElement={
+              <View style={{
+                backgroundColor: 'transparent',
+                width: progressBarWidth,
+                height: 12,
+                borderRadius: 10,
+                flexDirection: "row",
+                gap: 5
+              }}>
+                <View style={{ width: flashcardProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
+                <View style={{ width: mcqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
+                <View style={{ width: frqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
+              </View>
+            }
+          >
+
+            {/* F5EEE5 for resetting */}
+            <Animated.View style={{ backgroundColor: numAnswered > flashcards?.length ? "#F5EEE5" : "#D4CBC3", width: currentProgressCoverWidth, height: 12, position: "absolute", zIndex: 30, alignSelf: "flex-end" }} />
+            <LinearGradientRN colors={['#779DE9', '#e6c5ff', '#779de9']} style={{ width: progressBarWidth, height: 12, borderRadius: 10 }} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
+          </MaskedView>
+          <Svg
+            width={20}
+            height={20}
+            viewBox="0 0 17 17"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <Path
+              d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
+              fill="url(#paint0_linear_49_1672)"
+            />
+            <Path
+              d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
+            />
+            <Defs>
+              <LinearGradient
+                id="paint0_linear_49_1672"
+                x1={2}
+                y1={2.5}
+                x2={15}
+                y2={16}
+                gradientUnits="userSpaceOnUse"
+              >
+                <Stop stopColor="#65BAEE" />
+                <Stop offset={1} stopColor="#FD8DFF" />
+              </LinearGradient>
+            </Defs>
+          </Svg>
+
+        </View>
+      )
     }
-
-    return (
-      <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <MaskedView
-          style={{ borderRadius: 10 }}
-          maskElement={
-            <View style={{
-              backgroundColor: 'transparent',
-              width: progressBarWidth,
-              height: 12,
-              borderRadius: 10,
-              flexDirection: "row",
-              gap: 5
-            }}>
-              <View style={{ width: flashcardProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
-              <View style={{ width: mcqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
-              <View style={{ width: frqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
-            </View>
-          }
-        >
-
-          {/* F5EEE5 for resetting */}
-          <View style={{ width: currentProgressCoverWidth, height: 12, backgroundColor: "#D4CBC3", position: "absolute", zIndex: 30, alignSelf: "flex-end" }} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
-          <LinearGradientRN colors={['#779DE9', '#e6c5ff', '#779de9']} style={{ width: progressBarWidth, height: 12, borderRadius: 10 }} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
-        </MaskedView>
-        <Svg
-          width={20}
-          height={20}
-          viewBox="0 0 17 17"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <Path
-            d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
-            fill="url(#paint0_linear_49_1672)"
-          />
-          <Path
-            d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
-          />
-          <Defs>
-            <LinearGradient
-              id="paint0_linear_49_1672"
-              x1={2}
-              y1={2.5}
-              x2={15}
-              y2={16}
-              gradientUnits="userSpaceOnUse"
-            >
-              <Stop stopColor="#65BAEE" />
-              <Stop offset={1} stopColor="#FD8DFF" />
-            </LinearGradient>
-          </Defs>
-        </Svg>
-
-
-        {/* <Image source={require("./graph.png")} /> */}
-      </View>
-    )
 
   }
 
@@ -784,5 +808,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // backgroundColor: "red",
     height: "100%",
+  },
+  box: {
+    height: 100,
+    backgroundColor: '#b58df1',
+    borderRadius: 20,
+    marginVertical: 64,
   },
 });
