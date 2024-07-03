@@ -200,37 +200,91 @@ export default function StudyPage({ language }) {
             scrollEnabled={false}
           />
         </View>
-        <ProgressBar />
+        <ProgressBar flashcards={flashcards}/>
       </SafeAreaView >
     );
 
 
 
 
-  function ProgressBar() {
+  function ProgressBar({flashcards}) {
+    console.log("RP")
+
+    const progressBarWidth = screenWidth * 0.7
+    let numTerms = flashcards.length;
+
+    let numFlashcard = 0
+    let numMCQ = 0
+    let numFRQ = 0 
+    flashcards.forEach((flashcard) => {
+      console.log(flashcard)
+      if (flashcard.type == "flashcard")
+          numFlashcard++;
+      else if (flashcard.type == "mcq")
+          numMCQ++;
+      else
+        numFRQ++;
+    });
+
+    const flashcardProgressWidth = (numFlashcard / numTerms) * progressBarWidth - 5;
+    const mcqProgressWidth = (numMCQ / numTerms) * progressBarWidth - 5;
+    const frqProgressWidth = (numFRQ / numTerms) * progressBarWidth;
+
+    let currentProgressCoverWidth = ((numTerms - 9) / numTerms) * progressBarWidth
+    console.log(currentProgressCoverWidth)
+  
     return(
-      <View style={styles.progressBar}>
+      <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10}}>
         <MaskedView
-          style={{width: screenWidth * 0.8, height: 12, borderRadius: 10}}
+          style={{borderRadius: 10}}
           maskElement={
             <View style={{
-              // Transparent background because mask is based off alpha channel.
               backgroundColor: 'transparent',
-              width: screenWidth * 0.8,
+              width: progressBarWidth,
               height: 12,
               borderRadius: 10,
               flexDirection: "row", 
               gap: 5
             }}>
-              <View style={{width: screenWidth * 0.4 - 5, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
-              <View style={{width: screenWidth * 0.3 - 5, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
-              <View style={{width: screenWidth * 0.1, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
+              <View style={{width: flashcardProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
+              <View style={{width: mcqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
+              <View style={{width: frqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
             </View>
           }
         >
-
-          <LinearGradientRN colors={['#65baee', '#e6c5ff', '#779de9']} style={{width: screenWidth * 0.8, height: 12, borderRadius: 10}} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
+          <View style={{width: currentProgressCoverWidth, height: 12, backgroundColor: "#D4CBC3", position: "absolute", zIndex: 30, alignSelf: "flex-end"}} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
+          <LinearGradientRN colors={['#65baee', '#e6c5ff', '#779de9']} style={{width: progressBarWidth, height: 12, borderRadius: 10}} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
         </MaskedView>
+        <Svg      
+                  width={20}
+                  height={20}
+                  viewBox="0 0 17 17"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <Path
+                    d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
+                    fill="url(#paint0_linear_49_1672)"
+                  />
+                  <Path
+                    d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
+                  />
+                  <Defs>
+                    <LinearGradient
+                      id="paint0_linear_49_1672"
+                      x1={2}
+                      y1={2.5}
+                      x2={15}
+                      y2={16}
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <Stop stopColor="#65BAEE" />
+                      <Stop offset={1} stopColor="#FD8DFF" />
+                    </LinearGradient>
+                  </Defs>
+                </Svg>
+        
+
           {/* <Image source={require("./graph.png")} /> */}
       </View>
     )
@@ -592,8 +646,8 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   progressBar: {
-    position: "absolute",
-    top: screenHeight * 0.89
+
+
   },
   defaultBtn: {
     // backgroundColor: "#2F2C2A",
