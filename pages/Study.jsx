@@ -54,7 +54,7 @@ export default function StudyPage({ language }) {
   // Creating question flatlist
   const ref = useRef();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const goNextSlide = () => {
+  const goNextSlide = (delay=true) => {
     setTimeout(() => {
       const nextSlideIndex = currentSlideIndex + 1;
       if (nextSlideIndex != flashcards.length) {
@@ -64,7 +64,7 @@ export default function StudyPage({ language }) {
       } else {
         console.log("DONE!")
       }
-    }, 1000);
+    }, delay ? 1000 : 0);
   }
   const updateCurrentSlideIndex = e => {
     const contentOffsetX = e.nativeEvent.contentOffset.x;
@@ -369,12 +369,16 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
     const response = resultResponse.response;
     const resultFRQ = JSON.parse(response.text());
 
-    console.log(resultFRQ)
+    // console.log(resultFRQ)
 
-    console.log(resultFRQ.correct)
+    // console.log(resultFRQ.correct)
     setFRQcorrect(resultFRQ.correct);
     setFRQfeedback(resultFRQ.feedback);
     showAnswer.value = withTiming(1, { duration: 250 });
+    console.log(resultFRQ)
+    if (resultFRQ.correct) {
+      goNextSlide()
+    }
     setLoading(false);
   }
 
@@ -419,7 +423,9 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", padding: 20 }}>
               <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>Write a sentence with the following word</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.13 }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text></Text>
-              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20, width: "100%", fontSize: 18, }} placeholder="Start typing..." multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
+                
+                <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", fontSize: 18, flex: 1, height: screenHeight * 0.18, width: "100%"}} placeholder="Start typing..." editable={FRQcorrect === null ? true : false} multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
+                <Text style={{ position: "absolute", bottom: screenHeight * 0.03, alignItems: "center",  fontSize: 18, textAlign: "center", color: "#DD6348"}}>{FRQfeedback}</Text>
             </Pressable>
           </View>
         </>
@@ -521,15 +527,20 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
             <View style={styles.btnContainer}>
               <Animated.View style={[styles.defaultBtn, FRQcorrect == true ? correctColor : FRQcorrect === false ? wrongColor : { backgroundColor: answer ? "#2F2C2A" : "#A6A19D" }]}>
                 <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
-                  if (answer) {
+                  if (FRQcorrect == false) {
+                    goNextSlide(false)
+                  } else if (answer) {
                     evaluateFRQ()
-                    // goNextSlide()
-                  }
+                  } 
                 }}>
                   { loading
                   ? <ActivityIndicator />
-                  : <SFSymbol name="arrow.up" size={25} color="white" />
-
+                  : FRQcorrect 
+                    ? <SFSymbol name="checkmark" size={25} color="white" />
+                    : FRQcorrect === false 
+                      // ? <SFSymbol name="xmark" size={25} color="white" />
+                      ? <SFSymbol name="arrow.right" size={25} color="white" />
+                      : <SFSymbol name="arrow.up" size={25} color="white" />
                   }
                 </Pressable>
               </Animated.View>
