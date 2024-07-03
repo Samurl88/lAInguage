@@ -7,6 +7,9 @@ import database from "@react-native-firebase/database";
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
 import { SFSymbol } from 'react-native-sfsymbols';
+import {LinearGradient as LinearGradientRN} from 'react-native-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
+
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
@@ -197,10 +200,42 @@ export default function StudyPage({ language }) {
             scrollEnabled={false}
           />
         </View>
-
+        <ProgressBar />
       </SafeAreaView >
     );
 
+
+
+
+  function ProgressBar() {
+    return(
+      <View style={styles.progressBar}>
+        <MaskedView
+          style={{width: screenWidth * 0.8, height: 12, borderRadius: 10}}
+          maskElement={
+            <View style={{
+              // Transparent background because mask is based off alpha channel.
+              backgroundColor: 'transparent',
+              width: screenWidth * 0.8,
+              height: 12,
+              borderRadius: 10,
+              flexDirection: "row", 
+              gap: 5
+            }}>
+              <View style={{width: screenWidth * 0.4 - 5, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
+              <View style={{width: screenWidth * 0.3 - 5, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
+              <View style={{width: screenWidth * 0.1, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
+            </View>
+          }
+        >
+
+          <LinearGradientRN colors={['#65baee', '#e6c5ff', '#779de9']} style={{width: screenWidth * 0.8, height: 12, borderRadius: 10}} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
+        </MaskedView>
+          {/* <Image source={require("./graph.png")} /> */}
+      </View>
+    )
+
+  }
 
 
   // loading
@@ -431,11 +466,6 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
         </>
       }
 
-      {/* Progress bar */}
-      <View style={styles.progressBar}>
-        <Image source={require("./graph.png")} style={styles.graph}></Image>
-      </View>
-
       {/* Bottom buttons */}
       {type == "flashcard" ?
         !frontFacing
@@ -557,9 +587,13 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
 const styles = StyleSheet.create({
   btnContainer: {
     position: "absolute",
-    top: screenHeight * 0.67,
+    top: screenHeight * 0.59,
     flexDirection: "row",
     gap: 20,
+  },
+  progressBar: {
+    position: "absolute",
+    top: screenHeight * 0.89
   },
   defaultBtn: {
     // backgroundColor: "#2F2C2A",
@@ -644,8 +678,4 @@ const styles = StyleSheet.create({
     // backgroundColor: "red",
     height: "100%",
   },
-  progressBar: {
-    position: "absolute",
-    top: screenHeight * 0.6
-  }
 });
