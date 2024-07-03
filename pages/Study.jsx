@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, Pressable, StyleSheet, FlatList, Dimensions, Image, TextInput, ActivityIndicator } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming, withRepeat, Easing, interpolateColor } from 'react-native-reanimated';
+import Animated, { useSharedValue, interpolate, useAnimatedStyle, withTiming, withRepeat, Easing, interpolateColor, FadeInDown, FadeInUp, FadeIn, LightSpeedInLeft, LightSpeedInRight, SlideInRight, ZoomIn, FadeInRight, FadeOut } from 'react-native-reanimated';
 import Config from "react-native-config"
 import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database";
@@ -44,6 +44,7 @@ export default function StudyPage({ language }) {
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
   const [numAnswered, setNumAnswered] = useState(0)
+  const [complete, setComplete] = useState(null)
 
   // Loading animation
   const rotate = useSharedValue("0deg")
@@ -62,12 +63,12 @@ export default function StudyPage({ language }) {
     setTimeout(() => {
       setNumAnswered(numAnswered + 1);
       const nextSlideIndex = currentSlideIndex + 1;
-      if (nextSlideIndex != flashcards.length) {
-        const offset = nextSlideIndex * screenWidth;
-        ref?.current?.scrollToOffset({ offset });
-        setCurrentSlideIndex(nextSlideIndex);
-      } else {
-        console.log("DONE!")
+      const offset = nextSlideIndex * screenWidth;
+      ref?.current?.scrollToOffset({ offset });
+      setCurrentSlideIndex(nextSlideIndex);
+      if (nextSlideIndex == flashcards.length) {
+        setComplete(true);
+        console.log("COMPLETE")
       }
     }, delay ? 1000 : 0);
   }
@@ -166,14 +167,27 @@ export default function StudyPage({ language }) {
   }, []);
 
 
+
+  function reset() {
+    setFlashcards(null);
+    setMCQs(null);
+    setNumAnswered(0);
+    setComplete(null);
+    sortTerms();
+    setCurrentSlideIndex(0)
+  }
+
   // Renders questions (if terms are done sorting and MCQs have been generated, if applicable)
   if (flashcards && MCQs)
     return (
       <>
         <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
-          <Animated.View style={{ position: "absolute", height: screenHeight, width: screenWidth, top: 0, zIndex: 0 }}>
-            <LinearGradientRN useAngle={true} angle={135} angleCenter={{ x: 0.5, y: 0.5 }} locations={[0.3, 0.85, 1]} colors={['rgba(255, 255, 255, 0)', '#54B4EE', '#FD8DFF']} style={{ height: screenHeight, width: screenWidth, }} />
-          </Animated.View>
+          {complete
+            ? <Animated.View entering={FadeIn.duration(500)} exiting={FadeOut.duration(500)} style={{ position: "absolute", height: screenHeight, width: screenWidth, top: 0, zIndex: 0 }}>
+              <LinearGradientRN useAngle={true} angle={135} angleCenter={{ x: 0.5, y: 0.5 }} locations={[0.3, 0.85, 1]} colors={['rgba(255, 255, 255, 0)', '#54B4EE', '#FD8DFF']} style={{ height: screenHeight, width: screenWidth, }} />
+            </Animated.View>
+            : null
+          }
           <View style={styles.container}>
             <Text style={styles.title}>Practice</Text>
             <FlatList
@@ -203,7 +217,9 @@ export default function StudyPage({ language }) {
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => item.front}
               style={{ zIndex: 100 }}
-              scrollEnabled={false}
+              // scrollEnabled={false}
+
+              ListFooterComponent={<FooterFlashcard reset={reset} />}
             />
           </View>
           <ProgressBar flashcards={flashcards} numAnswered={numAnswered} />
@@ -212,30 +228,42 @@ export default function StudyPage({ language }) {
     );
 
 
-
-
   function ProgressBar({ flashcards, numAnswered }) {
     const progressBarWidth = screenWidth * 0.7
 
-    let numTerms = flashcards.length;
+    let numTerms = 10;
 
     let numFlashcard = 0
     let numMCQ = 0
     let numFRQ = 0
-    flashcards.forEach((flashcard) => {
-      if (flashcard.type == "flashcard")
-        numFlashcard++;
-      else if (flashcard.type == "mcq")
-        numMCQ++;
-      else
-        numFRQ++;
-    });
 
-    const flashcardProgressWidth = (numFlashcard / numTerms) * progressBarWidth - 5;
-    const mcqProgressWidth = (numMCQ / numTerms) * progressBarWidth - 5;
-    const frqProgressWidth = (numFRQ / numTerms) * progressBarWidth;
+    let flashcardProgressWidth = 0
+    let mcqProgressWidth = progressBarWidth - 5
+    let frqProgressWidth = 0
 
-    let currentProgressCoverWidth = ((numTerms - numAnswered) / numTerms) * progressBarWidth
+    let currentProgressCoverWidth = progressBarWidth
+
+    if (flashcards !== undefined && numAnswered !== undefined) {
+      numTerms = flashcards.length;
+
+      numFlashcard = 0
+      numMCQ = 0
+      numFRQ = 0
+      flashcards.forEach((flashcard) => {
+        if (flashcard.type == "flashcard")
+          numFlashcard++;
+        else if (flashcard.type == "mcq")
+          numMCQ++;
+        else
+          numFRQ++;
+      });
+
+      flashcardProgressWidth = (numFlashcard / numTerms) * progressBarWidth - 5;
+      mcqProgressWidth = (numMCQ / numTerms) * progressBarWidth - 5;
+      frqProgressWidth = (numFRQ / numTerms) * progressBarWidth;
+
+      currentProgressCoverWidth = ((numTerms - numAnswered) / numTerms) * progressBarWidth
+    }
 
     return (
       <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -340,12 +368,32 @@ export default function StudyPage({ language }) {
             </View>
           </View>
         </View>
+        <ProgressBar />
+
       </SafeAreaView>
     </>
   )
 }
 
-function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextSlide, language }) {
+function FooterFlashcard({ reset }) {
+  return (
+    <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ ...styles.back, gap: 20 }}>
+        <View style={{ gap: 15, alignItems: "center", padding: 20 }}>
+          <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 35, textAlign: "center", }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>Great Work!</Text></Text>
+          <Text style={{ fontSize: 20, textAlign: "center", }}>That's another star for your collection!</Text>
+        </View>
+        <Pressable onPress={reset} style={{ ...styles.defaultBtn, backgroundColor: "#2F2C2A", padding: 10, borderRadius: 10, }}>
+          {/* <Text style={{ fontSize: 18, textAlign: "center", color: "white" }}>Let's go again!</Text> */}
+          <SFSymbol name="repeat" size={25} color="white" />
+
+        </Pressable>
+      </View>
+    </View>
+  )
+}
+
+function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextSlide, language, }) {
   const [score, setScore] = useState(0);
   const [answer, setAnswer] = useState(null)
 
@@ -440,7 +488,6 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
       )
     }
   })
-
 
 
   // For FRQ: evaluate sentence
