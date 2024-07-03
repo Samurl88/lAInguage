@@ -172,7 +172,7 @@ export default function HomePage({ navigation }) {
 
         </Animated.View>
 
-        {cameraPage && false &&
+        {cameraPage && 
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
             <CameraPage language={userLanguage} />
           </Animated.View>
@@ -209,26 +209,3 @@ const styles = StyleSheet.create({
 
   }
 })
-
-{/* <Text>HomePage</Text>
-      <Pressable onPress={() => { navigation.navigate("Debug") }}>
-        <Text>Go to debug</Text>
-      </Pressable>
-      <Pressable onPress={() => { navigation.navigate("Camera") }}>
-        <Text>Go to camera</Text>
-      </Pressable>
-
-      <Pressable onPress={() => { navigation.navigate("Study") }}>
-        <Text>Go to study</Text>
-      </Pressable>
-
-      <Pressable onPress={() => { navigation.navigate("Dictionary") }}>
-        <Text>Go to dictionary</Text>
-      </Pressable>
-
-      <Pressable onPress={logOut}>
-        <Text>
-          Log out
-        </Text>
-      </Pressable> */}
-{/* <Image src={image}></Image> */ }

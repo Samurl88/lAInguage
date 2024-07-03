@@ -140,28 +140,32 @@ export default function StudyPage({ language, stars }) {
       .then(snapshot => {
         let words = snapshot.val();
 
+        // Get 10 random words, removing words w/ score of 3 (mastered)
+        let terms = Object.keys(words).filter(word => words[word].score !== 3);
+        const shuffled = terms.sort(() => 0.5 - Math.random());
+        let selectedTerms = shuffled.slice(0, 10);
+
         let flashcards = [];
         let mcqs = []
 
-        for (const word in words) {
-          let score = words[word]["score"]
-          let card = { front: word, back: words[word]["translatedDefinition"], frontFacing: true, score: words[word]["score"] };
+        for (const term of selectedTerms) {
+          let score = words[term]["score"]
+          let card = { front: term, back: words[term]["translatedDefinition"], frontFacing: true, score: words[term]["score"] };
           if (score == 2) {
             card.type = "frq"
           } else if (score == 1) {
             card.type = "mcq"
             mcqs.push(card)
-          } else {
+          } else if (score == 0) {
             card.type = "flashcard"
           }
           flashcards.push(card)
         }
-        // console.log(flashcards)
 
         // order terms -> flashcards, mcqs, frqs (by score)
         const sortedFlashcards = flashcards.sort((a, b) => {
           let x = a.score;
-          let y = b.score
+          let y = b.score;
 
           if (x > y) return 1
           if (y > x) return -1
@@ -247,7 +251,7 @@ export default function StudyPage({ language, stars }) {
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => item.front}
               style={{ zIndex: 100 }}
-              // scrollEnabled={false}
+              scrollEnabled={false}
 
               ListFooterComponent={<FooterFlashcard reset={reset} />}
             />
@@ -279,7 +283,7 @@ export default function StudyPage({ language, stars }) {
       });
       const flashcardProgressWidth = (numFlashcard / numTerms) * progressBarWidth - 5;
       const mcqProgressWidth = (numMCQ / numTerms) * progressBarWidth - 5;
-      const frqProgressWidth = (numFRQ / numTerms) * progressBarWidth;
+      const frqProgressWidth = (numFRQ / numTerms) * progressBarWidth - 5;
 
       return (
         <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10, justifyContent: "center" }}>
@@ -478,52 +482,27 @@ function FooterFlashcard({ reset }) {
   )
 }
 
-function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextSlide, language, }) {
-  const [score, setScore] = useState(0);
+function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, goNextSlide, language, }) {
   const [answer, setAnswer] = useState(null)
 
   const [loading, setLoading] = useState(null);
   const [FRQcorrect, setFRQcorrect] = useState(null);
   const [FRQfeedback, setFRQfeedback] = useState(null);
 
-
-  // function getScore() {
-  //   let uid = auth().currentUser.uid;
-  //   database()
-  //     .ref(`${uid}/words/${front}`)
-  //     .once('value')
-  //     .then(snapshot => {
-  //       let word = snapshot.val();
-  //       let currentScore = word["score"] || 0;
-
-  //       setScore(currentScore)
-  //       // console.log(currentScore)
-  //     })
-  //     .catch(error => {
-  //       console.error("Error reading score: ", error);
-  //     });
-  // }
-
-  // useEffect(() => {
-  //   getScore();
-  // }, [])
-
   function addScore() {
     let uid = auth().currentUser.uid;
     database()
       .ref(`${uid}/words/${front}`)
-      .once('value')
-      .then(snapshot => {
-        let word = snapshot.val();
-        let currentScore = word["score"] || 0;
-        let newScore = currentScore + 1;
+      .update({ score: score + 1 })
+      .catch(error => {console.log(error)})
+  }
 
-        // Update the score in Firebase
-        database().ref(`${uid}/words/${front}`).update({ score: newScore });
-      })
-      .catch(error => {
-        console.error("Error updating score: ", error);
-      });
+  function removeScore() {
+    let uid = auth().currentUser.uid;
+    database()
+      .ref(`${uid}/words/${front}`)
+      .update({ score: score - 1 >= 0 ? score - 1 : 0 })
+      .catch(error => {console.log(error)})
   }
 
   // Animated styles for flashcard flip
@@ -596,15 +575,15 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
     const response = resultResponse.response;
     const resultFRQ = JSON.parse(response.text());
 
-    // console.log(resultFRQ)
-
-    // console.log(resultFRQ.correct)
     setFRQcorrect(resultFRQ.correct);
     setFRQfeedback(resultFRQ.feedback);
     showAnswer.value = withTiming(1, { duration: 250 });
     console.log(resultFRQ)
     if (resultFRQ.correct) {
+      addScore()
       goNextSlide()
+    } else {
+      removeScore()
     }
     setLoading(false);
   }
@@ -678,6 +657,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
               <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
                 if (!answer) {
                   setAnswer(true)
+                  addScore()
                   showAnswer.value = withTiming(1, { duration: 250 });
                   goNextSlide()
                 }
@@ -706,6 +686,10 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
               <Animated.View style={[styles.defaultBtn, mcqs[front].correctAnswer == "A" ? correctColor : answer === "A" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
                 <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
                   if (!answer) {
+                    if (mcqs[front].correctAnswer == "A")
+                      addScore()
+                    else 
+                      removeScore();
                     setAnswer("A")
                     showAnswer.value = withTiming(1, { duration: 250 });
                     goNextSlide()
@@ -718,6 +702,10 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
               <Animated.View style={[styles.defaultBtn, mcqs[front].correctAnswer == "B" ? correctColor : answer === "B" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
                 <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
                   if (!answer) {
+                    if (mcqs[front].correctAnswer == "B")
+                      addScore()
+                    else 
+                      removeScore();
                     setAnswer("B")
                     showAnswer.value = withTiming(1, { duration: 250 });
                     goNextSlide()
@@ -730,6 +718,10 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
               <Animated.View style={[styles.defaultBtn, mcqs[front].correctAnswer == "C" ? correctColor : answer === "C" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
                 <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
                   if (!answer) {
+                    if (mcqs[front].correctAnswer == "C")
+                      addScore()
+                    else 
+                      removeScore();
                     setAnswer("C")
                     showAnswer.value = withTiming(1, { duration: 250 });
                     goNextSlide()

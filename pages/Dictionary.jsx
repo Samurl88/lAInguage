@@ -348,7 +348,7 @@ export default function Dictionary({ language }) {
                     if (words[i].score == 0) {
                         console.log(words[i])
                         tempUnfamiliar.push(words[i]);
-                    } else if (words[i].score == 1) {
+                    } else if (words[i].score < 3 ) {
                         tempFamiliar.push(words[i]);
                     } else {
                         tempMastered.push(words[i]);
