@@ -40,7 +40,7 @@ const safetySetting = [
 ];
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
-export default function StudyPage({ language }) {
+export default function StudyPage({ language, stars }) {
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
   const [numAnswered, setNumAnswered] = useState(0)
@@ -55,6 +55,18 @@ export default function StudyPage({ language }) {
 
   }, [flashcards, MCQs])
 
+  
+  // 
+  const onComplete = () => {
+    let uid = auth().currentUser.uid;
+    setComplete(true);
+    database()
+    .ref(`${uid}/profile`)
+    .update({
+      stars: stars + 1
+    })
+    
+  }
 
   // Creating question flatlist
   const ref = useRef();
@@ -67,12 +79,10 @@ export default function StudyPage({ language }) {
       ref?.current?.scrollToOffset({ offset });
       setCurrentSlideIndex(nextSlideIndex);
       if (nextSlideIndex == flashcards.length) {
-        setComplete(true);
-        console.log("COMPLETE")
+        onComplete();
       }
     }, delay ? 1000 : 0);
   }
-
   const updateCurrentSlideIndex = e => {
     const contentOffsetX = e.nativeEvent.contentOffset.x;
     const currentIndex = Math.round(contentOffsetX / screenWidth);
@@ -192,6 +202,9 @@ export default function StudyPage({ language }) {
       }
     }
   }, [numAnswered])
+  
+
+  
 
 
   // Renders questions (if terms are done sorting and MCQs have been generated)
@@ -245,7 +258,7 @@ export default function StudyPage({ language }) {
     );
 
 
-  function ProgressBar({ flashcards, numAnswered, currentProgressCoverWidth }) {
+  function ProgressBar({ flashcards, numAnswered, currentProgressCoverWidth, coverWidth }) {
     const progressBarWidth = screenWidth * 0.7
 
     // Progress bar animation 
@@ -269,7 +282,7 @@ export default function StudyPage({ language }) {
       const frqProgressWidth = (numFRQ / numTerms) * progressBarWidth;
 
       return (
-        <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10, justifyContent: "center" }}>
           <MaskedView
             style={{ borderRadius: 10 }}
             maskElement={
@@ -279,9 +292,9 @@ export default function StudyPage({ language }) {
                 height: 12,
                 borderRadius: 10,
                 flexDirection: "row",
-                gap: 5
+                gap: 5,
+                justifyContent: "center"
               }}>
-                {/* <View style={{ width: progressBarWidth, position: "absolute", height: 12, backgroundColor: "black", borderRadius: 10, }}></View> */}
                 <View style={{ width: flashcardProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
                 <View style={{ width: mcqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
                 <View style={{ width: frqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
@@ -362,26 +375,7 @@ export default function StudyPage({ language }) {
     } else {
       return (
         <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <MaskedView
-            style={{ borderRadius: 10 }}
-            maskElement={
-              <View style={{
-                backgroundColor: 'transparent',
-                width: progressBarWidth,
-                height: 12,
-                borderRadius: 10,
-                flexDirection: "row",
-                gap: 5
-              }}>
-                <View style={{ width: progressBarWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
-              </View>
-            }
-          >
-
-            {/* F5EEE5 for resetting */}
-            <Animated.View style={{ backgroundColor: "#D4CBC3", width: progressBarWidth, height: 12, position: "absolute", zIndex: 30, alignSelf: "flex-end" }} />
-            <LinearGradientRN colors={['#779DE9', '#e6c5ff', '#779de9']} style={{ width: progressBarWidth, height: 12, borderRadius: 10 }} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
-          </MaskedView>
+          <Animated.View exiting={FadeOut} style={{ width: progressBarWidth, height: 12, backgroundColor: "#D4CBC3", borderRadius: 10,  }} />
           <Svg
             width={20}
             height={20}
