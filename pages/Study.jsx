@@ -7,7 +7,7 @@ import database from "@react-native-firebase/database";
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
 import { SFSymbol } from 'react-native-sfsymbols';
-import {LinearGradient as LinearGradientRN} from 'react-native-linear-gradient';
+import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 
 
@@ -43,6 +43,7 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettin
 export default function StudyPage({ language }) {
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
+  const [numAnswered, setNumAnswered] = useState(0)
 
   // Loading animation
   const rotate = useSharedValue("0deg")
@@ -57,8 +58,9 @@ export default function StudyPage({ language }) {
   // Creating question flatlist
   const ref = useRef();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const goNextSlide = (delay=true) => {
+  const goNextSlide = (delay = true) => {
     setTimeout(() => {
+      setNumAnswered(numAnswered + 1);
       const nextSlideIndex = currentSlideIndex + 1;
       if (nextSlideIndex != flashcards.length) {
         const offset = nextSlideIndex * screenWidth;
@@ -167,61 +169,64 @@ export default function StudyPage({ language }) {
   // Renders questions (if terms are done sorting and MCQs have been generated, if applicable)
   if (flashcards && MCQs)
     return (
-      <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
-        <View style={styles.container}>
-          <Text style={styles.title}>Practice</Text>
-          <FlatList
-            data={flashcards}
-            ref={ref}
-            horizontal
-            renderItem={({ item, index }) => (
-              <Flashcard
-                mcqs={MCQs}
-                key={item.front}
-                front={item.front}
-                back={item.back}
-                frontFacing={item.frontFacing}
-                toggleFacing={() => {
-                  const newFlashcards = [...flashcards];
-                  newFlashcards[index].frontFacing = !newFlashcards[index].frontFacing;
-                  setFlashcards(newFlashcards);
-                }}
-                score={item.score}
-                type={item.type}
-                goNextSlide={goNextSlide}
-                language={language}
-              />
-            )}
-            pagingEnabled
-            onMomentumScrollEnd={updateCurrentSlideIndex}
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.front}
-            style={{ zIndex: 100 }}
-            scrollEnabled={false}
-          />
-        </View>
-        <ProgressBar flashcards={flashcards}/>
-      </SafeAreaView >
+      <>
+        <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
+          <Animated.View style={{ position: "absolute", height: screenHeight, width: screenWidth, top: 0, zIndex: 0 }}>
+            <LinearGradientRN useAngle={true} angle={135} angleCenter={{ x: 0.5, y: 0.5 }} locations={[0.3, 0.85, 1]} colors={['rgba(255, 255, 255, 0)', '#54B4EE', '#FD8DFF']} style={{ height: screenHeight, width: screenWidth, }} />
+          </Animated.View>
+          <View style={styles.container}>
+            <Text style={styles.title}>Practice</Text>
+            <FlatList
+              data={flashcards}
+              ref={ref}
+              horizontal
+              renderItem={({ item, index }) => (
+                <Flashcard
+                  mcqs={MCQs}
+                  key={item.front}
+                  front={item.front}
+                  back={item.back}
+                  frontFacing={item.frontFacing}
+                  toggleFacing={() => {
+                    const newFlashcards = [...flashcards];
+                    newFlashcards[index].frontFacing = !newFlashcards[index].frontFacing;
+                    setFlashcards(newFlashcards);
+                  }}
+                  score={item.score}
+                  type={item.type}
+                  goNextSlide={goNextSlide}
+                  language={language}
+                />
+              )}
+              pagingEnabled
+              onMomentumScrollEnd={updateCurrentSlideIndex}
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.front}
+              style={{ zIndex: 100 }}
+              scrollEnabled={false}
+            />
+          </View>
+          <ProgressBar flashcards={flashcards} numAnswered={numAnswered} />
+        </SafeAreaView >
+      </>
     );
 
 
 
 
-  function ProgressBar({flashcards}) {
-    console.log("RP")
-
+  function ProgressBar({ flashcards, numAnswered }) {
     const progressBarWidth = screenWidth * 0.7
+
     let numTerms = flashcards.length;
 
     let numFlashcard = 0
     let numMCQ = 0
-    let numFRQ = 0 
+    let numFRQ = 0
     flashcards.forEach((flashcard) => {
-      console.log(flashcard)
       if (flashcard.type == "flashcard")
-          numFlashcard++;
+        numFlashcard++;
       else if (flashcard.type == "mcq")
-          numMCQ++;
+        numMCQ++;
       else
         numFRQ++;
     });
@@ -230,62 +235,63 @@ export default function StudyPage({ language }) {
     const mcqProgressWidth = (numMCQ / numTerms) * progressBarWidth - 5;
     const frqProgressWidth = (numFRQ / numTerms) * progressBarWidth;
 
-    let currentProgressCoverWidth = ((numTerms - 9) / numTerms) * progressBarWidth
-    console.log(currentProgressCoverWidth)
-  
-    return(
-      <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10}}>
+    let currentProgressCoverWidth = ((numTerms - numAnswered) / numTerms) * progressBarWidth
+
+    return (
+      <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10 }}>
         <MaskedView
-          style={{borderRadius: 10}}
+          style={{ borderRadius: 10 }}
           maskElement={
             <View style={{
               backgroundColor: 'transparent',
               width: progressBarWidth,
               height: 12,
               borderRadius: 10,
-              flexDirection: "row", 
+              flexDirection: "row",
               gap: 5
             }}>
-              <View style={{width: flashcardProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
-              <View style={{width: mcqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
-              <View style={{width: frqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10}}></View>
+              <View style={{ width: flashcardProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
+              <View style={{ width: mcqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
+              <View style={{ width: frqProgressWidth, height: 12, backgroundColor: "black", borderRadius: 10 }}></View>
             </View>
           }
         >
-          <View style={{width: currentProgressCoverWidth, height: 12, backgroundColor: "#D4CBC3", position: "absolute", zIndex: 30, alignSelf: "flex-end"}} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
-          <LinearGradientRN colors={['#65baee', '#e6c5ff', '#779de9']} style={{width: progressBarWidth, height: 12, borderRadius: 10}} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
-        </MaskedView>
-        <Svg      
-                  width={20}
-                  height={20}
-                  viewBox="0 0 17 17"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <Path
-                    d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
-                    fill="url(#paint0_linear_49_1672)"
-                  />
-                  <Path
-                    d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
-                  />
-                  <Defs>
-                    <LinearGradient
-                      id="paint0_linear_49_1672"
-                      x1={2}
-                      y1={2.5}
-                      x2={15}
-                      y2={16}
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <Stop stopColor="#65BAEE" />
-                      <Stop offset={1} stopColor="#FD8DFF" />
-                    </LinearGradient>
-                  </Defs>
-                </Svg>
-        
 
-          {/* <Image source={require("./graph.png")} /> */}
+          {/* F5EEE5 for resetting */}
+          <View style={{ width: currentProgressCoverWidth, height: 12, backgroundColor: "#D4CBC3", position: "absolute", zIndex: 30, alignSelf: "flex-end" }} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
+          <LinearGradientRN colors={['#779DE9', '#e6c5ff', '#779de9']} style={{ width: progressBarWidth, height: 12, borderRadius: 10 }} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
+        </MaskedView>
+        <Svg
+          width={20}
+          height={20}
+          viewBox="0 0 17 17"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <Path
+            d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
+            fill="url(#paint0_linear_49_1672)"
+          />
+          <Path
+            d="M8.5 17a.694.694 0 01-.485-.188.81.81 0 01-.247-.477 33.306 33.306 0 00-.435-2.447c-.147-.688-.33-1.27-.545-1.748a3.85 3.85 0 00-.792-1.202 3.677 3.677 0 00-1.192-.793c-.477-.204-1.054-.375-1.73-.511a33.305 33.305 0 00-2.384-.4.793.793 0 01-.503-.24A.706.706 0 010 8.5a.69.69 0 01.196-.494.824.824 0 01.494-.248c1.107-.12 2.038-.261 2.793-.426.756-.17 1.377-.404 1.866-.7A3.45 3.45 0 006.54 5.449c.301-.5.542-1.14.724-1.918.182-.78.35-1.737.503-2.874A.81.81 0 018.015.18.713.713 0 018.5 0a.67.67 0 01.468.179c.137.12.222.279.256.477.159 1.137.33 2.095.511 2.874.187.773.431 1.41.732 1.91.301.494.696.889 1.184 1.184.489.296 1.11.529 1.866.7.755.164 1.686.31 2.793.434.193.029.355.111.486.248A.674.674 0 0117 8.5a.674.674 0 01-.204.494.785.785 0 01-.494.24 26.945 26.945 0 00-2.794.443c-.755.164-1.38.395-1.874.69a3.451 3.451 0 00-1.184 1.194c-.295.494-.536 1.13-.724 1.91a30.81 30.81 0 00-.502 2.864.752.752 0 01-.247.477A.664.664 0 018.5 17z"
+          />
+          <Defs>
+            <LinearGradient
+              id="paint0_linear_49_1672"
+              x1={2}
+              y1={2.5}
+              x2={15}
+              y2={16}
+              gradientUnits="userSpaceOnUse"
+            >
+              <Stop stopColor="#65BAEE" />
+              <Stop offset={1} stopColor="#FD8DFF" />
+            </LinearGradient>
+          </Defs>
+        </Svg>
+
+
+        {/* <Image source={require("./graph.png")} /> */}
       </View>
     )
 
@@ -512,9 +518,9 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", padding: 20 }}>
               <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>Write a sentence with the following word</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.13 }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text></Text>
-                
-                <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", fontSize: 18, flex: 1, height: screenHeight * 0.18, width: "100%"}} placeholder="Start typing..." editable={FRQcorrect === null ? true : false} multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
-                <Text style={{ position: "absolute", bottom: screenHeight * 0.03, alignItems: "center",  fontSize: 18, textAlign: "center", color: "#DD6348"}}>{FRQfeedback}</Text>
+
+              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", fontSize: 18, flex: 1, height: screenHeight * 0.18, width: "100%" }} placeholder="Start typing..." editable={FRQcorrect === null ? true : false} multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
+              <Text style={{ position: "absolute", bottom: screenHeight * 0.03, alignItems: "center", fontSize: 18, textAlign: "center", color: "#DD6348" }}>{FRQfeedback}</Text>
             </Pressable>
           </View>
         </>
@@ -615,16 +621,16 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, type, goNextS
                     goNextSlide(false)
                   } else if (answer) {
                     evaluateFRQ()
-                  } 
+                  }
                 }}>
-                  { loading
-                  ? <ActivityIndicator />
-                  : FRQcorrect 
-                    ? <SFSymbol name="checkmark" size={25} color="white" />
-                    : FRQcorrect === false 
-                      // ? <SFSymbol name="xmark" size={25} color="white" />
-                      ? <SFSymbol name="arrow.right" size={25} color="white" />
-                      : <SFSymbol name="arrow.up" size={25} color="white" />
+                  {loading
+                    ? <ActivityIndicator />
+                    : FRQcorrect
+                      ? <SFSymbol name="checkmark" size={25} color="white" />
+                      : FRQcorrect === false
+                        // ? <SFSymbol name="xmark" size={25} color="white" />
+                        ? <SFSymbol name="arrow.right" size={25} color="white" />
+                        : <SFSymbol name="arrow.up" size={25} color="white" />
                   }
                 </Pressable>
               </Animated.View>
