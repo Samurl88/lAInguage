@@ -40,7 +40,7 @@ const safetySetting = [
 ];
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
-export default function StudyPage({ language, stars }) {
+export default function StudyPage({ language, stars, translations }) {
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
   const [numAnswered, setNumAnswered] = useState(0)
@@ -223,7 +223,7 @@ export default function StudyPage({ language, stars }) {
             : null
           }
           <View style={styles.container}>
-            <Text style={styles.title}>Practice</Text>
+            <Text style={styles.title}>{translations.practice[language]}</Text>
             <FlatList
               data={flashcards}
               ref={ref}
@@ -244,6 +244,7 @@ export default function StudyPage({ language, stars }) {
                   type={item.type}
                   goNextSlide={goNextSlide}
                   language={language}
+                  translations={translations}
                 />
               )}
               pagingEnabled
@@ -253,7 +254,7 @@ export default function StudyPage({ language, stars }) {
               style={{ zIndex: 100 }}
               scrollEnabled={false}
 
-              ListFooterComponent={<FooterFlashcard reset={reset} />}
+              ListFooterComponent={<FooterFlashcard reset={reset} language={language} translations={translations}/>}
             />
           </View>
           <ProgressBar flashcards={flashcards} numAnswered={numAnswered} currentProgressCoverWidth={currentProgressCoverWidth} />
@@ -420,7 +421,7 @@ export default function StudyPage({ language, stars }) {
     <>
       <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
         <View style={styles.container}>
-          <Text style={styles.title}>Practice</Text>
+          <Text style={styles.title}>{translations.practice[language]}</Text>
           <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
             <View style={styles.back}>
               <Animated.View style={{ transform: [{ rotate: rotate }] }}>
@@ -453,7 +454,7 @@ export default function StudyPage({ language, stars }) {
                   </Defs>
                 </Svg>
               </Animated.View>
-              <Text style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray" }}>Preparing your session...</Text>
+              <Text style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray" }}>{translations.preparing_your_session[language]}...</Text>
             </View>
           </View>
         </View>
@@ -464,25 +465,23 @@ export default function StudyPage({ language, stars }) {
   )
 }
 
-function FooterFlashcard({ reset }) {
+function FooterFlashcard({ reset, language, translations }) {
   return (
     <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
       <View style={{ ...styles.back, gap: 20 }}>
         <View style={{ gap: 15, alignItems: "center", padding: 20 }}>
-          <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 35, textAlign: "center", }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>Great Work!</Text></Text>
-          <Text style={{ fontSize: 20, textAlign: "center", }}>That's another star for your collection!</Text>
+          <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 35, textAlign: "center", }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{translations.great_work[language]}</Text></Text>
+          <Text style={{ fontSize: 20, textAlign: "center", }}>{translations.thats_another_star_for_your_collection[language]}</Text>
         </View>
         <Pressable onPress={reset} style={{ ...styles.defaultBtn, backgroundColor: "#2F2C2A", padding: 10, borderRadius: 10, }}>
-          {/* <Text style={{ fontSize: 18, textAlign: "center", color: "white" }}>Let's go again!</Text> */}
           <SFSymbol name="repeat" size={25} color="white" />
-
         </Pressable>
       </View>
     </View>
   )
 }
 
-function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, goNextSlide, language, }) {
+function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, goNextSlide, language, translations }) {
   const [answer, setAnswer] = useState(null)
 
   const [loading, setLoading] = useState(null);
@@ -563,7 +562,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
     Sentence: ${answer}
 
     Provide feedback if the sentence is not correct. This feedback must be a full sentence written in ${language} 15 words or less. It must explain what is wrong and what would be correct.
-    If the word "${front}" is not used in the sentence, feedback should be "You didn't use "${front}" in the sentence!"
+    If the word "${front}" is not used in the sentence, feedback should be "You didn't use "${front}" in the sentence!" (in the language of ${language})
     Answer in the following schema:
     {
       correct: boolean,
@@ -594,7 +593,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
       {type == "flashcard"
         && <>
           <Animated.View style={[styles.front, frontAnimatedStyle]}>
-            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>Quiz yourself</Text>
+            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>{translations.quiz_yourself[language]}</Text>
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
               {
                 <Text style={styles.bigCardText}>{front}</Text>
@@ -612,8 +611,8 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
         && <>
           <View style={styles.back}>
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", padding: 20 }}>
-              <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>Choose the best answer</Text>
-              <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.1 }}>What does <Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text> mean?</Text>
+              <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>{translations.choose_the_best_answer[language]}</Text>
+              <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.1 }}>{translations.what_is_the_meaning_of[language]}<Text style={{ fontFamily: "NewYorkLarge-Semibold" }}> {front}</Text>?</Text>
               <View style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20 }}>
                 <Text style={styles.smallCardText}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>A.</Text> {mcqs[front].choices.A}</Text>
                 <Text style={styles.smallCardText}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>B.</Text> {mcqs[front].choices.B}</Text>
@@ -627,10 +626,10 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
         && <>
           <View style={styles.back}>
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", padding: 20 }}>
-              <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>Write a sentence with the following word</Text>
+              <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>{translations.write_a_sentence_with_the_following_word[language]}</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.13 }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text></Text>
 
-              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", fontSize: 18, flex: 1, height: screenHeight * 0.18, width: "100%" }} placeholder="Start typing..." editable={FRQcorrect === null ? true : false} multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
+              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", fontSize: 18, flex: 1, height: screenHeight * 0.18, width: "100%" }} placeholder={ translations.start_typing[language] + "..."} editable={FRQcorrect === null ? true : false} multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
               <Text style={{ position: "absolute", bottom: screenHeight * 0.03, alignItems: "center", fontSize: 18, textAlign: "center", color: "#DD6348" }}>{FRQfeedback}</Text>
             </Pressable>
           </View>

@@ -15,6 +15,273 @@ import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
+
+const translations = {
+  "dictionary": {
+    "spanish": "Diccionario",
+    "chinese": "词典",
+    "tagalog": "Diksyunaryo",
+    "vietnamese": "Từ Điển",
+    "arabic": "قاموس",
+    "french": "Dictionnaire",
+    "korean": "사전",
+    "russian": "Словарь",
+    "portuguese": "Dicionário",
+    "hindi": "शब्दकोश",
+    "english": "Dictionary"
+  },
+  "camera": {
+    "spanish": "Cámara",
+    "chinese": "相机",
+    "tagalog": "Kamera",
+    "vietnamese": "Máy Ảnh",
+    "arabic": "كاميرا",
+    "french": "Caméra",
+    "korean": "카메라",
+    "russian": "Камера",
+    "portuguese": "Câmera",
+    "hindi": "कैमरा",
+    "english": "Camera"
+  },
+  "highlight_text_to_translate": {
+    "spanish": "Resaltar texto para traducir",
+    "chinese": "突出显示要翻译的文本",
+    "tagalog": "I-highlight ang teksto upang isalin",
+    "vietnamese": "Làm nổi bật văn bản để dịch",
+    "arabic": "تسليط الضوء على النص لترجمته",
+    "french": "Surligner le texte à traduire",
+    "korean": "번역할 텍스트 강조 표시",
+    "russian": "Выделить текст для перевода",
+    "portuguese": "Destacar texto para traduzir",
+    "hindi": "अनुवाद के लिए पाठ को हाइलाइट करें",
+    "english": "Highlight text to translate"
+  },
+  "clear": {
+    "spanish": "Borrar",
+    "chinese": "擦除",
+    "tagalog": "Burahin",
+    "vietnamese": "Xóa",
+    "arabic": "مسح",
+    "french": "Effacer",
+    "korean": "지우기",
+    "russian": "Стереть",
+    "portuguese": "Apagar",
+    "hindi": "मिटाना",
+    "english": "Erase"
+  },
+  "retake": {
+    "spanish": "Volver a tomar",
+    "chinese": "重拍",
+    "tagalog": "Muling kunan",
+    "vietnamese": "Chụp lại",
+    "arabic": "إعادة",
+    "french": "Reprendre",
+    "korean": "다시 찍기",
+    "russian": "Переснять",
+    "portuguese": "Repetir",
+    "hindi": "पुनः लेना",
+    "english": "Retake"
+  },
+  "done": {
+    "spanish": "Hecho",
+    "chinese": "完成",
+    "tagalog": "Tapos na",
+    "vietnamese": "Xong",
+    "arabic": "تم",
+    "french": "Terminé",
+    "korean": "완료",
+    "russian": "Готово",
+    "portuguese": "Feito",
+    "hindi": "पूर्ण",
+    "english": "Done"
+  },
+  "definitions": {
+    "spanish": "Definiciones",
+    "chinese": "定义",
+    "tagalog": "Mga Kahulugan",
+    "vietnamese": "Định Nghĩa",
+    "arabic": "التعاريف",
+    "french": "Définitions",
+    "korean": "정의",
+    "russian": "Определения",
+    "portuguese": "Definições",
+    "hindi": "परिभाषाएँ",
+    "english": "Definitions"
+  },
+  "practice": {
+    "spanish": "Practicar",
+    "chinese": "练习",
+    "tagalog": "Magsanay",
+    "vietnamese": "Thực Hành",
+    "arabic": "ممارسة",
+    "french": "Pratiquer",
+    "korean": "연습",
+    "russian": "Практика",
+    "portuguese": "Praticar",
+    "hindi": "अभ्यास",
+    "english": "Practice"
+  },
+  "quiz_yourself": {
+    "spanish": "Ponerse a prueba",
+    "chinese": "自测",
+    "tagalog": "I-quiz ang iyong sarili",
+    "vietnamese": "Tự kiểm tra",
+    "arabic": "اختبر نفسك",
+    "french": "Teste-toi",
+    "korean": "퀴즈 풀기",
+    "russian": "Проверь себя",
+    "portuguese": "Faça um teste",
+    "hindi": "स्वयं का परीक्षण करें",
+    "english": "Quiz yourself"
+  },
+  "choose_the_best_answer": {
+    "spanish": "Elige la mejor respuesta",
+    "chinese": "选择最佳答案",
+    "tagalog": "Piliin ang pinakamahusay na sagot",
+    "vietnamese": "Chọn câu trả lời tốt nhất",
+    "arabic": "اختر أفضل إجابة",
+    "french": "Choisissez la meilleure réponse",
+    "korean": "가장 좋은 답변을 선택하세요",
+    "russian": "Выберите лучший ответ",
+    "portuguese": "Escolha a melhor resposta",
+    "hindi": "सबसे अच्छा उत्तर चुनें",
+    "english": "Choose the best answer"
+  },
+  "preparing_your_session": {
+    "spanish": "Preparando su sesión",
+    "chinese": "准备你的会议",
+    "tagalog": "Inihahanda ang iyong session",
+    "vietnamese": "Chuẩn bị phiên của bạn",
+    "arabic": "تحضير جلستك",
+    "french": "Préparation de votre session",
+    "korean": "세션 준비 중",
+    "russian": "Подготовка вашей сессии",
+    "portuguese": "Preparando sua sessão",
+    "hindi": "आपका सत्र तैयार हो रहा है",
+    "english": "Preparing your session"
+  },
+  "what_is_the_meaning_of": {
+    "spanish": "Cuál es el significado de",
+    "chinese": "是什么意思",
+    "tagalog": "Ano ang kahulugan ng",
+    "vietnamese": "Nghĩa của là gì",
+    "arabic": "ما هو معنى",
+    "french": "Quelle est la signification de",
+    "korean": "의 의미는 무엇입니까",
+    "russian": "Что означает",
+    "portuguese": "Qual é o significado de",
+    "hindi": "का अर्थ क्या है",
+    "english": "What is the meaning of"
+  },
+  "write_a_sentence_with_the_following_word": {
+    "spanish": "Escribe una oración con la siguiente palabra",
+    "chinese": "用以下单词写一个句子",
+    "tagalog": "Sumulat ng pangungusap gamit ang sumusunod na salita",
+    "vietnamese": "Viết một câu với từ sau",
+    "arabic": "اكتب جملة بالكلمة التالية",
+    "french": "Écrivez une phrase avec le mot suivant",
+    "korean": "다음 단어로 문장을 작성하세요",
+    "russian": "Напишите предложение с следующим словом",
+    "portuguese": "Escreva uma frase com a seguinte palavra",
+    "hindi": "निम्नलिखित शब्द के साथ एक वाक्य लिखें",
+    "english": "Write a sentence with the following word"
+  },
+  "start_typing": {
+    "spanish": "Empieza a escribir",
+    "chinese": "开始输入",
+    "tagalog": "Magsimulang mag-type",
+    "vietnamese": "Bắt đầu gõ",
+    "arabic": "ابدأ الكتابة",
+    "french": "Commencez à taper",
+    "korean": "타이핑 시작",
+    "russian": "Начните печатать",
+    "portuguese": "Comece a digitar",
+    "hindi": "टाइप करना शुरू करें",
+    "english": "Start typing"
+  },
+  "great_work": {
+    "spanish": "¡Gran trabajo!",
+    "chinese": "干得好！",
+    "tagalog": "Mahusay na trabaho!",
+    "vietnamese": "Làm tốt lắm!",
+    "arabic": "عمل رائع!",
+    "french": "Bon travail!",
+    "korean": "잘했어요!",
+    "russian": "Отличная работа!",
+    "portuguese": "Ótimo trabalho!",
+    "hindi": "उत्तम कार्य!",
+    "english": "Great work!"
+  },
+  "thats_another_star_for_your_collection": {
+    "spanish": "¡Esa es otra estrella para tu colección.",
+    "chinese": "那是你收藏的另一颗星星.",
+    "tagalog": "Iyan ay isa pang bituin para sa iyong koleksyon.",
+    "vietnamese": "Đó là một ngôi sao khác cho bộ sưu tập của bạn.",
+    "arabic": "هذه نجمة أخرى لمجموعتك.",
+    "french": "C'est une autre étoile pour ta collection.",
+    "korean": "그것은 당신의 컬렉션에 또 하나의 별입니다.",
+    "russian": "Это еще одна звезда в вашу коллекцию.",
+    "portuguese": "Essa é outra estrela para sua coleção.",
+    "hindi": "यह आपके संग्रह के लिए एक और सितारा है.",
+    "english": "That's another star for your collection."
+  },
+  "search": {
+    "spanish": "Buscar",
+    "chinese": "搜索",
+    "tagalog": "Maghanap",
+    "vietnamese": "Tìm Kiếm",
+    "arabic": "بحث",
+    "french": "Rechercher",
+    "korean": "검색",
+    "russian": "Поиск",
+    "portuguese": "Buscar",
+    "hindi": "खोज",
+    "english": "Search"
+  },
+  "unfamiliar": {
+    "spanish": "Desconocido",
+    "chinese": "陌生的",
+    "tagalog": "Hindi Pamilyar",
+    "vietnamese": "Không Quen",
+    "arabic": "غير مألوف",
+    "french": "Inconnu",
+    "korean": "익숙하지 않은",
+    "russian": "Незнакомый",
+    "portuguese": "Desconhecido",
+    "hindi": "अनजान",
+    "english": "Unfamiliar"
+  },
+  "familiar": {
+    "spanish": "Familiar",
+    "chinese": "熟悉的",
+    "tagalog": "Pamilyar",
+    "vietnamese": "Quen Thuộc",
+    "arabic": "مألوف",
+    "french": "Familier",
+    "korean": "익숙한",
+    "russian": "Знакомый",
+    "portuguese": "Familiar",
+    "hindi": "परिचित",
+    "english": "Familiar"
+  },
+  "mastered": {
+    "spanish": "Dominado",
+    "chinese": "精通",
+    "tagalog": "Nasasaklawan",
+    "vietnamese": "Thạo",
+    "arabic": "تمكن",
+    "french": "Maîtrisé",
+    "korean": "정복한",
+    "russian": "Освоенный",
+    "portuguese": "Dominado",
+    "hindi": "निपुण",
+    "english": "Mastered"
+  },
+
+
+}
+
+
 export default function HomePage({ navigation }) {
   const [cameraPage, setCameraPage] = useState(true)
   const [studyPage, setStudyPage] = useState(false)
@@ -95,9 +362,9 @@ export default function HomePage({ navigation }) {
           {!cameraPage
             ? <Animated.View key={"leftone"} exiting={FadeOut} style={{ opacity: edgeOpacity }}>
               <MaskedView
-                style={{ }}
+                style={{}}
                 maskElement={
-                  <View style={{flexDirection: "row", alignItems: "center", gap: 7, height: 50, width: 50, justifyContent: "center"}}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 7, height: 50, width: 50, justifyContent: "center" }}>
                     <Animated.View style={{ transform: [{ "rotate": rotateStar }] }}>
                       <Svg
                         width={17}
@@ -116,12 +383,12 @@ export default function HomePage({ navigation }) {
                   </View>
                 }
               >
-                { 
-                <Animated.View style={{position: "absolute", zIndex: 1000, opacity: opacity}}>
-                  <LinearGradientRN useAngle={true} angle={135} angleCenter={{ x: 0.5, y: 0.5 }}  colors={['#65BAEE', '#FD8DFF']} style={{ width: 50, height: 50, }} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
-                </Animated.View>
+                {
+                  <Animated.View style={{ position: "absolute", zIndex: 1000, opacity: opacity }}>
+                    <LinearGradientRN useAngle={true} angle={135} angleCenter={{ x: 0.5, y: 0.5 }} colors={['#65BAEE', '#FD8DFF']} style={{ width: 50, height: 50, }} start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} />
+                  </Animated.View>
                 }
-                <View style={{backgroundColor: "black", width: 50, height: 50}}></View>
+                <View style={{ backgroundColor: "black", width: 50, height: 50 }}></View>
 
               </MaskedView>
             </Animated.View>
@@ -172,19 +439,19 @@ export default function HomePage({ navigation }) {
 
         </Animated.View>
 
-        {cameraPage && 
+        {cameraPage &&
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
-            <CameraPage language={userLanguage} />
+            <CameraPage language={userLanguage} translations={translations} />
           </Animated.View>
         }
         {studyPage &&
           <Animated.View entering={CustomEnteringAnimation} exiting={CustomExitingAnimation} style={{ flex: 1 }}>
-            <StudyPage language={userLanguage} stars={stars} />
+            <StudyPage language={userLanguage} stars={stars} translations={translations} />
           </Animated.View>
         }
         {dictionaryPage &&
           <Animated.View entering={SlideInRight} exiting={SlideOutRight} style={{ flex: 1 }}>
-            <Dictionary language={userLanguage} />
+            <Dictionary language={userLanguage} translations={translations} />
           </Animated.View>
         }
       </View>
