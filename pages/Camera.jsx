@@ -253,7 +253,6 @@ export default function CameraPage({language, translations}) {
                           opacity={0.5}
                           borderRadius={30}
                         >
-
                           <CornerPathEffect r={64} />
                         </Path>
                       ))}

@@ -277,14 +277,12 @@ const translations = {
     "hindi": "निपुण",
     "english": "Mastered"
   },
-
-
 }
 
 
 export default function HomePage({ navigation }) {
-  const [cameraPage, setCameraPage] = useState(true)
-  const [studyPage, setStudyPage] = useState(false)
+  const [cameraPage, setCameraPage] = useState(false)
+  const [studyPage, setStudyPage] = useState(true)
   const [dictionaryPage, setDictionaryPage] = useState(false)
 
   const [userLanguage, setUserLanguage] = useState(null)

@@ -6,377 +6,165 @@ import database from '@react-native-firebase/database';
 
 const screenWidth = Dimensions.get("screen").width
 const screenHeight = Dimensions.get("screen").height
-const stuff = "";
-const errors = {
-    "auth/invalid-email": "Please enter a valid email.",
-    "auth/email-already-in-use": "This email is already associated with an account.",
-    "auth/weak-password": "Your password must include at least 6 characters.",
-    "auth/user-not-found": "Your email or password is incorrect.",
-    "auth/wrong-password": "Your email or password is incorrect.",
-    "auth/invalid-credential": "Your email or password is incorrect."
-}
+
 
 const translations = {
-    "dictionary": {
-      "spanish": "diccionario",
-      "chinese": "词典",
-      "tagalog": "diksyunaryo",
-      "vietnamese": "từ điển",
-      "arabic": "قاموس",
-      "french": "dictionnaire",
-      "korean": "사전",
-      "russian": "словарь",
-      "portuguese": "dicionário",
-      "hindi": "शब्दकोश"
-    },
-    "camera": {
-      "spanish": "cámara",
-      "chinese": "相机",
-      "tagalog": "kamera",
-      "vietnamese": "máy ảnh",
-      "arabic": "كاميرا",
-      "french": "caméra",
-      "korean": "카메라",
-      "russian": "камера",
-      "portuguese": "câmera",
-      "hindi": "कैमरा"
-    },
-    "highlight_text_to_translate_to_language": {
-      "spanish": "Resalta los textos para traducir a español",
-      "chinese": "突出显示文本以翻译为中文",
-      "tagalog": "I-highlight ang mga teksto upang isalin sa Tagalog",
-      "vietnamese": "Làm nổi bật các văn bản để dịch sang tiếng Việt",
-      "arabic": "تمييز النصوص لترجمتها إلى العربية",
-      "french": "Surlignez les textes à traduire en français",
-      "korean": "한국어로 번역할 텍스트 강조",
-      "russian": "Выделите тексты для перевода на русский",
-      "portuguese": "Realce os textos para traduzir para português",
-      "hindi": "पाठों को हिंदी में अनुवाद करने के लिए हाइलाइट करें"
-    },
-    "clear": {
-      "spanish": "borrar",
-      "chinese": "清除",
-      "tagalog": "i-clear",
-      "vietnamese": "xóa",
-      "arabic": "مسح",
-      "french": "effacer",
-      "korean": "지우기",
-      "russian": "очистить",
-      "portuguese": "limpar",
-      "hindi": "साफ़ करें"
-    },
-    "retake": {
-      "spanish": "retomar",
-      "chinese": "重拍",
-      "tagalog": "muling kunin",
-      "vietnamese": "chụp lại",
-      "arabic": "إعادة",
-      "french": "reprendre",
-      "korean": "다시 찍기",
-      "russian": "переснять",
-      "portuguese": "repetir",
-      "hindi": "फिर से लेना"
-    },
-    "done": {
-      "spanish": "hecho",
-      "chinese": "完成",
-      "tagalog": "tapos na",
-      "vietnamese": "xong",
-      "arabic": "تم",
-      "french": "terminé",
-      "korean": "완료",
-      "russian": "готово",
-      "portuguese": "feito",
-      "hindi": "हो गया"
-    },
-    "definitions": {
-      "spanish": "definiciones",
-      "chinese": "定义",
-      "tagalog": "mga kahulugan",
-      "vietnamese": "định nghĩa",
-      "arabic": "تعريفات",
-      "french": "définitions",
-      "korean": "정의",
-      "russian": "определения",
-      "portuguese": "definições",
-      "hindi": "परिभाषाएँ"
-    },
-    "recently_practiced": {
-      "spanish": "recientemente practicado",
-      "chinese": "最近练习",
-      "tagalog": "kamakailan nagsanay",
-      "vietnamese": "vừa luyện tập",
-      "arabic": "تمت ممارسته مؤخرًا",
-      "french": "récemment pratiqué",
-      "korean": "최근에 연습한",
-      "russian": "недавно практиковались",
-      "portuguese": "recentemente praticado",
-      "hindi": "हाल ही में अभ्यास किया गया"
-    },
-    "unfamiliar_words": {
-      "spanish": "palabras desconocidas",
-      "chinese": "不熟悉的单词",
-      "tagalog": "hindi pamilyar na mga salita",
-      "vietnamese": "từ không quen thuộc",
-      "arabic": "كلمات غير مألوفة",
-      "french": "mots inconnus",
-      "korean": "낯선 단어",
-      "russian": "незнакомые слова",
-      "portuguese": "palavras desconhecidas",
-      "hindi": "अनजान शब्द"
-    },
-    "familiar_words": {
-      "spanish": "palabras familiares",
-      "chinese": "熟悉的单词",
-      "tagalog": "pamilyar na mga salita",
-      "vietnamese": "từ quen thuộc",
-      "arabic": "كلمات مألوفة",
-      "french": "mots familiers",
-      "korean": "익숙한 단어",
-      "russian": "знакомые слова",
-      "portuguese": "palavras familiares",
-      "hindi": "परिचित शब्द"
-    },
-    "mastered_words": {
-      "spanish": "palabras dominadas",
-      "chinese": "掌握的单词",
-      "tagalog": "mga napag-aralan na salita",
-      "vietnamese": "từ đã thành thạo",
-      "arabic": "كلمات متقنة",
-      "french": "mots maîtrisés",
-      "korean": "마스터한 단어",
-      "russian": "освоенные слова",
-      "portuguese": "palavras dominadas",
-      "hindi": "अधिग्रहीत शब्द"
-    },
-    "slang": {
-      "spanish": "jerga",
-      "chinese": "俚语",
-      "tagalog": "salitang balbal",
-      "vietnamese": "tiếng lóng",
-      "arabic": "عامية",
-      "french": "argot",
-      "korean": "속어",
-      "russian": "сленг",
-      "portuguese": "gíria",
-      "hindi": "बोलचाल की भाषा"
-    },
-    "medical": {
-      "spanish": "médico",
-      "chinese": "医学",
-      "tagalog": "medikal",
-      "vietnamese": "y khoa",
-      "arabic": "طبي",
-      "french": "médical",
-      "korean": "의료",
-      "russian": "медицинский",
-      "portuguese": "médico",
-      "hindi": "चिकित्सा"
-    },
-    "financial": {
-      "spanish": "financiero",
-      "chinese": "金融",
-      "tagalog": "pinansyal",
-      "vietnamese": "tài chính",
-      "arabic": "مالي",
-      "french": "financier",
-      "korean": "재정의",
-      "russian": "финансовый",
-      "portuguese": "financeiro",
-      "hindi": "वित्तीय"
-    },
-    "all_words": {
-      "spanish": "todas las palabras",
-      "chinese": "所有单词",
-      "tagalog": "lahat ng mga salita",
-      "vietnamese": "tất cả các từ",
-      "arabic": "جميع الكلمات",
-      "french": "tous les mots",
-      "korean": "모든 단어",
-      "russian": "все слова",
-      "portuguese": "todas as palavras",
-      "hindi": "सभी शब्द"
-    },
-    "search": {
-      "spanish": "buscar",
-      "chinese": "搜索",
-      "tagalog": "maghanap",
-      "vietnamese": "tìm kiếm",
-      "arabic": "بحث",
-      "french": "rechercher",
-      "korean": "검색",
-      "russian": "поиск",
-      "portuguese": "pesquisar",
-      "hindi": "खोज"
-    },
-    "cancel": {
-      "spanish": "cancelar",
-      "chinese": "取消",
-      "tagalog": "kanselahin",
-      "vietnamese": "hủy bỏ",
-      "arabic": "إلغاء",
-      "french": "annuler",
-      "korean": "취소",
-      "russian": "отменить",
-      "portuguese": "cancelar",
-      "hindi": "रद्द करें"
-    },
-    "practice": {
-      "spanish": "practicar",
-      "chinese": "练习",
-      "tagalog": "magsanay",
-      "vietnamese": "luyện tập",
-      "arabic": "ممارسة",
-      "french": "pratiquer",
-      "korean": "연습",
-      "russian": "практиковать",
-      "portuguese": "praticar",
-      "hindi": "अभ्यास"
-    },
-    "choose_the_best_answer": {
-      "spanish": "Elija la mejor respuesta",
-      "chinese": "选择最佳答案",
-      "tagalog": "Piliin ang pinakamahusay na sagot",
-      "vietnamese": "Chọn câu trả lời tốt nhất",
-      "arabic": "اختر أفضل إجابة",
-      "french": "Choisissez la meilleure réponse",
-      "korean": "가장 좋은 답을 고르세요",
-      "russian": "Выберите лучший ответ",
-      "portuguese": "Escolha a melhor resposta",
-      "hindi": "सबसे अच्छा उत्तर चुनें"
-    },
-    "write_a_sentence_with_these_words": {
-      "spanish": "Escribe una oración con estas palabras",
-      "chinese": "用这些词写一个句子",
-      "tagalog": "Sumulat ng pangungusap gamit ang mga salitang ito",
-      "vietnamese": "Viết một câu với những từ này",
-      "arabic": "اكتب جملة بهذه الكلمات",
-      "french": "Écrivez une phrase avec ces mots",
-      "korean": "이 단어들로 문장을 작성하세요",
-      "russian": "Напишите предложение с этими словами",
-      "portuguese": "Escreva uma frase com estas palavras",
-      "hindi": "इन शब्दों के साथ एक वाक्य लिखें"
-    },
-    "star_earned": {
-      "spanish": "¡Estrella ganada!",
-      "chinese": "获得星星！",
-      "tagalog": "Bituin na nakuha!",
-      "vietnamese": "Đã kiếm được ngôi sao!",
-      "arabic": "حصلت على نجمة!",
-      "french": "Étoile gagnée!",
-      "korean": "별 획득!",
-      "russian": "Звезда заработана!",
-      "portuguese": "Estrela conquistada!",
-      "hindi": "तारा अर्जित!"
-    },
-    "good_job": {
-      "spanish": "¡Buen trabajo!",
-      "chinese": "干得好！",
-      "tagalog": "Magaling!",
-      "vietnamese": "Làm tốt lắm!",
-      "arabic": "عمل جيد!",
-      "french": "Bon travail!",
-      "korean": "잘 했어!",
-      "russian": "Хорошая работа!",
-      "portuguese": "Bom trabalho!",
-      "hindi": "शाबाश!"
-    },
-    "not_quite": {
-      "spanish": "¡No del todo!",
-      "chinese": "不完全是！",
-      "tagalog": "Hindi masyadong!",
-      "vietnamese": "Chưa hẳn!",
-      "arabic": "ليس تماما!",
-      "french": "Pas tout à fait!",
-      "korean": "아직 아니야!",
-      "russian": "Не совсем!",
-      "portuguese": "Não exatamente!",
-      "hindi": "अभी नहीं!"
-    },
-    "email": {
-        "spanish": "correo electrónico",
+    "please_enter_a_valid_email": {
+        "spanish": "Por favor, introduzca un correo electrónico válido.",
+        "chinese": "请输入有效的电子邮件。",
+        "tagalog": "Mangyaring ipasok ang isang wastong email.",
+        "vietnamese": "Vui lòng nhập một email hợp lệ.",
+        "arabic": "الرجاء إدخال بريد إلكتروني صحيح.",
+        "french": "Veuillez entrer un email valide.",
+        "korean": "유효한 이메일을 입력하세요.",
+        "russian": "Пожалуйста, введите действительный адрес электронной почты.",
+        "portuguese": "Por favor, insira um email válido.",
+        "hindi": "कृपया एक वैध ईमेल दर्ज करें।",
+        "english": "Please enter a valid email."
+      },
+      "this_email_is_already_associated_with_an_account": {
+        "spanish": "Este correo electrónico ya está asociado con una cuenta.",
+        "chinese": "此电子邮件已与一个帐户关联。",
+        "tagalog": "Ang email na ito ay nauugnay na sa isang account.",
+        "vietnamese": "Email này đã được liên kết với một tài khoản.",
+        "arabic": "هذا البريد الإلكتروني مرتبط بالفعل بحساب.",
+        "french": "Cet email est déjà associé à un compte.",
+        "korean": "이 이메일은 이미 계정과 연결되어 있습니다.",
+        "russian": "Этот адрес электронной почты уже связан с учетной записью.",
+        "portuguese": "Este email já está associado a uma conta.",
+        "hindi": "यह ईमेल पहले से ही एक खाते से जुड़ा हुआ है।",
+        "english": "This email is already associated with an account."
+      },
+      "your_password_must_include_at_least_6_characters": {
+        "spanish": "Su contraseña debe incluir al menos 6 caracteres.",
+        "chinese": "您的密码必须包含至少6个字符。",
+        "tagalog": "Ang iyong password ay dapat maglaman ng hindi bababa sa 6 na character.",
+        "vietnamese": "Mật khẩu của bạn phải bao gồm ít nhất 6 ký tự.",
+        "arabic": "يجب أن تحتوي كلمة مرورك على 6 أحرف على الأقل.",
+        "french": "Votre mot de passe doit contenir au moins 6 caractères.",
+        "korean": "비밀번호는 최소 6자 이상이어야 합니다.",
+        "russian": "Ваш пароль должен содержать не менее 6 символов.",
+        "portuguese": "Sua senha deve incluir pelo menos 6 caracteres.",
+        "hindi": "आपका पासवर्ड कम से कम 6 अक्षर शामिल होना चाहिए।",
+        "english": "Your password must include at least 6 characters."
+      },
+      "your_email_or_password_is_incorrect": {
+        "spanish": "Su correo electrónico o contraseña es incorrecto.",
+        "chinese": "您的电子邮件或密码不正确。",
+        "tagalog": "Mali ang iyong email o password.",
+        "vietnamese": "Email hoặc mật khẩu của bạn không chính xác.",
+        "arabic": "بريدك الإلكتروني أو كلمة المرور غير صحيحة.",
+        "french": "Votre email ou mot de passe est incorrect.",
+        "korean": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "russian": "Ваш электронный адрес или пароль неправильны.",
+        "portuguese": "Seu email ou senha está incorreto.",
+        "hindi": "आपका ईमेल या पासवर्ड गलत है।",
+        "english": "Your email or password is incorrect."
+      },
+      "email": {
+        "spanish": "Correo Electrónico",
         "chinese": "电子邮件",
-        "tagalog": "email",
-        "vietnamese": "email",
+        "tagalog": "Email",
+        "vietnamese": "Email",
         "arabic": "البريد الإلكتروني",
-        "french": "email",
+        "french": "Email",
         "korean": "이메일",
-        "russian": "электронная почта",
-        "portuguese": "e-mail",
-        "hindi": "ईमेल"
+        "russian": "Эл. адрес",
+        "portuguese": "Email",
+        "hindi": "ईमेल",
+        "english": "Email"
       },
       "password": {
-        "spanish": "contraseña",
+        "spanish": "Contraseña",
         "chinese": "密码",
-        "tagalog": "password",
-        "vietnamese": "mật khẩu",
+        "tagalog": "Password",
+        "vietnamese": "Mật Khẩu",
         "arabic": "كلمة المرور",
-        "french": "mot de passe",
+        "french": "Mot De Passe",
         "korean": "비밀번호",
-        "russian": "пароль",
-        "portuguese": "senha",
-        "hindi": "पासवर्ड"
+        "russian": "Пароль",
+        "portuguese": "Senha",
+        "hindi": "पासवर्ड",
+        "english": "Password",
       },
-      "create_account": {
-        "spanish": "crear cuenta",
-        "chinese": "创建账户",
-        "tagalog": "gumawa ng account",
-        "vietnamese": "tạo tài khoản",
-        "arabic": "إنشاء حساب",
-        "french": "créer un compte",
-        "korean": "계정 생성",
-        "russian": "создать аккаунт",
-        "portuguese": "criar conta",
-        "hindi": "खाता बनाएं"
+      "sign_up": {
+        "spanish": "Regístrate",
+        "chinese": "注册",
+        "tagalog": "Mag-Sign Up",
+        "vietnamese": "Đăng Ký",
+        "arabic": "اشترك",
+        "french": "Inscrivez-Vous",
+        "korean": "가입하기",
+        "russian": "Зарегистрироваться",
+        "portuguese": "Inscrever-Se",
+        "hindi": "साइन अप करें",
+        "english": "Sign Up"
       },
-    "positive_statements": {
-      "spanish": ["¡Excelente!", "¡Sigue así!", "¡Fantástico!", "¡Impresionante!", "¡Muy bien!", "¡Estupendo!", "¡Buen trabajo!", "¡Maravilloso!", "¡Perfecto!", "¡Lo estás haciendo genial!"],
-      "chinese": ["很好！", "继续保持！", "太棒了！", "令人印象深刻！", "非常好！", "优秀！", "好工作！", "精彩！", "完美！", "你做得很好！"],
-      "tagalog": ["Mahusay!", "I-keep up mo yan!", "Kahanga-hanga!", "Nakaka-impress!", "Napakagaling!", "Napakaganda!", "Magandang trabaho!", "Kamangha-mangha!", "Perpekto!", "Ginagawa mo ng mahusay!"],
-      "vietnamese": ["Xuất sắc!", "Tiếp tục đi!", "Tuyệt vời!", "Ấn tượng!", "Rất tốt!", "Tuyệt vời!", "Làm tốt lắm!", "Tuyệt hảo!", "Hoàn hảo!", "Bạn đang làm rất tốt!"],
-      "arabic": ["ممتاز!", "واصل هكذا!", "رائع!", "مثير للإعجاب!", "جيد جداً!", "ممتاز!", "عمل جيد!", "رائع!", "مثالي!", "أنت تقوم بعمل رائع!"],
-      "french": ["Excellent!", "Continuez comme ça!", "Fantastique!", "Impressionnant!", "Très bien!", "Super!", "Bon travail!", "Merveilleux!", "Parfait!", "Tu fais du bon travail!"],
-      "korean": ["훌륭해!", "계속 그렇게 해!", "대단해!", "인상적이야!", "아주 좋아!", "멋져!", "잘했어!", "놀라워!", "완벽해!", "너 잘하고 있어!"],
-      "russian": ["Отлично!", "Так держать!", "Фантастика!", "Впечатляюще!", "Очень хорошо!", "Превосходно!", "Хорошая работа!", "Замечательно!", "Идеально!", "Ты делаешь это отлично!"],
-      "portuguese": ["Excelente!", "Continue assim!", "Fantástico!", "Impressionante!", "Muito bem!", "Ótimo!", "Bom trabalho!", "Maravilhoso!", "Perfeito!", "Você está indo muito bem!"],
-      "hindi": ["बहुत बढ़िया!", "ऐसे ही करते रहो!", "शानदार!", "प्रभावशाली!", "बहुत अच्छा!", "उत्कृष्ट!", "अच्छा काम!", "अद्भुत!", "सही!", "आप बहुत अच्छा कर रहे हैं!"]
-    },
-    "negative_statements": {
-      "spanish": ["¡Casi!", "¡Inténtalo de nuevo!", "¡No está mal!", "¡Casi allí!", "¡Un poco más de esfuerzo!", "¡Puedes hacerlo mejor!", "¡No te rindas!", "¡Sigue intentándolo!", "¡No te preocupes!", "¡Lo harás mejor la próxima vez!"],
-      "chinese": ["差一点！", "再试一次！", "不错！", "快到了！", "再加把劲！", "你可以做得更好！", "别放弃！", "继续努力！", "别担心！", "下次会更好！"],
-      "tagalog": ["Malapit na!", "Subukan muli!", "Hindi masama!", "Malapit na!", "Kailangan lang ng kaunting pagsusumikap!", "Kaya mo pang gumawa ng mas mahusay!", "Huwag sumuko!", "Patuloy na subukan!", "Huwag mag-alala!", "Mas magiging mahusay ka sa susunod!"],
-      "vietnamese": ["Gần rồi!", "Thử lại lần nữa!", "Không tệ!", "Gần tới rồi!", "Chỉ cần cố gắng thêm chút nữa!", "Bạn có thể làm tốt hơn!", "Đừng bỏ cuộc!", "Tiếp tục cố gắng!", "Đừng lo!", "Lần sau sẽ tốt hơn!"],
-      "arabic": ["قريب!", "حاول مرة أخرى!", "ليس سيئاً!", "قريب!", "المزيد من الجهد!", "يمكنك أن تفعل أفضل!", "لا تستسلم!", "استمر في المحاولة!", "لا تقلق!", "ستكون أفضل في المرة القادمة!"],
-      "french": ["Presque!", "Réessayez!", "Pas mal!", "Presque là!", "Encore un peu d'effort!", "Vous pouvez faire mieux!", "Ne lâchez pas!", "Continuez à essayer!", "Ne vous inquiétez pas!", "Vous ferez mieux la prochaine fois!"],
-      "korean": ["거의 다 왔어!", "다시 시도해!", "나쁘지 않아!", "거의 다 왔어!", "조금만 더 힘내!", "더 잘할 수 있어!", "포기하지 마!", "계속 시도해!", "걱정 마!", "다음 번에는 더 잘할 거야!"],
-      "russian": ["Почти получилось!", "Попробуй еще раз!", "Неплохо!", "Почти там!", "Еще немного усилий!", "Ты можешь лучше!", "Не сдавайся!", "Продолжай пытаться!", "Не волнуйся!", "В следующий раз будет лучше!"],
-      "portuguese": ["Quase!", "Tente novamente!", "Nada mal!", "Quase lá!", "Só mais um pouco de esforço!", "Você pode fazer melhor!", "Não desista!", "Continue tentando!", "Não se preocupe!", "Você vai se sair melhor da próxima vez!"],
-      "hindi": ["लगभग!", "फिर से प्रयास करें!", "बुरा नहीं!", "लगभग पहुँच गए!", "थोड़ी और मेहनत!", "आप बेहतर कर सकते हैं!", "हार मत मानो!", "प्रयास करते रहो!", "चिंता मत करो!", "अगली बार बेहतर करोगे!"]
-    },
-    "see_all": {
-      "spanish": "ver todo",
-      "chinese": "查看全部",
-      "tagalog": "tingnan lahat",
-      "vietnamese": "xem tất cả",
-      "arabic": "مشاهدة الكل",
-      "french": "voir tout",
-      "korean": "모두 보기",
-      "russian": "увидеть все",
-      "portuguese": "ver tudo",
-      "hindi": "सभी देखें"
-    },
-    "sign_up": {
-        "spanish": "registrarse",
-    "chinese": "注册",
-    "tagalog": "mag-sign up",
-    "vietnamese": "đăng ký",
-    "arabic": "سجل",
-    "french": "s'inscrire",
-    "korean": "가입하기",
-    "russian": "зарегистрироваться",
-    "portuguese": "inscrever-se",
-    "hindi": "साइन अप करें"
-    }
+      "log_in": {
+        "spanish": "Iniciar Sesión",
+        "chinese": "登录",
+        "tagalog": "Mag-Log In",
+        "vietnamese": "Đăng Nhập",
+        "arabic": "تسجيل الدخول",
+        "french": "Se Connecter",
+        "korean": "로그인",
+        "russian": "Войти",
+        "portuguese": "Entrar",
+        "hindi": "लॉग इन करें",
+        "english": "Log In"
+      },
+      "create_an_account": {
+        "spanish": "Crea una cuenta!",
+        "chinese": "创建一个账户！",
+        "tagalog": "Lumikha ng isang account!",
+        "vietnamese": "Tạo một tài khoản!",
+        "arabic": "أنشئ حساباً!",
+        "french": "Créez un compte!",
+        "korean": "계정을 생성하세요!",
+        "russian": "Создайте аккаунт!",
+        "portuguese": "Crie uma conta!",
+        "hindi": "एक खाता बनाएँ!",
+        "english": "Create an account!"
+      },
+      "no_account": {
+    "spanish": "¿No tienes cuenta?",
+    "chinese": "没有账户吗？",
+    "tagalog": "Walang account?",
+    "vietnamese": "Không có tài khoản?",
+    "arabic": "لا حساب؟",
+    "french": "Pas de compte ?",
+    "korean": "계정이 없나요?",
+    "russian": "Нет аккаунта?",
+    "portuguese": "Não tem conta?",
+    "hindi": "कोई खाता नहीं?",
+    "english": "No account?"
+  },
+  "sign_in_exclamation": {
+    "spanish": "¡Inicia sesión!",
+    "chinese": "登录！",
+    "tagalog": "Mag-sign in!",
+    "vietnamese": "Đăng nhập!",
+    "arabic": "سجّل الدخول!",
+    "french": "Connectez-vous !",
+    "korean": "로그인하세요!",
+    "russian": "Войти!",
+    "portuguese": "Faça login!",
+    "hindi": "साइन इन करें!",
+    "english": "Sign in!"
+  },
+  "already_have_an_account": {
+    "spanish": "¿Ya tienes una cuenta?",
+    "chinese": "已经有账户了？",
+    "tagalog": "May account na?",
+    "vietnamese": "Đã có tài khoản?",
+    "arabic": "هل لديك حساب؟",
+    "french": "Vous avez déjà un compte ?",
+    "korean": "이미 계정이 있습니까?",
+    "russian": "Уже есть аккаунт?",
+    "portuguese": "Já tem uma conta?",
+    "hindi": "पहले से ही एक खाता है?",
+    "english": "Already have an account?"
+  }
   }
 
 const data = [
@@ -395,7 +183,14 @@ const data = [
 
 export default function SignUpScreen() {
 
-
+    const errors = {
+        "auth/invalid-email": "Please enter a valid email.",
+        "auth/email-already-in-use": "This email is already associated with an account.",
+        "auth/weak-password": "Your password must include at least 6 characters.",
+        "auth/user-not-found": "Your email or password is incorrect.",
+        "auth/wrong-password": "Your email or password is incorrect.",
+        "auth/invalid-credential": "Your email or password is incorrect."
+    }
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -459,20 +254,20 @@ export default function SignUpScreen() {
                 />
             </View>
             <View style={styles.container}>
-                <Text style={styles.title}>{translations.sign_up[chosenLanguage] || "Sign Up" }</Text>
+                <Text style={styles.title}>{translations.sign_up[chosenLanguage] }</Text>
                 <View style={{ position: "absolute", top: screenHeight * 0.15, width: "100%" }}>
                     <View style={{ ...styles.inputContainer, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
                         <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
                             <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
-                                <Text style={styles.inputLabel}>{translations.email[chosenLanguage] || "Email"}</Text>
+                                <Text style={styles.inputLabel}>{translations.email[chosenLanguage]}</Text>
                             </View>
                             <TextInput value={email} style={styles.input} placeholder='email@example.com' onChangeText={(text) => setEmail(text)} autoCapitalize='none' />
                         </View>
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
-                                <Text style={styles.inputLabel}>{translations.password[chosenLanguage] || "Password"}</Text>
+                                <Text style={styles.inputLabel}>{translations.password[chosenLanguage]}</Text>
                             </View>
-                            <TextInput value={password} style={styles.input} placeholder={translations.password[chosenLanguage] || "Password"} secureTextEntry={true} onChangeText={(text) => setPassword(text)} autoCapitalize='none' />
+                            <TextInput value={password} style={styles.input} placeholder={translations.password[chosenLanguage]} secureTextEntry={true} onChangeText={(text) => setPassword(text)} autoCapitalize='none' />
                         </View>
                     </View>
                     <Text style={styles.error}>{error}</Text>
@@ -481,10 +276,10 @@ export default function SignUpScreen() {
                 {email && password
                     ? <Pressable onPress={async () => { register() }}
                         style={styles.infoButton}>
-                        <Text style={styles.infoButtonText}>{translations.create_account[chosenLanguage] || "Create Account"}</Text>
+                        <Text style={styles.infoButtonText}>{translations.create_an_account[chosenLanguage]}</Text>
                     </Pressable>
                     : <Pressable style={styles.infoButton}>
-                        <Text style={styles.infoButtonDisabledText}>{translations.create_account[chosenLanguage] || "Create Account"}</Text>
+                        <Text style={styles.infoButtonDisabledText}>{translations.create_an_account[chosenLanguage]}</Text>
                     </Pressable>
                 }
 
@@ -492,8 +287,8 @@ export default function SignUpScreen() {
             </View>
 
             <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
-                <Text style={styles.swapPage}>Already have an account? </Text>
-                <Pressable onPress={() => { setSignUp(false) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>Log in here!</Text></Pressable>
+                <Text style={styles.swapPage}>{translations.already_have_an_account[chosenLanguage]} </Text>
+                <Pressable onPress={() => { setSignUp(false) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>{translations.log_in[chosenLanguage]}!</Text></Pressable>
             </View>
         </SafeAreaView>
     );
@@ -505,21 +300,21 @@ export default function SignUpScreen() {
                     {/* <Pressable onPress={() => { navigation.goBack() }} style={{ position: "absolute", left: 20 }}>
                         <ArrowLeft2 color="#000" size={32} />
                     </Pressable> */}
-                    <Text style={styles.title}>Login</Text>
+                    <Text style={styles.title}>{translations.log_in[chosenLanguage]}</Text>
     
                     <View style={{ position: "absolute", top: screenHeight * 0.15, width: "100%" }}>
                         <View style={{ ...styles.inputContainer, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
                             <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
                                 <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
-                                    <Text style={styles.inputLabel}>Email</Text>
+                                    <Text style={styles.inputLabel}>{translations.email[chosenLanguage]}</Text>
                                 </View>
                                 <TextInput value={email} style={styles.input} placeholder='email@example.com' onChangeText={(text) => setEmail(text)} autoCapitalize='none' />
                             </View>
                             <View style={{ flexDirection: "row", alignItems: "center" }}>
                                 <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
-                                    <Text style={styles.inputLabel}>Password</Text>
+                                    <Text style={styles.inputLabel}>{translations.password[chosenLanguage]}</Text>
                                 </View>
-                                <TextInput value={password} style={styles.input} placeholder='password' secureTextEntry={true} onChangeText={(text) => setPassword(text)} autoCapitalize='none' />
+                                <TextInput value={password} style={styles.input} placeholder={translations.password[chosenLanguage]} secureTextEntry={true} onChangeText={(text) => setPassword(text)} autoCapitalize='none' />
                             </View>
                         </View>
                         <Text style={styles.error}>{error}</Text>
@@ -528,10 +323,10 @@ export default function SignUpScreen() {
                     {email && password
                         ? <Pressable onPress={async () => { login() }}
                             style={styles.infoButton}>
-                            <Text style={styles.infoButtonText}>Sign in!</Text>
+                            <Text style={styles.infoButtonText}>{translations.sign_in_exclamation[chosenLanguage]}</Text>
                         </Pressable>
                         : <Pressable style={styles.infoButton}>
-                            <Text style={styles.infoButtonDisabledText}>Sign in!</Text>
+                            <Text style={styles.infoButtonDisabledText}>{translations.sign_in_exclamation[chosenLanguage]}</Text>
                         </Pressable>
                     }
     
@@ -539,8 +334,8 @@ export default function SignUpScreen() {
                 </View>
     
                 <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
-                    <Text style={styles.swapPage}>No account? </Text>
-                    <Pressable onPress={() => { setSignUp(true) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>Create an account!</Text></Pressable>
+                    <Text style={styles.swapPage}>{translations.no_account[chosenLanguage]} </Text>
+                    <Pressable onPress={() => { setSignUp(true) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>{translations.create_an_account[chosenLanguage]}</Text></Pressable>
                 </View>
             </SafeAreaView>
         );
@@ -557,7 +352,7 @@ const styles = StyleSheet.create({
         padding: 50,
     },
     title: {
-        fontSize: 50,
+        fontSize: 45,
         alignSelf: "center",
         fontFamily: "NewYorkLarge-Regular",
         position: "absolute",
@@ -657,50 +452,3 @@ const styles = StyleSheet.create({
 
 
 
-
-
-
-
-
-// import { View, Text, SafeAreaView, Pressable, } from 'react-native'
-// import React, {useState, useEffect} from 'react'
-// import auth from '@react-native-firebase/auth';
-
-
-// export default function SignUp() {
-  
-//   const [email, setEmail] = useState("teddyffdvssfrrbu@gmail.com");
-//   const [password, setPassword] = useState("password");
-
-//   function signUp(email, password) {
-    // auth()
-    // // .createUserWithEmailAndPassword(email, password)
-//     .signInWithEmailAndPassword(email, password)
-//     .then(() => {
-//       console.log('User account created & signed in!');
-//     })
-//     .catch(error => {
-//       if (error.code === 'auth/email-already-in-use') {
-//         console.log('That email address is already in use!');
-//       }
-  
-//       if (error.code === 'auth/invalid-email') {
-//         console.log('That email address is invalid!');
-//       }
-  
-//       console.error(error);
-//     });
-//   }
-
-
-//   return (
-//     <SafeAreaView>
-//       <Text>SignUp</Text>
-//       <Pressable onPress={() => signUp(email, password)}>
-//         <Text>
-//           Sign Up!!!
-//         </Text>
-//       </Pressable>
-//     </SafeAreaView>
-//   )
-// }
