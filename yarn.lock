@@ -7037,6 +7037,7 @@ __metadata:
     react-native-screens: ^3.32.0
     react-native-sfsymbols: ^1.2.2
     react-native-svg: ^15.3.0
+    react-native-tts: ^4.1.1
     react-native-vision-camera: ^4.3.2
     react-test-renderer: 18.2.0
     typescript: 5.0.4
@@ -8567,6 +8568,13 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: e976878361c100639ab4f9bd2cd042f526b28890cc0052139b36a5ebde44cd3b1a54c6dd3b5e391fe10a998767a994748fc6ee3f1b356154418828d12f98d77a
+  languageName: node
+  linkType: hard
+
+"react-native-tts@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "react-native-tts@npm:4.1.1"
+  checksum: 16508a701ce446341aa2e6d0107d214d53f80ee09f0ac967f79757e5e44bfa3e797caf5847de23265524b983a58bafb6a0f98c6cf970cbb40f1f6f88783b092e
   languageName: node
   linkType: hard
 

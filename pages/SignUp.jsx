@@ -183,14 +183,6 @@ const data = [
 
 export default function SignUpScreen() {
 
-    const errors = {
-        "auth/invalid-email": "Please enter a valid email.",
-        "auth/email-already-in-use": "This email is already associated with an account.",
-        "auth/weak-password": "Your password must include at least 6 characters.",
-        "auth/user-not-found": "Your email or password is incorrect.",
-        "auth/wrong-password": "Your email or password is incorrect.",
-        "auth/invalid-credential": "Your email or password is incorrect."
-    }
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -201,6 +193,15 @@ export default function SignUpScreen() {
 
     const [chosenLanguage, setChosenLanguage] = useState("english")
 
+
+    const errors = {
+        "auth/invalid-email": translations.please_enter_a_valid_email[chosenLanguage],
+        "auth/email-already-in-use": translations.this_email_is_already_associated_with_an_account[chosenLanguage],
+        "auth/weak-password": translations.your_password_must_include_at_least_6_characters[chosenLanguage],
+        "auth/user-not-found": translations.your_email_or_password_is_incorrect[chosenLanguage],
+        "auth/wrong-password": translations.your_email_or_password_is_incorrect[chosenLanguage],
+        "auth/invalid-credential": translations.your_email_or_password_is_incorrect[chosenLanguage]
+    }
     async function register() {
         setLoading(true);
         auth()
@@ -216,8 +217,10 @@ export default function SignUpScreen() {
             
         })
         .catch(error => {
+            console.log(errors[error.code])
+
             setError(errors[error.code] ? errors[error.code] : "Something went wrong!");
-            console.log(error)
+            // console.log(error.code)
         })
     }
 
@@ -404,7 +407,7 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         alignSelf: "center",
         zIndex: 100,
-        top: screenHeight * 0.31,
+        top: screenHeight * 0.35,
         position: "absolute",
 
     },

@@ -30,6 +30,7 @@
     "react-native-screens": "^3.32.0",
     "react-native-sfsymbols": "^1.2.2",
     "react-native-svg": "^15.3.0",
+    "react-native-tts": "^4.1.1",
     "react-native-vision-camera": "^4.3.2"
   },
   "devDependencies": {
