@@ -1,10 +1,10 @@
-import { View, Text, SafeAreaView, StyleSheet, Dimensions, TextInput, ScrollView } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, Dimensions, TextInput, ScrollView, Pressable } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { SFSymbol } from 'react-native-sfsymbols';
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import { FlatList } from 'react-native-gesture-handler';
-import * as DropdownMenu from 'zeego/dropdown-menu'
+import ContextMenu from "react-native-context-menu-view";
 
 
 const screenHeight = Dimensions.get("screen").height;
@@ -22,9 +22,9 @@ export default function Dictionary({ language, translations, terms }) {
 
     function search(words) {
         console.log("WORDS" + words.length)
-        let tempFamiliar = [];
-        let tempUnfamiliar = [];
-        let tempMastered = [];
+        let tempFamiliar = [{ title: translations.familiar[language], color: "green" }];
+        let tempUnfamiliar = [{ title: translations.unfamiliar[language], color: "#77bee9" }];
+        let tempMastered = [{ title: translations.mastered[language], color: "#FFD12D" }];
 
         for (let i = 0; i < words.length; i++) {
             try {
@@ -108,16 +108,16 @@ export default function Dictionary({ language, translations, terms }) {
 function CategorySection({ title, color, data }) {
     return (
         <View style={{ paddingBottom: 10, alignItems: "center" }}>
-            <View style={{ width: "92%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 10 }}>
-                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", paddingTop: 15 }}>
+            {/* <View style={{ width: "92%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 10 }}>
+                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", paddingTop: 15, zIndex: 100 }}>
                     <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
                     <Text style={styles.category}>{title}</Text>
                 </View>
-            </View>
+            </View> */}
             <FlatList
                 data={data}
-                contentContainerStyle={{ gap: 10, padding: 10 }}
-                renderItem={({ item }) => <Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />}
+                contentContainerStyle={{ gap: 10, padding: 10, width: screenWidth, alignItems: "center" }}
+                renderItem={({ item }) => <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />}
                 scrollEnabled={false}
 
             />
@@ -125,17 +125,30 @@ function CategorySection({ title, color, data }) {
     );
 }
 
-function Term({ word, translatedWord, translatedDefinition }) {
-    return (
-        <View style={styles.termContainer}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-                <Text style={styles.termTitle}>{word}</Text>
-                <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+function Term({ title, color, word, translatedWord, translatedDefinition }) {
+    if (title)
+        // console.log(title)
+        return (
+            <View style={{ flexDirection: "row", gap: 10, width: screenWidth * 0.92, alignItems: "center", paddingTop: 15, }}>
+                <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
+                <Text style={styles.category}>{title}</Text>
             </View>
-            <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-        </View>
+        )
+    return (
+        <ContextMenu
+            actions={[{ title: "Remove term", destructive: true, systemIcon: "xmark" }]}
+        >
+            <Pressable style={styles.termContainer}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+                    <Text style={styles.termTitle}>{word}</Text>
+                    <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+                </View>
+                <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
+            </Pressable>
+        </ContextMenu>
     );
 }
+
 
 const styles = StyleSheet.create({
     scrollingContainer: {

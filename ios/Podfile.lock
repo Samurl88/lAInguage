@@ -998,6 +998,8 @@ PODS:
     - react-native-config/App (= 1.5.2)
   - react-native-config/App (1.5.2):
     - React-Core
+  - react-native-context-menu-view (1.16.0):
+    - React
   - react-native-ios-context-menu (1.15.1):
     - React-Core
   - react-native-safe-area-context (4.10.7):
@@ -1382,6 +1384,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - react-native-config (from `../node_modules/react-native-config`)
+  - react-native-context-menu-view (from `../node_modules/react-native-context-menu-view`)
   - react-native-ios-context-menu (from `../node_modules/react-native-ios-context-menu`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sfsymbols (from `../node_modules/react-native-sfsymbols`)
@@ -1503,6 +1506,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   react-native-config:
     :path: "../node_modules/react-native-config"
+  react-native-context-menu-view:
+    :path: "../node_modules/react-native-context-menu-view"
   react-native-ios-context-menu:
     :path: "../node_modules/react-native-ios-context-menu"
   react-native-safe-area-context:
@@ -1624,6 +1629,7 @@ SPEC CHECKSUMS:
   React-logger: 29fa3e048f5f67fe396bc08af7606426d9bd7b5d
   React-Mapbuffer: 86703e9e4f6522053568300827b436ccc01e1101
   react-native-config: d7d8a0c65f7fa523197879f6b777997abbfc987e
+  react-native-context-menu-view: 30915369a9b5887904c571b616653acf3f1c8edb
   react-native-ios-context-menu: b170594b4448c0cd10c79e13432216bac99de1ac
   react-native-safe-area-context: 422017db8bcabbada9ad607d010996c56713234c
   react-native-sfsymbols: ca90d8bb7d6ad06523bf833f2becae22b97fb056
