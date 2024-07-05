@@ -215,7 +215,7 @@ export default function StudyPage({ language, stars, translations }) {
   if (flashcards && MCQs)
     return (
       <>
-        <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
+        <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F7F0E7", height: screenHeight }}>
           {complete
             ? <Animated.View entering={FadeIn.duration(500)} exiting={FadeOut.duration(500)} style={{ position: "absolute", height: screenHeight, width: screenWidth, top: 0, zIndex: 0 }}>
               <LinearGradientRN useAngle={true} angle={135} angleCenter={{ x: 0.5, y: 0.5 }} locations={[0.3, 0.85, 1]} colors={['rgba(255, 255, 255, 0)', '#54B4EE', '#FD8DFF']} style={{ height: screenHeight, width: screenWidth, }} />
@@ -593,8 +593,8 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
       {type == "flashcard"
         && <>
           <Animated.View style={[styles.front, frontAnimatedStyle]}>
-            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>{translations.quiz_yourself[language]}</Text>
-            <Pressable style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03, }}>{translations.quiz_yourself[language]}</Text>
+           <Pressable style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
               {
                 <Text style={styles.bigCardText}>{front}</Text>
               }

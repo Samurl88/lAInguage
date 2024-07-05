@@ -1,5 +1,4 @@
 import { View, Text, SafeAreaView, StyleSheet, Button, Dimensions, Pressable, ActivityIndicator, FlatList } from 'react-native'
-import { Configuration, PESDK, Tool } from "react-native-photoeditorsdk";
 import { useCameraDevice, useCameraPermission, Camera } from 'react-native-vision-camera'
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import React, { useCallback, useEffect, useRef, useState } from 'react'

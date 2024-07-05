@@ -4,13 +4,15 @@ import { SFSymbol } from 'react-native-sfsymbols';
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import { FlatList } from 'react-native-gesture-handler';
+import * as DropdownMenu from 'zeego/dropdown-menu'
+
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
-  
-export default function Dictionary({ language, translations }) {
-    const [words, setWords] = useState([]);
+
+export default function Dictionary({ language, translations, terms }) {
+    const [words, setWords] = useState(terms);
     const [searchValue, setSearchValue] = useState(null);
     const [filteredFamiliar, setFamiliar] = useState(null);
     const [filteredUnfamiliar, setUnfamiliar] = useState(null);
@@ -30,7 +32,7 @@ export default function Dictionary({ language, translations }) {
                     if (words[i].score == 0) {
                         console.log(words[i])
                         tempUnfamiliar.push(words[i]);
-                    } else if (words[i].score < 3 ) {
+                    } else if (words[i].score < 3) {
                         tempFamiliar.push(words[i]);
                     } else {
                         tempMastered.push(words[i]);
@@ -69,18 +71,9 @@ export default function Dictionary({ language, translations }) {
 
     useEffect(() => {
         if (searchValue || searchValue == "")
-        search(words);
+            search(words);
     }, [searchValue]);
 
-    // useEffect(() => {
-    //     if (filteredFamiliar && filteredUnfamiliar && filteredMastered) {
-    //         setInitialized(true)
-    //         console.log(filteredFamiliar, filteredUnfamiliar, filteredMastered)
-    //     }
-    // }, [filteredFamiliar, filteredUnfamiliar, filteredMastered])
-    
-
-    // if (initialized)
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center" }}>
             <View style={styles.container}>
@@ -96,7 +89,7 @@ export default function Dictionary({ language, translations }) {
                         onChangeText={(text) => setSearchValue(text)}
                     />
                 </View>
-                <ScrollView style={styles.scrollingContainer} contentContainerStyle={{paddingBottom: 40}}>
+                <ScrollView style={styles.scrollingContainer} contentContainerStyle={{ paddingBottom: 40 }}>
                     {filteredUnfamiliar?.length > 0 && (
                         <CategorySection title={translations.unfamiliar[language]} color="#77BEE9" data={filteredUnfamiliar} />
                     )}
@@ -114,19 +107,19 @@ export default function Dictionary({ language, translations }) {
 
 function CategorySection({ title, color, data }) {
     return (
-        <View style={{paddingBottom: 10, alignItems: "center"}}>
+        <View style={{ paddingBottom: 10, alignItems: "center" }}>
             <View style={{ width: "92%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 10 }}>
-                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", paddingTop: 20 }}>
+                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", paddingTop: 15 }}>
                     <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
                     <Text style={styles.category}>{title}</Text>
                 </View>
             </View>
             <FlatList
                 data={data}
-                contentContainerStyle={{ gap: 10,}}
+                contentContainerStyle={{ gap: 10, padding: 10 }}
                 renderItem={({ item }) => <Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />}
                 scrollEnabled={false}
-            
+
             />
         </View>
     );
@@ -135,12 +128,12 @@ function CategorySection({ title, color, data }) {
 function Term({ word, translatedWord, translatedDefinition }) {
     return (
         <View style={styles.termContainer}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-          <Text style={styles.termTitle}>{translatedWord}</Text>
-          <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+            <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+                <Text style={styles.termTitle}>{word}</Text>
+                <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+            </View>
+            <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
         </View>
-        <Text style={styles.termSubtitle}>{word} · {translatedDefinition}</Text>
-      </View>
     );
 }
 
@@ -190,7 +183,14 @@ const styles = StyleSheet.create({
         borderRadius: 26,
         padding: 20,
         width: screenWidth * 0.9,
-        height: screenHeight * 0.16
+        height: screenHeight * 0.16,
+        shadowOffset: {
+            width: 0,
+            height: 0,
+        },
+        shadowRadius: 2,
+        shadowColor: "black",
+        shadowOpacity: 0.2,
     },
     termTitle: {
         fontFamily: "NewYorkLarge-Regular",

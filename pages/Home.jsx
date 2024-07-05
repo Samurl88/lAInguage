@@ -11,10 +11,10 @@ import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
 import database from '@react-native-firebase/database';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient';
+import * as DropdownMenu from 'zeego/dropdown-menu'
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
-
 
 const translations = {
   "dictionary": {
@@ -288,6 +288,8 @@ export default function HomePage({ navigation }) {
   const [userLanguage, setUserLanguage] = useState(null)
   const [stars, setStars] = useState(null);
 
+  const [words, setWords] = useState(null)
+
 
   // Subscribe to changes in database
   useEffect(() => {
@@ -306,6 +308,23 @@ export default function HomePage({ navigation }) {
         return () => database().ref(`${uid}/profile`).off('value', onValueChange);
       })
   }, [])
+
+
+  // Subscribes to changes in words
+  useEffect(() => {
+    let uid = auth().currentUser.uid;
+    const onValueChange = database()
+      .ref(`${uid}/words`)
+      .on('value', snapshot => {
+        console.log("something changed!")
+        let data = snapshot.val()
+
+        setWords(data)
+
+        return () => database().ref(`${uid}/words`).off('value', onValueChange);
+      })
+  }, [])
+
 
   const rotateStar = useSharedValue("0deg")
   const size = useSharedValue(20)
@@ -425,13 +444,39 @@ export default function HomePage({ navigation }) {
           </View>
 
           {!cameraPage
-            ? <Animated.View key={"rightone"} style={{ opacity: edgeOpacity }}>
-              <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }} onPress={() => {
-                logOut()
-              }}>
-                <SFSymbol name="person.crop.circle" size={25} color="#2F2C2A" />
-              </Pressable>
-            </Animated.View>
+            ?
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                <Animated.View key={"rightone"} style={{ opacity: edgeOpacity }}>
+                  <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }} onPress={() => {
+                    // logOut()
+                  }}>
+                    <SFSymbol name="person.crop.circle" size={25} color="#2F2C2A" />
+                  </Pressable>
+                </Animated.View>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content>
+                <DropdownMenu.Label />
+                <DropdownMenu.Item key="settings" onSelect={() => console.log("settings")}>
+                  <DropdownMenu.ItemTitle>Settings</DropdownMenu.ItemTitle>
+                  <DropdownMenu.ItemIcon ios={{
+                    name: 'gear',
+                    pointSize: 15,
+                    weight: 'semibold',
+                    scale: 'medium',
+                  }} />
+                </DropdownMenu.Item>
+                <DropdownMenu.Item key="log-out" onSelect={() => logOut()}>
+                  <DropdownMenu.ItemTitle>Log out</DropdownMenu.ItemTitle>
+                  <DropdownMenu.ItemIcon ios={{
+                    name: 'rectangle.portrait.and.arrow.right',
+                    pointSize: 15,
+                    weight: 'semibold',
+                    scale: 'medium',
+                  }} />
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
             : null
           }
 
@@ -449,7 +494,7 @@ export default function HomePage({ navigation }) {
         }
         {dictionaryPage &&
           <Animated.View entering={SlideInRight} exiting={SlideOutRight} style={{ flex: 1 }}>
-            <Dictionary language={userLanguage} translations={translations} />
+            <Dictionary language={userLanguage} translations={translations} terms={words} />
           </Animated.View>
         }
       </View>
@@ -465,6 +510,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     borderRadius: 60,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowRadius: 2,
+    shadowColor: "black",
+    shadowOpacity: 0.2,
 
   },
   tabBarIcons: {

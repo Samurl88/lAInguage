@@ -998,6 +998,8 @@ PODS:
     - react-native-config/App (= 1.5.2)
   - react-native-config/App (1.5.2):
     - React-Core
+  - react-native-ios-context-menu (1.15.1):
+    - React-Core
   - react-native-safe-area-context (4.10.7):
     - React-Core
   - react-native-sfsymbols (1.2.2):
@@ -1335,6 +1337,8 @@ PODS:
   - RNSVG (15.3.0):
     - React-Core
   - SocketRocket (0.7.0)
+  - TextToSpeech (4.1.1):
+    - React-Core
   - VisionCamera (4.3.2):
     - VisionCamera/Core (= 4.3.2)
     - VisionCamera/React (= 4.3.2)
@@ -1378,6 +1382,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - react-native-config (from `../node_modules/react-native-config`)
+  - react-native-ios-context-menu (from `../node_modules/react-native-ios-context-menu`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sfsymbols (from `../node_modules/react-native-sfsymbols`)
   - "react-native-skia (from `../node_modules/@shopify/react-native-skia`)"
@@ -1412,6 +1417,7 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
+  - TextToSpeech (from `../node_modules/react-native-tts`)
   - VisionCamera (from `../node_modules/react-native-vision-camera`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1497,6 +1503,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   react-native-config:
     :path: "../node_modules/react-native-config"
+  react-native-ios-context-menu:
+    :path: "../node_modules/react-native-ios-context-menu"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sfsymbols:
@@ -1565,6 +1573,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  TextToSpeech:
+    :path: "../node_modules/react-native-tts"
   VisionCamera:
     :path: "../node_modules/react-native-vision-camera"
   Yoga:
@@ -1614,6 +1624,7 @@ SPEC CHECKSUMS:
   React-logger: 29fa3e048f5f67fe396bc08af7606426d9bd7b5d
   React-Mapbuffer: 86703e9e4f6522053568300827b436ccc01e1101
   react-native-config: d7d8a0c65f7fa523197879f6b777997abbfc987e
+  react-native-ios-context-menu: b170594b4448c0cd10c79e13432216bac99de1ac
   react-native-safe-area-context: 422017db8bcabbada9ad607d010996c56713234c
   react-native-sfsymbols: ca90d8bb7d6ad06523bf833f2becae22b97fb056
   react-native-skia: fca476facd8035dab39815942e7d8b3d17d2eb16
@@ -1650,6 +1661,7 @@ SPEC CHECKSUMS:
   RNScreens: fd2722bcc59f36a629205af8cc7b48e4bc0d09f5
   RNSVG: a48668fd382115bc89761ce291a81c4ca5f2fd2e
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
+  TextToSpeech: 2b930ec3756afde499061f4f01ea895e1f75dccb
   VisionCamera: 2c4cb89c573c5d54d1191e433bd224998d3b14b7
   Yoga: 45564236f670899c9739b1581a12b00ead5d391f
 
