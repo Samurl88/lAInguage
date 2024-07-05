@@ -15,22 +15,22 @@ const screenWidth = Dimensions.get("screen").width;
 export default function Dictionary({ language, translations, terms }) {
     const [words, setWords] = useState();
     const [searchValue, setSearchValue] = useState(null);
+    const [wordCounts, setWordCounts] = useState(null)
 
     const [initialized, setInitialized] = useState(false)
 
     const [data, setData] = useState(null)
 
     function search(words) {
-        console.log("WORDS" + words.length)
-        let tempFamiliar = [{ title: translations.familiar[language], color: "green" }];
-        let tempUnfamiliar = [{ title: translations.unfamiliar[language], color: "#77bee9" }];
-        let tempMastered = [{ title: translations.mastered[language], color: "#FFD12D" }];
+        let tempFamiliar = [{ title: translations.familiar[language], color: "green", score: 1 }];
+        let tempUnfamiliar = [{ title: translations.unfamiliar[language], color: "#77bee9", score: 0 }];
+        let tempMastered = [{ title: translations.mastered[language], color: "#FFD12D", score: 3 }];
 
         for (let i = 0; i < words.length; i++) {
             try {
                 if (!searchValue || words[i].word.toLowerCase().includes(searchValue.toLowerCase())) {
                     if (words[i].score == 0) {
-                        console.log(words[i])
+                        // console.log(words[i])
                         tempUnfamiliar.push(words[i]);
                     } else if (words[i].score < 3) {
                         tempFamiliar.push(words[i]);
@@ -46,33 +46,15 @@ export default function Dictionary({ language, translations, terms }) {
         tempUnfamiliar = tempUnfamiliar.length > 1 ? tempUnfamiliar : []
         tempMastered = tempMastered.length > 1 ? tempMastered : []
 
+        setWordCounts({familiar: tempFamiliar.length - 1, unfamiliar: tempUnfamiliar.length - 1, mastered: tempMastered.length - 1})
+
         // console.log(tempUnfamiliar.concat(tempFamiliar).concat(tempMastered))
         setData(tempUnfamiliar.concat(tempFamiliar).concat(tempMastered))
 
     }
 
-    async function getWords() {
-        let uid = auth().currentUser.uid;
-        database()
-            .ref(`${uid}/words`)
-            .once('value')
-            .then(snapshot => {
-                let data = snapshot.val();
-                let words = [];
-                for (const word in data) {
-                    let obj = data[word];
-                    obj.word = word;
-                    words.push(obj);
-                }
-                setWords(words);
-                search(words);  // Trigger the search to initialize filtered lists
-            });
-    }
-
     useEffect(() => {
         if (terms) {
-            console.log("TERMSSS")
-            console.log(terms)
             let words = [];
             for (const word in terms) {
                 let obj = terms[word];
@@ -82,12 +64,14 @@ export default function Dictionary({ language, translations, terms }) {
             setWords(words);
             search(words);
         }
-    }, [terms]);
+    }, []);
 
     useEffect(() => {
         if (searchValue || searchValue == "")
             search(words);
     }, [searchValue]);
+
+
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center", }}>
@@ -107,48 +91,70 @@ export default function Dictionary({ language, translations, terms }) {
                 <FlatList
                     data={data}
                     contentContainerStyle={{ padding: 10, width: screenWidth, alignItems: "center", paddingBottom: 160 }}
-                    renderItem={({ item }) => <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />}
+                    renderItem={({ item }) => <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} 
+                                                score={item.score} wordCounts={wordCounts} setWordCounts={setWordCounts} />}
                 />
             </View>
         </SafeAreaView>
     );
 }
 
-function Term({ title, color, word, translatedWord, translatedDefinition }) {
+
+
+function Term({ title, color, word, translatedWord, translatedDefinition, score, wordCounts, setWordCounts }) {
     const termOpacity = useSharedValue(1)
     const termHeight = useSharedValue(screenHeight * 0.16)
+    const marginTop = useSharedValue(12)
+
+    const titleOpacity = useSharedValue(1)
+    const titleHeight = useSharedValue(screenHeight * 0.055)
 
 
-    if (title)
+    if (title) {
+
+        if ((score === 0 && wordCounts.unfamiliar <= 0) || (score === 1 && wordCounts.familiar <= 0) || (score === 3 && wordCounts.mastered <= 0) ) {
+            titleOpacity.value = withTiming(0, {duration: 750})
+            titleHeight.value = withDelay(750, withTiming(0, {duration: 750}))
+        }
+        
         return (
-            <View style={{ flexDirection: "row", gap: 10, width: screenWidth * 0.92, alignItems: "center", paddingTop: 15, }}>
+            <Animated.View key={title} style={{ opacity: titleOpacity, height: titleHeight, flexDirection: "row", gap: 10, width: screenWidth * 0.92, alignItems: "center", paddingTop: 15,  }}>
                 <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
                 <Text style={styles.category}>{title}</Text>
-            </View>
+            </Animated.View>
         )
+    } else
     return (
-        <Animated.View key={word} style={{  opacity: termOpacity, height: termHeight }}>
+        <Animated.View key={word} style={{  opacity: termOpacity, height: termHeight, marginTop: marginTop }}>
             <ContextMenu
                 actions={[{ title: "Remove term", destructive: true, systemIcon: "xmark" }]}
                 onPress={async (e) => {
                     if (e.nativeEvent.name == "Remove term") {
-                        console.log("E")
                         termOpacity.value = withTiming(0, {duration: 750})
-                        termHeight.value = withDelay(750, withTiming(0))
-                        // let uid = auth().currentUser.uid;
-                        // await database()
-                        //     .ref(`${uid}/words/${word}`)
-                        //     .set(null)
+                        termHeight.value = withDelay(750, withTiming(0, {duration: 750}))
+                        marginTop.value = withDelay(750, withTiming(0, {duration: 750}))
+                        
+                        
+                        let newWordCounts = {}
+                        if (score == 0) {
+                            newWordCounts = {"unfamiliar": wordCounts.unfamiliar - 1, "familiar": wordCounts.familiar, "mastered": wordCounts.mastered}
+                        } else if (score < 3) {
+                            newWordCounts = {"unfamiliar": wordCounts.unfamiliar, "familiar": wordCounts.familiar - 1, "mastered": wordCounts.mastered}
+                        } else {
+                            newWordCounts = {"unfamiliar": wordCounts.unfamiliar, "familiar": wordCounts.familiar, "mastered": wordCounts.mastered - 1}
+                        }
+
+                        setWordCounts(newWordCounts)
                     }
                 }}
             >
-                <Animated.View style={{...styles.termContainer, }}>
+                <View style={{...styles.termContainer, }}>
                     <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
                         <Text style={styles.termTitle}>{word}</Text>
                         <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
                     </View>
                     <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-                </Animated.View>
+                </View>
             </ContextMenu>
         </Animated.View>
     );
