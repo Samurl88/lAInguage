@@ -145,6 +145,12 @@ function Term({ title, color, word, translatedWord, translatedDefinition, score,
                         }
 
                         setWordCounts(newWordCounts)
+
+                        let uid = auth().currentUser.uid;
+                        database()
+                            .ref(`${uid}/words/${word}`)
+                            .set(null)
+                    
                     }
                 }}
             >
