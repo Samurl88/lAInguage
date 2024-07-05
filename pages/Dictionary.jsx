@@ -5,19 +5,32 @@ import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import { FlatList } from 'react-native-gesture-handler';
 import ContextMenu from "react-native-context-menu-view";
-import Animated, { FadeOut, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
+{/* <Pressable onPress={() => {
+    let uid = auth().currentUser.uid
+    database()
+        .ref(`${uid}/words`)
+        .update({
+            cuidad: {
+                translatedWord: "translatedWord",
+                translatedDefinition: "translatedDefinition",
+                definition: "definition",
+                score: "score"
+            }
+        })
+}}>
+    <Text>Make new term</Text>
+</Pressable> */}
 
 export default function Dictionary({ language, translations, terms }) {
     const [words, setWords] = useState();
     const [searchValue, setSearchValue] = useState(null);
     const [wordCounts, setWordCounts] = useState(null)
-
-    const [initialized, setInitialized] = useState(false)
 
     const [data, setData] = useState(null)
 
@@ -74,7 +87,7 @@ export default function Dictionary({ language, translations, terms }) {
 
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center", }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#F5EEE5", alignItems: "center", }}>
             <View style={styles.container}>
                 <Text style={styles.title}>{translations.dictionary[language]}</Text>
                 <View style={styles.searchBar}>
@@ -88,12 +101,21 @@ export default function Dictionary({ language, translations, terms }) {
                         onChangeText={(text) => setSearchValue(text)}
                     />
                 </View>
-                <FlatList
-                    data={data}
-                    contentContainerStyle={{ padding: 10, width: screenWidth, alignItems: "center", paddingBottom: 160 }}
-                    renderItem={({ item }) => <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} 
-                                                score={item.score} wordCounts={wordCounts} setWordCounts={setWordCounts} />}
-                />
+                { terms
+                    ? <Animated.View key="flatlist" exiting={FadeOut.duration(750)} style={{ width: screenWidth, flex: 1, alignItems: "center",}}>
+                        <FlatList
+                            data={data}
+                            contentContainerStyle={{ padding: 10, width: screenWidth, alignItems: "center", paddingBottom: 160 }}
+                            renderItem={({ item }) => <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} 
+                                                        score={item.score} wordCounts={wordCounts} setWordCounts={setWordCounts} />}
+                            />
+                    </Animated.View>
+                    : <>
+                    <Animated.Text entering={words ? FadeIn.duration(750).delay(750) : null} key="no-terms" style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray", top: screenHeight * 0.2 }}>
+                        View all your terms here!
+                    </Animated.Text>
+                    </> 
+                }
             </View>
         </SafeAreaView>
     );
@@ -197,6 +219,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         flex: 1,
         height: screenHeight,
+        width: screenWidth
     },
     title: {
         fontFamily: "NewYorkLarge-Semibold",

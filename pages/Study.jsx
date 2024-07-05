@@ -47,6 +47,8 @@ export default function StudyPage({ language, stars, translations }) {
   const [complete, setComplete] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const [selectedTerms, setSelectedTerms] = useState(null)
+
   // Loading animation
   const rotate = useSharedValue("0deg")
   useEffect(() => {
@@ -55,17 +57,16 @@ export default function StudyPage({ language, stars, translations }) {
 
   }, [flashcards, MCQs])
 
-  
-  // 
+
+  // Add star
   const onComplete = () => {
     let uid = auth().currentUser.uid;
     setComplete(true);
     database()
-    .ref(`${uid}/profile`)
-    .update({
-      stars: stars + 1
-    })
-    
+      .ref(`${uid}/profile`)
+      .update({
+        stars: stars + 1
+      })
   }
 
   // Creating question flatlist
@@ -140,10 +141,17 @@ export default function StudyPage({ language, stars, translations }) {
       .then(snapshot => {
         let words = snapshot.val();
 
+        if (words === null) {
+          setSelectedTerms([]);
+          return
+        }
+
         // Get 10 random words, removing words w/ score of 3 (mastered)
         let terms = Object.keys(words).filter(word => words[word].score !== 3);
         const shuffled = terms.sort(() => 0.5 - Math.random());
         let selectedTerms = shuffled.slice(0, 10);
+        setSelectedTerms(selectedTerms);
+
 
         let flashcards = [];
         let mcqs = []
@@ -206,16 +214,33 @@ export default function StudyPage({ language, stars, translations }) {
       }
     }
   }, [numAnswered])
-  
 
-  
 
+
+
+
+  if (selectedTerms?.length == 0) {
+    return (
+      <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
+        <View style={styles.container}>
+          <Text style={styles.title}>{translations.practice[language]}</Text>
+          <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
+            <View style={styles.back}>
+              <Text style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray" }}>{translations.scan_a_term_to_get_started[language]}</Text>
+            </View>
+          </View>
+        </View>
+        <ProgressBar />
+
+      </SafeAreaView>
+    )
+  }
 
   // Renders questions (if terms are done sorting and MCQs have been generated)
   if (flashcards && MCQs)
     return (
       <>
-        <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F7F0E7", height: screenHeight }}>
+        <SafeAreaView style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#F5EEE5", height: screenHeight }}>
           {complete
             ? <Animated.View entering={FadeIn.duration(500)} exiting={FadeOut.duration(500)} style={{ position: "absolute", height: screenHeight, width: screenWidth, top: 0, zIndex: 0 }}>
               <LinearGradientRN useAngle={true} angle={135} angleCenter={{ x: 0.5, y: 0.5 }} locations={[0.3, 0.85, 1]} colors={['rgba(255, 255, 255, 0)', '#54B4EE', '#FD8DFF']} style={{ height: screenHeight, width: screenWidth, }} />
@@ -254,7 +279,7 @@ export default function StudyPage({ language, stars, translations }) {
               style={{ zIndex: 100 }}
               scrollEnabled={false}
 
-              ListFooterComponent={<FooterFlashcard reset={reset} language={language} translations={translations}/>}
+              ListFooterComponent={<FooterFlashcard reset={reset} language={language} translations={translations} />}
             />
           </View>
           <ProgressBar flashcards={flashcards} numAnswered={numAnswered} currentProgressCoverWidth={currentProgressCoverWidth} />
@@ -282,7 +307,7 @@ export default function StudyPage({ language, stars, translations }) {
         else
           numFRQ++;
       });
-      const flashcardProgressWidth = (numFlashcard / numTerms) * progressBarWidth - 5;
+      const flashcardProgressWidth = (numFlashcard / numTerms) * progressBarWidth - 6;
       const mcqProgressWidth = (numMCQ / numTerms) * progressBarWidth - 5;
       const frqProgressWidth = (numFRQ / numTerms) * progressBarWidth - 5;
 
@@ -380,7 +405,7 @@ export default function StudyPage({ language, stars, translations }) {
     } else {
       return (
         <View style={{ position: "absolute", top: screenHeight * 0.89, flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <Animated.View exiting={FadeOut} style={{ width: progressBarWidth, height: 12, backgroundColor: "#D4CBC3", borderRadius: 10,  }} />
+          <Animated.View exiting={FadeOut} style={{ width: progressBarWidth, height: 12, backgroundColor: "#D4CBC3", borderRadius: 10, }} />
           <Svg
             width={20}
             height={20}
@@ -493,7 +518,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
     database()
       .ref(`${uid}/words/${front}`)
       .update({ score: score + 1 })
-      .catch(error => {console.log(error)})
+      .catch(error => { console.log(error) })
   }
 
   function removeScore() {
@@ -501,7 +526,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
     database()
       .ref(`${uid}/words/${front}`)
       .update({ score: score - 1 >= 0 ? score - 1 : 0 })
-      .catch(error => {console.log(error)})
+      .catch(error => { console.log(error) })
   }
 
   // Animated styles for flashcard flip
@@ -594,7 +619,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
         && <>
           <Animated.View style={[styles.front, frontAnimatedStyle]}>
             <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03, }}>{translations.quiz_yourself[language]}</Text>
-           <Pressable style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+            <Pressable style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
               {
                 <Text style={styles.bigCardText}>{front}</Text>
               }
@@ -629,7 +654,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
               <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03, textAlign: "center", }}>{translations.write_a_sentence_with_the_following_word[language]}</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.13 }}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>{front}</Text></Text>
 
-              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", fontSize: 18, flex: 1, height: screenHeight * 0.18, width: "100%" }} placeholder={ translations.start_typing[language] + "..."} editable={FRQcorrect === null ? true : false} multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
+              <TextInput style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", fontSize: 18, flex: 1, height: screenHeight * 0.18, width: "100%" }} placeholder={translations.start_typing[language] + "..."} editable={FRQcorrect === null ? true : false} multiline blurOnSubmit value={answer} onChangeText={setAnswer} />
               <Text style={{ position: "absolute", bottom: screenHeight * 0.03, alignItems: "center", fontSize: 18, textAlign: "center", color: "#DD6348" }}>{FRQfeedback}</Text>
             </Pressable>
           </View>
@@ -687,7 +712,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
                   if (!answer) {
                     if (mcqs[front].correctAnswer == "A")
                       addScore()
-                    else 
+                    else
                       removeScore();
                     setAnswer("A")
                     showAnswer.value = withTiming(1, { duration: 250 });
@@ -703,7 +728,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
                   if (!answer) {
                     if (mcqs[front].correctAnswer == "B")
                       addScore()
-                    else 
+                    else
                       removeScore();
                     setAnswer("B")
                     showAnswer.value = withTiming(1, { duration: 250 });
@@ -719,7 +744,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
                   if (!answer) {
                     if (mcqs[front].correctAnswer == "C")
                       addScore()
-                    else 
+                    else
                       removeScore();
                     setAnswer("C")
                     showAnswer.value = withTiming(1, { duration: 250 });

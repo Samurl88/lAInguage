@@ -277,6 +277,19 @@ const translations = {
     "hindi": "निपुण",
     "english": "Mastered"
   },
+  "scan_a_term_to_get_started": {
+    "spanish": "¡Escanea un término para comenzar!",
+    "chinese": "扫描一个术语以开始！",
+    "tagalog": "I-scan ang isang termino upang makapagsimula!",
+    "vietnamese": "Quét một thuật ngữ để bắt đầu!",
+    "arabic": "امسح مصطلحًا للبدء!",
+    "french": "Scannez un terme pour commencer!",
+    "korean": "용어를 스캔하여 시작하세요!",
+    "russian": "Сканируйте термин, чтобы начать!",
+    "portuguese": "Escaneie um termo para começar!",
+    "hindi": "प्रारंभ करने के लिए एक शब्द स्कैन करें!",
+    "english": "Scan a term to get started!"
+  }
 }
 
 
