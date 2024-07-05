@@ -5,6 +5,7 @@ import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import { FlatList } from 'react-native-gesture-handler';
 import ContextMenu from "react-native-context-menu-view";
+import Animated, { FadeOut, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
 
 
 const screenHeight = Dimensions.get("screen").height;
@@ -12,13 +13,12 @@ const screenWidth = Dimensions.get("screen").width;
 
 
 export default function Dictionary({ language, translations, terms }) {
-    const [words, setWords] = useState(terms);
+    const [words, setWords] = useState();
     const [searchValue, setSearchValue] = useState(null);
-    const [filteredFamiliar, setFamiliar] = useState(null);
-    const [filteredUnfamiliar, setUnfamiliar] = useState(null);
-    const [filteredMastered, setMastered] = useState(null);
 
     const [initialized, setInitialized] = useState(false)
+
+    const [data, setData] = useState(null)
 
     function search(words) {
         console.log("WORDS" + words.length)
@@ -42,9 +42,13 @@ export default function Dictionary({ language, translations, terms }) {
                 continue;
             }
         }
-        setFamiliar(tempFamiliar);
-        setUnfamiliar(tempUnfamiliar);
-        setMastered(tempMastered);
+        tempFamiliar = tempFamiliar.length > 1 ? tempFamiliar : []
+        tempUnfamiliar = tempUnfamiliar.length > 1 ? tempUnfamiliar : []
+        tempMastered = tempMastered.length > 1 ? tempMastered : []
+
+        // console.log(tempUnfamiliar.concat(tempFamiliar).concat(tempMastered))
+        setData(tempUnfamiliar.concat(tempFamiliar).concat(tempMastered))
+
     }
 
     async function getWords() {
@@ -66,8 +70,19 @@ export default function Dictionary({ language, translations, terms }) {
     }
 
     useEffect(() => {
-        getWords();
-    }, []);
+        if (terms) {
+            console.log("TERMSSS")
+            console.log(terms)
+            let words = [];
+            for (const word in terms) {
+                let obj = terms[word];
+                obj.word = word;
+                words.push(obj);
+            }
+            setWords(words);
+            search(words);
+        }
+    }, [terms]);
 
     useEffect(() => {
         if (searchValue || searchValue == "")
@@ -75,7 +90,7 @@ export default function Dictionary({ language, translations, terms }) {
     }, [searchValue]);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", alignItems: "center", }}>
             <View style={styles.container}>
                 <Text style={styles.title}>{translations.dictionary[language]}</Text>
                 <View style={styles.searchBar}>
@@ -89,45 +104,22 @@ export default function Dictionary({ language, translations, terms }) {
                         onChangeText={(text) => setSearchValue(text)}
                     />
                 </View>
-                <ScrollView style={styles.scrollingContainer} contentContainerStyle={{ paddingBottom: 40 }}>
-                    {filteredUnfamiliar?.length > 0 && (
-                        <CategorySection title={translations.unfamiliar[language]} color="#77BEE9" data={filteredUnfamiliar} />
-                    )}
-                    {filteredFamiliar?.length > 0 && (
-                        <CategorySection title={translations.familiar[language]} color="green" data={filteredFamiliar} />
-                    )}
-                    {filteredMastered?.length > 0 && (
-                        <CategorySection title={translations.mastered[language]} color="#FFD12D" data={filteredMastered} />
-                    )}
-                </ScrollView>
+                <FlatList
+                    data={data}
+                    contentContainerStyle={{ padding: 10, width: screenWidth, alignItems: "center", paddingBottom: 160 }}
+                    renderItem={({ item }) => <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />}
+                />
             </View>
         </SafeAreaView>
     );
 }
 
-function CategorySection({ title, color, data }) {
-    return (
-        <View style={{ paddingBottom: 10, alignItems: "center" }}>
-            {/* <View style={{ width: "92%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 10 }}>
-                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center", paddingTop: 15, zIndex: 100 }}>
-                    <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
-                    <Text style={styles.category}>{title}</Text>
-                </View>
-            </View> */}
-            <FlatList
-                data={data}
-                contentContainerStyle={{ gap: 10, padding: 10, width: screenWidth, alignItems: "center" }}
-                renderItem={({ item }) => <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />}
-                scrollEnabled={false}
-
-            />
-        </View>
-    );
-}
-
 function Term({ title, color, word, translatedWord, translatedDefinition }) {
+    const termOpacity = useSharedValue(1)
+    const termHeight = useSharedValue(screenHeight * 0.16)
+
+
     if (title)
-        // console.log(title)
         return (
             <View style={{ flexDirection: "row", gap: 10, width: screenWidth * 0.92, alignItems: "center", paddingTop: 15, }}>
                 <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
@@ -135,17 +127,30 @@ function Term({ title, color, word, translatedWord, translatedDefinition }) {
             </View>
         )
     return (
-        <ContextMenu
-            actions={[{ title: "Remove term", destructive: true, systemIcon: "xmark" }]}
-        >
-            <Pressable style={styles.termContainer}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-                    <Text style={styles.termTitle}>{word}</Text>
-                    <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
-                </View>
-                <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-            </Pressable>
-        </ContextMenu>
+        <Animated.View key={word} style={{  opacity: termOpacity, height: termHeight }}>
+            <ContextMenu
+                actions={[{ title: "Remove term", destructive: true, systemIcon: "xmark" }]}
+                onPress={async (e) => {
+                    if (e.nativeEvent.name == "Remove term") {
+                        console.log("E")
+                        termOpacity.value = withTiming(0, {duration: 750})
+                        termHeight.value = withDelay(750, withTiming(0))
+                        // let uid = auth().currentUser.uid;
+                        // await database()
+                        //     .ref(`${uid}/words/${word}`)
+                        //     .set(null)
+                    }
+                }}
+            >
+                <Animated.View style={{...styles.termContainer, }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+                        <Text style={styles.termTitle}>{word}</Text>
+                        <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+                    </View>
+                    <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
+                </Animated.View>
+            </ContextMenu>
+        </Animated.View>
     );
 }
 
@@ -177,7 +182,9 @@ const styles = StyleSheet.create({
     container: {
         position: "absolute",
         top: screenHeight * 0.15,
-        alignItems: "center"
+        alignItems: "center",
+        flex: 1,
+        height: screenHeight,
     },
     title: {
         fontFamily: "NewYorkLarge-Semibold",
