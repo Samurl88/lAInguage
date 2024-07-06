@@ -7,6 +7,7 @@ import DebugPage from "./pages/Debug"
 import StudyPage from "./pages/Study"
 import CameraPage from "./pages/Camera"
 import SignUp from './pages/SignUp';
+import Onboarding from './pages/Onboarding';
 import DictionaryPage from './pages/Dictionary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LogBox } from 'react-native';
@@ -54,6 +55,7 @@ export default function App() {
               <Stack.Screen name="Dictionary" component={DictionaryPage} /> */}
             </>
             : <>
+              <Stack.Screen name="Onboarding" component={Onboarding} />
               <Stack.Screen name="SignUp" component={SignUp} />
             </>
           }
