@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Image, StyleSheet, ScrollView, Dimensions, TextInput, Pressable, FlatList, SafeAreaView, } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
+import { SFSymbol } from 'react-native-sfsymbols';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 
 const screenWidth = Dimensions.get("screen").width
@@ -181,8 +183,8 @@ const data = [
     { "language": "hindi", "emoji": "🇮🇳" },
 ]
 
-export default function SignUpScreen() {
-
+export default function SignUpScreen({ route, navigation }) {
+    const { chosenLanguage } = route.params;
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -191,8 +193,7 @@ export default function SignUpScreen() {
 
     const [signUp, setSignUp] = useState(true)
 
-    const [chosenLanguage, setChosenLanguage] = useState("english")
-
+    const [change, setChange] = useState(false)
 
     const errors = {
         "auth/invalid-email": translations.please_enter_a_valid_email[chosenLanguage],
@@ -202,6 +203,7 @@ export default function SignUpScreen() {
         "auth/wrong-password": translations.your_email_or_password_is_incorrect[chosenLanguage],
         "auth/invalid-credential": translations.your_email_or_password_is_incorrect[chosenLanguage]
     }
+
     async function register() {
         setLoading(true);
         auth()
@@ -214,7 +216,6 @@ export default function SignUpScreen() {
                 language: chosenLanguage,
                 stars: 0
             })
-            
         })
         .catch(error => {
             console.log(errors[error.code])
@@ -234,30 +235,14 @@ export default function SignUpScreen() {
         })
     }
 
-
-
-    function LanguageIcon({ emoji, language}) {
-        return (
-            <Pressable onPress={() => setChosenLanguage(language)} style={{backgroundColor: "rgba(118, 118, 128, 0.12)", height: 60, width: 60, justifyContent: "center", alignItems: "center", borderRadius: 30, borderWidth: chosenLanguage === language ? 2 : 0 }}>
-                <Text style={{fontSize: 40,  }}>{emoji}</Text>
-            </Pressable>
-        )
-    }
-
     if (signUp)
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", }}>
-            <View>
-                <FlatList 
-                    data={data}
-                    renderItem={({item}) => <LanguageIcon language={item.language} emoji={item.emoji} />}
-                    horizontal
-                    contentContainerStyle={{gap: 15, paddingLeft: 20, paddingRight: 20, paddingTop: 20}}
-                    showsHorizontalScrollIndicator={false}
-                />
-            </View>
             <View style={styles.container}>
-                <Text style={styles.title}>{translations.sign_up[chosenLanguage] }</Text>
+                <Pressable onPress={() => { navigation.goBack() }} style={{ position: "absolute", left: 20,  width: 24, height: 24, justifyContent: "center", alignItems: 'center' }}>
+                    <SFSymbol name="chevron.left" color="#000" size={24} />
+                </Pressable>
+                <Animated.Text key="signup-title" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={styles.title}>{translations.sign_up[chosenLanguage] }</Animated.Text>
                 <View style={{ position: "absolute", top: screenHeight * 0.15, width: "100%" }}>
                     <View style={{ ...styles.inputContainer, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
                         <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
@@ -276,23 +261,28 @@ export default function SignUpScreen() {
                     <Text style={styles.error}>{error}</Text>
                 </View>
 
-                {email && password
-                    ? <Pressable onPress={async () => { register() }}
-                        style={styles.infoButton}>
-                        <Text style={styles.infoButtonText}>{translations.create_an_account[chosenLanguage]}</Text>
-                    </Pressable>
-                    : <Pressable style={styles.infoButton}>
-                        <Text style={styles.infoButtonDisabledText}>{translations.create_an_account[chosenLanguage]}</Text>
-                    </Pressable>
-                }
+                <Animated.View key="signup-btn" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ top: screenHeight * 0.35, position: "absolute",}}>
+                    {email && password
+                        ? <Pressable onPress={async () => { register() }}
+                            style={styles.infoButton}>
+                            <Text style={styles.infoButtonText}>{translations.create_an_account[chosenLanguage]}</Text>
+                        </Pressable>
+                        : <Pressable style={styles.infoButton}>
+                            <Text style={styles.infoButtonDisabledText}>{translations.create_an_account[chosenLanguage]}</Text>
+                        </Pressable>
+                    }
+                </Animated.View>
 
 
             </View>
 
-            <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
+            <Animated.View key="change-sign-in" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
                 <Text style={styles.swapPage}>{translations.already_have_an_account[chosenLanguage]} </Text>
-                <Pressable onPress={() => { setSignUp(false) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>{translations.log_in[chosenLanguage]}!</Text></Pressable>
-            </View>
+                <Pressable onPress={() => { 
+                    setSignUp(false) 
+                    setChange(true)
+                    }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>{translations.log_in[chosenLanguage]}!</Text></Pressable>
+            </Animated.View>
         </SafeAreaView>
     );
 
@@ -300,10 +290,10 @@ export default function SignUpScreen() {
         return (
             <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", }}>
                 <View style={styles.container}>
-                    {/* <Pressable onPress={() => { navigation.goBack() }} style={{ position: "absolute", left: 20 }}>
-                        <ArrowLeft2 color="#000" size={32} />
-                    </Pressable> */}
-                    <Text style={styles.title}>{translations.log_in[chosenLanguage]}</Text>
+                    <Pressable onPress={() => { navigation.goBack() }} style={{ position: "absolute", left: 20,  width: 24, height: 24, justifyContent: "center", alignItems: 'center' }}>
+                        <SFSymbol name="chevron.left" color="#000" size={24} />
+                    </Pressable>
+                    <Animated.Text key="login-title" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={styles.title}>{translations.log_in[chosenLanguage]}</Animated.Text>
     
                     <View style={{ position: "absolute", top: screenHeight * 0.15, width: "100%" }}>
                         <View style={{ ...styles.inputContainer, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
@@ -323,23 +313,25 @@ export default function SignUpScreen() {
                         <Text style={styles.error}>{error}</Text>
                     </View>
     
-                    {email && password
-                        ? <Pressable onPress={async () => { login() }}
-                            style={styles.infoButton}>
-                            <Text style={styles.infoButtonText}>{translations.sign_in_exclamation[chosenLanguage]}</Text>
-                        </Pressable>
-                        : <Pressable style={styles.infoButton}>
-                            <Text style={styles.infoButtonDisabledText}>{translations.sign_in_exclamation[chosenLanguage]}</Text>
-                        </Pressable>
-                    }
+                    <Animated.View key="login-btn" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ top: screenHeight * 0.35, position: "absolute",}}>
+                        {email && password
+                            ? <Pressable onPress={async () => { login() }}
+                                style={styles.infoButton}>
+                                <Text style={styles.infoButtonText}>{translations.sign_in_exclamation[chosenLanguage]}</Text>
+                            </Pressable>
+                            : <Pressable style={styles.infoButton}>
+                                <Text style={styles.infoButtonDisabledText}>{translations.sign_in_exclamation[chosenLanguage]}</Text>
+                            </Pressable>
+                        }
+                    </Animated.View>
     
     
                 </View>
     
-                <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
+                <Animated.View key="change-sign-up" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
                     <Text style={styles.swapPage}>{translations.no_account[chosenLanguage]} </Text>
                     <Pressable onPress={() => { setSignUp(true) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>{translations.create_an_account[chosenLanguage]}</Text></Pressable>
-                </View>
+                </Animated.View>
             </SafeAreaView>
         );
 }
@@ -407,9 +399,6 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         alignSelf: "center",
         zIndex: 100,
-        top: screenHeight * 0.35,
-        position: "absolute",
-
     },
     infoButtonText: {
         fontFamily: "SFPro-Regular",
