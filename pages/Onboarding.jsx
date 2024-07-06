@@ -1,7 +1,7 @@
 import { View, Text, SafeAreaView, Image, Dimensions, FlatList, Pressable, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
 import lexify from '../assets/lexify.png'
-import Animated, { FadeIn, FadeOut, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, runOnJS, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { Defs, LinearGradient, Path, Stop, Svg } from 'react-native-svg';
 import { SFSymbol } from 'react-native-sfsymbols';
 
@@ -37,13 +37,66 @@ const translations =
         "portuguese": "Próximo",
         "hindi": "अगला",
         "english": "Next"
+    },
+    "built_for_immersion": {
+        "spanish": "Construido para \n inmersión.",
+        "chinese": "专为 \n 沉浸式体验而设计。",
+        "tagalog": "Nilikha para sa \n paglubog.",
+        "vietnamese": "Được xây dựng để \n đắm chìm.",
+        "arabic": "مصمم ل \n الانغماس.",
+        "french": "Conçu pour \n immersion.",
+        "korean": "몰입을 위해 \n 설계되었습니다.",
+        "russian": "Создано для \n погружения.",
+        "portuguese": "Construído para \n imersão.",
+        "hindi": "डिज़ाइन किया गया \n अनुभव के लिए।",
+        "english": "Built for \n immersion."
+    },
+    "convenient_translations_of_words_you_dont_know": {
+        "spanish": "Traducciones convenientes de palabras que no conoces",
+        "chinese": "不认识的单词的便捷翻译",
+        "tagalog": "Maginhawang pagsasalin ng mga salitang hindi mo alam",
+        "vietnamese": "Bản dịch tiện lợi của những từ bạn không biết",
+        "arabic": "ترجمات مريحة للكلمات التي لا تعرفها",
+        "french": "Traductions pratiques des mots que vous ne connaissez pas",
+        "korean": "모르는 단어의 편리한 번역",
+        "russian": "Удобные переводы слов, которые вы не знаете",
+        "portuguese": "Traduções convenientes de palavras que você não conhece",
+        "hindi": "आपके न जानने वाले शब्दों के सुविधाजनक अनुवाद",
+        "english": "Convenient translations of words you don't know"
+    },
+    "extensive_vocabulary_practice_with_ai_powered_training": {
+        "spanish": "Práctica extensa de vocabulario con entrenamiento impulsado por IA",
+        "chinese": "通过 AI 驱动的训练进行广泛的词汇练习",
+        "tagalog": "Malawak na pagsasanay sa bokabularyo gamit ang AI-powered na pagsasanay",
+        "vietnamese": "Luyện tập từ vựng phong phú với đào tạo hỗ trợ bởi AI",
+        "arabic": "ممارسة واسعة النطاق للمفردات مع تدريب مدعوم بالذكاء الاصطناعي",
+        "french": "Pratique étendue du vocabulaire avec un entraînement assisté par l'IA",
+        "korean": "AI 기반 교육으로 폭넓은 어휘 연습",
+        "russian": "Обширная практика словарного запаса с обучением на основе ИИ",
+        "portuguese": "Prática extensiva de vocabulário com treinamento impulsionado por IA",
+        "hindi": "एआई-संचालित प्रशिक्षण के साथ व्यापक शब्दावली अभ्यास",
+        "english": "Extensive vocabulary practice with AI-powered training"
+    }, "intuitive_catalogues_of_words_youve_scanned_for_mastery": {
+        "spanish": "Catálogos intuitivos de palabras que has escaneado para el dominio",
+        "chinese": "直观的词汇目录，便于掌握",
+        "tagalog": "Intuitive na mga katalogo ng mga salitang na-scan mo para sa mastery",
+        "vietnamese": "Danh mục trực quan của các từ bạn đã quét để thành thạo",
+        "arabic": "كتالوجات بديهية للكلمات التي قمت بمسحها ضوئيًا لإتقانها",
+        "french": "Catalogues intuitifs des mots que vous avez scannés pour la maîtrise",
+        "korean": "숙달을 위해 스캔한 단어의 직관적인 카탈로그",
+        "russian": "Интуитивно понятные каталоги слов, которые вы отсканировали для освоения",
+        "portuguese": "Catálogos intuitivos das palavras que você digitalizou para domínio",
+        "hindi": "शब्दों के सहज ज्ञान युक्त कैटलॉग जिन्हें आपने महारत के लिए स्कैन किया है",
+        "english": "Intuitive catalogues of words you've scanned for mastery"
     }
+
 }
 
 
 export default function Onboarding({ navigation }) {
     const [chosenLanguage, setChosenLanguage] = useState("english")
     const [page, setPage] = useState(0)
+    const [nextBtnDoneLoading, setNextBtnDoneLoading] = useState(false)
 
     const duration = 500
     const delay = 250
@@ -74,9 +127,9 @@ export default function Onboarding({ navigation }) {
                 </Animated.View>
                 <Animated.View key="btn1" entering={FadeIn.duration(duration).delay(delay * 3)} exiting={FadeOut.duration(duration).delay(delay * 3)}>
                     <Pressable style={styles.button} onPress={() => {
-                        setPage(page + 1)
-                        rotate.value = withDelay(duration + delay , withTiming("360deg", {duration: 750}))
-                        }}>
+                        setPage(1)
+                        rotate.value = withDelay(duration + delay, withTiming("360deg", { duration: 750 }))
+                    }}>
                         <Text style={styles.buttonText}>{translations.next[chosenLanguage]}</Text>
                     </Pressable>
                 </Animated.View>
@@ -86,14 +139,14 @@ export default function Onboarding({ navigation }) {
     if (page == 1) {
         return (
             <View style={{ backgroundColor: "#F5EEE5", alignItems: "center", flex: 1 }}>
-                <Pressable onPress={() => { 
-                    setPage(page - 1) 
+                <Pressable onPress={() => {
+                    setPage(0)
                     rotate.value = "180deg"
-                    }} style={{ position: "absolute", left: 20, top: 55, width: 24, height: 24, justifyContent: "center", alignItems: 'center' }}>
+                }} style={{ position: "absolute", left: 20, top: 55, width: 24, height: 24, justifyContent: "center", alignItems: 'center' }}>
                     <SFSymbol name="chevron.left" color="#000" size={24} />
                 </Pressable>
                 <Animated.View key="stuff" entering={FadeIn.duration(duration).delay(delay + duration)} exiting={FadeOut.duration(duration).delay(delay)} style={{ position: "absolute", top: screenHeight * 0.1, gap: 25, alignItems: "center", }}>
-                    <Animated.View style={{transform: [{rotate: rotate}]}}>
+                    <Animated.View style={{ transform: [{ rotate: rotate }] }}>
                         <Svg
                             width={screenWidth * 0.5}
                             height={screenWidth * 0.5}
@@ -123,26 +176,28 @@ export default function Onboarding({ navigation }) {
                             </Defs>
                         </Svg>
                     </Animated.View>
-                    <Text style={{ letterSpacing: 3, lineHeight: 30, fontSize: 20, fontFamily: "NewYorkLarge-Regular", alignSelf: "center", textAlign: "center", }}>Built for {"\n"} immersion.</Text>
+                    <Text style={{ letterSpacing: 3, lineHeight: 30, fontSize: 20, fontFamily: "NewYorkLarge-Regular", alignSelf: "center", textAlign: "center", }}>{translations.built_for_immersion[chosenLanguage]}</Text>
 
                 </Animated.View>
 
                 <View style={{ position: "absolute", top: screenHeight * 0.49, gap: 25, width: screenWidth * 0.7 }}>
-                    <Animated.View key="info-1" entering={FadeIn.duration(duration).delay(3 * delay + duration * 1.5)} style={styles.listItem}>
+                    <Animated.View key="info-1" entering={FadeIn.duration(duration).delay(3 * delay + duration * 1.5)} exiting={FadeOut.duration(duration)} style={styles.listItem}>
                         <SFSymbol name="globe" size={28} color="black" />
-                        <Text style={styles.listText}>Convenient translations of words you don't know</Text>
+                        <Text style={styles.listText}>{translations.convenient_translations_of_words_you_dont_know[chosenLanguage]}</Text>
                     </Animated.View>
-                    <Animated.View key="info-2" entering={FadeIn.duration(duration).delay(4 * delay + duration * 1.5)} style={styles.listItem}>
+                    <Animated.View key="info-2" entering={FadeIn.duration(duration).delay(4 * delay + duration * 1.5)} exiting={FadeOut.duration(duration)} style={styles.listItem}>
                         <SFSymbol name="rectangle.portrait.on.rectangle.portrait.fill" size={28} color="black" />
-                        <Text style={styles.listText}>Extensive vocabulary practice with AI-powered training</Text>
+                        <Text style={styles.listText}>{translations.extensive_vocabulary_practice_with_ai_powered_training[chosenLanguage]}</Text>
                     </Animated.View>
-                    <Animated.View key="info-3" entering={FadeIn.duration(duration).delay(5 * delay + duration * 1.5)} style={styles.listItem}>
+                    <Animated.View key="info-3" entering={FadeIn.duration(duration).delay(5 * delay + duration * 1.5)} exiting={FadeOut.duration(duration)} style={styles.listItem}>
                         <SFSymbol name="character.book.closed.fill" size={28} color="black" />
-                        <Text style={styles.listText}>Intuitive catalogues of words you've scanned for mastery</Text>
+                        <Text style={styles.listText}>{translations.intuitive_catalogues_of_words_youve_scanned_for_mastery[chosenLanguage]}</Text>
                     </Animated.View>
                 </View>
-                <Animated.View key="btn2" entering={FadeIn.duration(duration).delay(7 * delay + duration * 1.5)} exiting={FadeOut.duration(duration).delay(delay * 3)}>
-                    <Pressable style={styles.button} onPress={() => navigation.navigate("SignUp", {chosenLanguage: chosenLanguage})}>
+                <Animated.View key="btn2" entering={FadeIn.duration(duration).delay(7 * delay + duration * 1.5).withCallback(() => {
+                    runOnJS(setNextBtnDoneLoading)(true)
+                })} exiting={FadeOut.duration(duration).delay(delay * 3)}>
+                    <Pressable style={styles.button} onPress={() => {if (nextBtnDoneLoading) navigation.navigate("SignUp", { chosenLanguage: chosenLanguage })}}>
                         <Text style={styles.buttonText}>{translations.next[chosenLanguage]}</Text>
                     </Pressable>
                 </Animated.View>
