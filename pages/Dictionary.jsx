@@ -11,22 +11,6 @@ import Animated, { FadeIn, FadeOut, useSharedValue, withDelay, withTiming } from
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
-{/* <Pressable onPress={() => {
-    let uid = auth().currentUser.uid
-    database()
-        .ref(`${uid}/words`)
-        .update({
-            cuidad: {
-                translatedWord: "translatedWord",
-                translatedDefinition: "translatedDefinition",
-                definition: "definition",
-                score: "score"
-            }
-        })
-}}>
-    <Text>Make new term</Text>
-</Pressable> */}
-
 export default function Dictionary({ language, translations, terms }) {
     const [words, setWords] = useState();
     const [searchValue, setSearchValue] = useState(null);
@@ -45,15 +29,12 @@ export default function Dictionary({ language, translations, terms }) {
 
         for (let i = 0; i < words.length; i++) {
             try {
-                // if (!searchValue || words[i].word.toLowerCase().includes(searchValue.toLowerCase())) {
                 if (!searchValue || words[i].word.toLowerCase().search(searchValue.toLowerCase()) == 0) {
-                    if (words[i].score == 0 && !(onlyFamiliar || onlyMastered)) {
-                        // console.log(words[i])
+                    if (words[i].score == 0) {
                         tempUnfamiliar.push(words[i]);
-                    } else if (words[i].score == 1 || words[i].score == 2 && !(onlyUnfamiliar || onlyMastered)) {
+                    } else if ((words[i].score == 1 || words[i].score == 2)) {
                         tempFamiliar.push(words[i]);
-                        console.log(words[i])
-                    } else if (words[i].score == 3 && !(onlyFamiliar || onlyUnfamiliar)) {
+                    } else if (words[i].score == 3) {
                         tempMastered.push(words[i]);
                     }
                 }
@@ -65,10 +46,8 @@ export default function Dictionary({ language, translations, terms }) {
         tempUnfamiliar = tempUnfamiliar.length > 1 ? tempUnfamiliar : []
         tempMastered = tempMastered.length > 1 ? tempMastered : []
 
-        // console.log({ familiar: tempFamiliar.length - 1, unfamiliar: tempUnfamiliar.length - 1, mastered: tempMastered.length - 1 })
         setWordCounts({ familiar: tempFamiliar.length - 1, unfamiliar: tempUnfamiliar.length - 1, mastered: tempMastered.length - 1 })
 
-        // console.log(tempUnfamiliar.concat(tempFamiliar).concat(tempMastered))
         setData(tempUnfamiliar.concat(tempFamiliar).concat(tempMastered))
 
     }
@@ -91,18 +70,32 @@ export default function Dictionary({ language, translations, terms }) {
             search(words);
     }, [searchValue]);
 
-    useEffect(() => {
-        if (words)
-            search(words);
-    }, [onlyUnfamiliar, onlyFamiliar, onlyMastered]);
+    // useEffect(() => {
+    //     if (words)
+    //         search(words);
+    // }, [onlyUnfamiliar, onlyFamiliar, onlyMastered]);
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F5EEE5", alignItems: "center", }}>
             <View style={styles.container}>
+                {/* <Pressable onPress={() => {
+                    let uid = auth().currentUser.uid
+                    database()
+                        .ref(`${uid}/words`)
+                        .update({
+                            tt: {
+                                translatedWord: "translatedWord",
+                                translatedDefinition: "translatedDefinition",
+                                definition: "definition",
+                                score: 0
+                            }
+                        })
+                }}>
+                    <Text>Make new term</Text>
+                </Pressable> */}
                 <Text style={styles.title}>{translations.dictionary[language]}</Text>
 
                 <View style={{ gap: 10, width: screenWidth * 0.9, }}>
-                    {/* Search bar */}
                     <View style={{ backgroundColor: "rgba(118, 118, 128, 0.12)", height: 35, borderRadius: 10, alignItems: "center", flexDirection: "row" }}>
                         <SFSymbol name="magnifyingglass" size={18} color="grey" style={{ left: screenWidth * 0.05, position: "absolute" }} />
                         <TextInput
@@ -113,23 +106,21 @@ export default function Dictionary({ language, translations, terms }) {
                         />
                     </View>
 
-                    {
-                        console.log(wordCounts)
-                    }
-                    <View style={{ gap: 10, flexDirection: "row", width: screenWidth * 0.9, flexWrap: 'wrap' }}>
+                    {/* Filter buttons */}
+                    <View style={{ gap: 10, flexDirection: "row", width: screenWidth * 0.9, flexWrap: 'wrap', height: screenHeight * 0.036 }}>
                         {wordCounts?.unfamiliar > 0
                             ? <Pressable style={onlyUnfamiliar ? styles.categoryBtnSelected : styles.categoryBtn} onPress={() => {
-                                if (onlyUnfamiliar) {
-                                    setOnlyUnfamiliar(false)
-                                } else {
-                                    setOnlyUnfamiliar(true)
-                                    setOnlyFamiliar(false)
-                                    setOnlyMastered(false)
-                                }
-                            }}>
-                                <View style={{ width: 10, height: 10, backgroundColor: "#77bee9", borderRadius: 5 }} />
-                                <Text style={styles.categoryText}>Unfamiliar</Text>
-                            </Pressable>
+                                    if (onlyUnfamiliar) {
+                                        setOnlyUnfamiliar(false)
+                                    } else {
+                                        setOnlyUnfamiliar(true)
+                                        setOnlyFamiliar(false)
+                                        setOnlyMastered(false)
+                                    }
+                                }}>
+                                    <View style={{ width: 10, height: 10, backgroundColor: "#77bee9", borderRadius: 5 }} />
+                                    <Text style={styles.categoryText}>Unfamiliar</Text>
+                                </Pressable>
                             : null
                         }
                         {wordCounts?.familiar > 0
@@ -171,7 +162,9 @@ export default function Dictionary({ language, translations, terms }) {
                             contentContainerStyle={{ padding: 10, width: screenWidth, alignItems: "center", paddingBottom: 160 }}
                             renderItem={({ item }) =>
                                 <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord}
-                                    translatedDefinition={item.translatedDefinition} score={item.score} wordCounts={wordCounts} setWordCounts={setWordCounts} />}
+                                    translatedDefinition={item.translatedDefinition} score={item.score} wordCounts={wordCounts} setWordCounts={setWordCounts}
+                                    onlyUnfamiliar={onlyUnfamiliar} onlyFamiliar={onlyFamiliar} onlyMastered={onlyMastered}
+                                />}
                         />
                     </Animated.View>
                     : <>
@@ -187,7 +180,7 @@ export default function Dictionary({ language, translations, terms }) {
 
 
 
-function Term({ title, color, word, translatedWord, translatedDefinition, score, wordCounts, setWordCounts }) {
+function Term({ title, color, word, translatedWord, translatedDefinition, score, wordCounts, setWordCounts, onlyUnfamiliar, onlyFamiliar, onlyMastered }) {
     const termOpacity = useSharedValue(1)
     const termHeight = useSharedValue(screenHeight * 0.16)
     const marginTop = useSharedValue(12)
@@ -195,23 +188,25 @@ function Term({ title, color, word, translatedWord, translatedDefinition, score,
     const titleOpacity = useSharedValue(1)
     const titleHeight = useSharedValue(screenHeight * 0.055)
 
+    // Logic for filter buttons
+    if ((onlyUnfamiliar && score != 0) || (onlyFamiliar && (score > 2 || score < 1)) || (onlyMastered && score != 3)) return
 
     if (title) {
-
         if ((score === 0 && wordCounts.unfamiliar <= 0) || (score === 1 && wordCounts.familiar <= 0) || (score === 3 && wordCounts.mastered <= 0)) {
             titleOpacity.value = withTiming(0, { duration: 750 })
             titleHeight.value = withDelay(750, withTiming(0, { duration: 750 }))
         }
 
+        // entering={FadeIn.duration(500).delay(500)} exiting={FadeOut.duration(500)}
         return (
-            <Animated.View entering={FadeIn.duration(500).delay(500)} exiting={FadeOut.duration(500)} key={title} style={{ opacity: titleOpacity, height: titleHeight, flexDirection: "row", gap: 10, width: screenWidth * 0.92, alignItems: "center", paddingTop: 15, }}>
+            <Animated.View key={title} style={{ opacity: titleOpacity, height: titleHeight, flexDirection: "row", gap: 10, width: screenWidth * 0.92, alignItems: "center", paddingTop: 15, }}>
                 <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
                 <Text style={styles.category}>{title}</Text>
             </Animated.View>
         )
     } else
         return (
-            <Animated.View entering={FadeIn.duration(500).delay(500)} exiting={FadeOut.duration(500)} key={word} style={{ opacity: termOpacity, height: termHeight, marginTop: marginTop }}>
+            <Animated.View key={word} style={{ opacity: termOpacity, height: termHeight, marginTop: marginTop }}>
                 <ContextMenu
                     actions={[{ title: "Remove term", destructive: true, systemIcon: "xmark" }]}
                     onPress={async (e) => {
