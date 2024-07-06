@@ -47,12 +47,13 @@ export default function Dictionary({ language, translations, terms }) {
             try {
                 // if (!searchValue || words[i].word.toLowerCase().includes(searchValue.toLowerCase())) {
                 if (!searchValue || words[i].word.toLowerCase().search(searchValue.toLowerCase()) == 0) {
-                    if (words[i].score == 0) {
+                    if (words[i].score == 0 && !(onlyFamiliar || onlyMastered)) {
                         // console.log(words[i])
                         tempUnfamiliar.push(words[i]);
-                    } else if (words[i].score < 3) {
+                    } else if (words[i].score == 1 || words[i].score == 2 && !(onlyUnfamiliar || onlyMastered)) {
                         tempFamiliar.push(words[i]);
-                    } else {
+                        console.log(words[i])
+                    } else if (words[i].score == 3 && !(onlyFamiliar || onlyUnfamiliar)) {
                         tempMastered.push(words[i]);
                     }
                 }
@@ -64,6 +65,7 @@ export default function Dictionary({ language, translations, terms }) {
         tempUnfamiliar = tempUnfamiliar.length > 1 ? tempUnfamiliar : []
         tempMastered = tempMastered.length > 1 ? tempMastered : []
 
+        // console.log({ familiar: tempFamiliar.length - 1, unfamiliar: tempUnfamiliar.length - 1, mastered: tempMastered.length - 1 })
         setWordCounts({ familiar: tempFamiliar.length - 1, unfamiliar: tempUnfamiliar.length - 1, mastered: tempMastered.length - 1 })
 
         // console.log(tempUnfamiliar.concat(tempFamiliar).concat(tempMastered))
@@ -89,20 +91,20 @@ export default function Dictionary({ language, translations, terms }) {
             search(words);
     }, [searchValue]);
 
-
-    // let tempFamiliar = [{ title: translations.familiar[language], color: "green", score: 1 }];
-    // let tempUnfamiliar = [{ title: translations.unfamiliar[language], color: "#77bee9", score: 0 }];
-    // let tempMastered = [{ title: translations.mastered[language], color: "#FFD12D", score: 3 }];
+    useEffect(() => {
+        if (words)
+            search(words);
+    }, [onlyUnfamiliar, onlyFamiliar, onlyMastered]);
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F5EEE5", alignItems: "center", }}>
             <View style={styles.container}>
                 <Text style={styles.title}>{translations.dictionary[language]}</Text>
 
-                <View style={{gap: 10, width: screenWidth * 0.9, }}>
+                <View style={{ gap: 10, width: screenWidth * 0.9, }}>
                     {/* Search bar */}
-                    <View style={{ backgroundColor: "rgba(118, 118, 128, 0.12)", height: 35, borderRadius: 10, alignItems: "center", flexDirection: "row"}}>
-                        <SFSymbol name="magnifyingglass" size={18} color="grey"  style={{ left: screenWidth * 0.05, position: "absolute" }} />
+                    <View style={{ backgroundColor: "rgba(118, 118, 128, 0.12)", height: 35, borderRadius: 10, alignItems: "center", flexDirection: "row" }}>
+                        <SFSymbol name="magnifyingglass" size={18} color="grey" style={{ left: screenWidth * 0.05, position: "absolute" }} />
                         <TextInput
                             placeholder={translations.search[language]}
                             style={styles.searchInput}
@@ -111,19 +113,55 @@ export default function Dictionary({ language, translations, terms }) {
                         />
                     </View>
 
-                    <View style={{gap: 10, flexDirection: "row", width: screenWidth * 0.9, flexWrap: 'wrap' }}>
-                        <Pressable style={{...styles.categoryBtn, backgroundColor: onlyUnfamiliar ? "rgba(118, 118, 128, 0.12)" : "rgba(118, 118, 128, 0.12)" }}>
-                            <View style={{ width: 10, height: 10, backgroundColor: "#77bee9", borderRadius: 5 }} />
-                            <Text style={{fontFamily: "NewYorkLarge-Regular", fontSize: 17}}>Unfamiliar</Text>
-                        </Pressable>
-                        <Pressable style={styles.categoryBtn}>
-                            <View style={{ width: 10, height: 10, backgroundColor: "green", borderRadius: 5 }} />
-                            <Text style={{fontFamily: "NewYorkLarge-Regular", fontSize: 17}}>Familiar</Text>
-                        </Pressable>
-                        <Pressable style={styles.categoryBtn}>
-                            <View style={{ width: 10, height: 10, backgroundColor: "#FFD12D", borderRadius: 5 }} />
-                            <Text style={{fontFamily: "NewYorkLarge-Regular", fontSize: 17}}>Mastered</Text>
-                        </Pressable>
+                    {
+                        console.log(wordCounts)
+                    }
+                    <View style={{ gap: 10, flexDirection: "row", width: screenWidth * 0.9, flexWrap: 'wrap' }}>
+                        {wordCounts?.unfamiliar > 0
+                            ? <Pressable style={onlyUnfamiliar ? styles.categoryBtnSelected : styles.categoryBtn} onPress={() => {
+                                if (onlyUnfamiliar) {
+                                    setOnlyUnfamiliar(false)
+                                } else {
+                                    setOnlyUnfamiliar(true)
+                                    setOnlyFamiliar(false)
+                                    setOnlyMastered(false)
+                                }
+                            }}>
+                                <View style={{ width: 10, height: 10, backgroundColor: "#77bee9", borderRadius: 5 }} />
+                                <Text style={styles.categoryText}>Unfamiliar</Text>
+                            </Pressable>
+                            : null
+                        }
+                        {wordCounts?.familiar > 0
+                            ? <Pressable style={onlyFamiliar ? styles.categoryBtnSelected : styles.categoryBtn} onPress={() => {
+                                if (onlyFamiliar) {
+                                    setOnlyFamiliar(false)
+                                } else {
+                                    setOnlyUnfamiliar(false)
+                                    setOnlyFamiliar(true)
+                                    setOnlyMastered(false)
+                                }
+                            }}>
+                                <View style={{ width: 10, height: 10, backgroundColor: "green", borderRadius: 5 }} />
+                                <Text style={styles.categoryText}>Familiar</Text>
+                            </Pressable>
+                            : null
+                        }
+                        {wordCounts?.mastered > 0
+                            ? <Pressable style={onlyMastered ? styles.categoryBtnSelected : styles.categoryBtn} onPress={() => {
+                                if (onlyMastered) {
+                                    setOnlyMastered(false)
+                                } else {
+                                    setOnlyUnfamiliar(false)
+                                    setOnlyFamiliar(false)
+                                    setOnlyMastered(true)
+                                }
+                            }}>
+                                <View style={{ width: 10, height: 10, backgroundColor: "#FFD12D", borderRadius: 5 }} />
+                                <Text style={styles.categoryText}>Mastered</Text>
+                            </Pressable>
+                            : null
+                        }
                     </View>
                 </View>
                 {terms
@@ -143,7 +181,7 @@ export default function Dictionary({ language, translations, terms }) {
                     </>
                 }
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -166,14 +204,14 @@ function Term({ title, color, word, translatedWord, translatedDefinition, score,
         }
 
         return (
-            <Animated.View key={title} style={{ opacity: titleOpacity, height: titleHeight, flexDirection: "row", gap: 10, width: screenWidth * 0.92, alignItems: "center", paddingTop: 15, }}>
+            <Animated.View entering={FadeIn.duration(500).delay(500)} exiting={FadeOut.duration(500)} key={title} style={{ opacity: titleOpacity, height: titleHeight, flexDirection: "row", gap: 10, width: screenWidth * 0.92, alignItems: "center", paddingTop: 15, }}>
                 <View style={{ width: 10, height: 10, backgroundColor: color, borderRadius: 5 }} />
                 <Text style={styles.category}>{title}</Text>
             </Animated.View>
         )
     } else
         return (
-            <Animated.View key={word} style={{ opacity: termOpacity, height: termHeight, marginTop: marginTop }}>
+            <Animated.View entering={FadeIn.duration(500).delay(500)} exiting={FadeOut.duration(500)} key={word} style={{ opacity: termOpacity, height: termHeight, marginTop: marginTop }}>
                 <ContextMenu
                     actions={[{ title: "Remove term", destructive: true, systemIcon: "xmark" }]}
                     onPress={async (e) => {
@@ -217,15 +255,41 @@ function Term({ title, color, word, translatedWord, translatedDefinition, score,
 
 const styles = StyleSheet.create({
     categoryBtn: {
-        flexDirection: "row", 
-        gap: 10, 
-        justifyContent: "center", 
-        alignItems: "center", 
-        paddingTop: 5, 
-        paddingBottom: 5, 
-        paddingLeft: 10, 
-        paddingRight: 10, 
-        borderRadius: 10
+        flexDirection: "row",
+        gap: 10,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingTop: 5,
+        paddingBottom: 5,
+        paddingLeft: 10,
+        paddingRight: 10,
+        borderRadius: 10,
+        backgroundColor: "rgba(118, 118, 128, 0.12)"
+    },
+    categoryBtnSelected: {
+        flexDirection: "row",
+        gap: 10,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingTop: 4,
+        paddingBottom: 4,
+        paddingLeft: 9,
+        paddingRight: 9,
+        borderRadius: 10,
+        // backgroundColor: "#2F2C2A"
+        backgroundColor: "rgba(118, 118, 128, 0.12)",
+        borderColor: "#2F2C2A",
+        borderWidth: 1
+
+    },
+    categoryText: {
+        fontFamily: "NewYorkLarge-Regular",
+        fontSize: 17
+    },
+    categoryTextSelected: {
+        fontFamily: "NewYorkLarge-Regular",
+        fontSize: 17,
+        // color: "white"
     },
     scrollingContainer: {
         height: screenHeight * 0.79,
