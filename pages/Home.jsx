@@ -305,12 +305,12 @@ export default function HomePage({ navigation }) {
   const [words, setWords] = useState(null)
 
 
-  async function onDisplayNotification() {
-    await notifee.displayNotification({
-      title: `Practice!`,
-      body: `Your streak is waiting.`,
-    });
-  }
+  // async function onDisplayNotification() {
+  //   await notifee.displayNotification({
+  //     title: `Practice!`,
+  //     body: `Your streak is waiting.`,
+  //   });
+  // }
 
   // Request perms for notifcations
   useEffect(() => {
@@ -467,7 +467,7 @@ export default function HomePage({ navigation }) {
             }}>
               <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: dictionaryPage ? 1 : 0.21 }} />
             </Pressable>
-            <Button title="notif" style={{position: "absolute", top: screenHeight * 0.5, zIndex: 100}} onPress={() => { onDisplayNotification() }} />
+            {/* <Button title="notif" style={{position: "absolute", top: screenHeight * 0.5, zIndex: 100}} onPress={() => { onDisplayNotification() }} /> */}
           </View>
 
           {!cameraPage
