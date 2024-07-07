@@ -9,10 +9,38 @@ import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
 import { SFSymbol } from 'react-native-sfsymbols';
 import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
+import notifee, { RepeatFrequency, TimestampTrigger, TriggerType } from '@notifee/react-native';
 
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
+
+
+
+async function onCreateTriggerNotification() {
+  const date = new Date(Date.now());
+  date.setHours(10);
+  date.setMinutes(1);
+
+  // Create a time-based trigger
+  const trigger = {
+    type: TriggerType.TIMESTAMP,
+    timestamp: date.getTime(), 
+    repeatFrequency: RepeatFrequency.DAILY,
+  };
+
+  // Create a trigger notification
+  await notifee.createTriggerNotification(
+    {
+      title: `Practice!`,
+      body: `Your streak is waiting.`,
+    },
+    trigger,
+  );
+  console.log("DONE")
+}
+
+
 
 // Initializing model
 const genAI = new GoogleGenerativeAI(Config.API_KEY);
@@ -41,6 +69,11 @@ const safetySetting = [
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
 export default function StudyPage({ language, stars, translations }) {
+
+  useEffect(() => {
+    onCreateTriggerNotification()
+  }, [])
+  
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
   const [numAnswered, setNumAnswered] = useState(0)

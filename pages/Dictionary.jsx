@@ -7,9 +7,10 @@ import { FlatList } from 'react-native-gesture-handler';
 import ContextMenu from "react-native-context-menu-view";
 import Animated, { FadeIn, FadeOut, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
-
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
+
+
 
 export default function Dictionary({ language, translations, terms }) {
     const [words, setWords] = useState();

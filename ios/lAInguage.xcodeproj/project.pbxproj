@@ -173,6 +173,7 @@
 		7879907BDDB542918436D6C5 /* NewYorkMedium-MediumItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "NewYorkMedium-MediumItalic.otf"; path = "../assets/fonts/NewYorkMedium-MediumItalic.otf"; sourceTree = "<group>"; };
 		78C6A9EC3CF74CF8B1C171B3 /* NewYorkSmall-Heavy.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "NewYorkSmall-Heavy.otf"; path = "../assets/fonts/NewYorkSmall-Heavy.otf"; sourceTree = "<group>"; };
 		7A4DA425AA6D4B2BBE6493D0 /* SF-Pro-Text-Heavy.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SF-Pro-Text-Heavy.otf"; path = "../assets/fonts/SF-Pro-Text-Heavy.otf"; sourceTree = "<group>"; };
+		7E02CDAC2C3B00780084389F /* lAInguage.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = lAInguage.entitlements; path = lAInguage/lAInguage.entitlements; sourceTree = "<group>"; };
 		7E89CF862C2FBC8000B5C1CC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		80E7B81C9AC2411188BC95B5 /* NewYorkSmall-BoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "NewYorkSmall-BoldItalic.otf"; path = "../assets/fonts/NewYorkSmall-BoldItalic.otf"; sourceTree = "<group>"; };
 		81286BFC22F04A89911907A7 /* SF-Pro-Text-RegularItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SF-Pro-Text-RegularItalic.otf"; path = "../assets/fonts/SF-Pro-Text-RegularItalic.otf"; sourceTree = "<group>"; };
@@ -281,6 +282,7 @@
 		13B07FAE1A68108700A75B9A /* lAInguage */ = {
 			isa = PBXGroup;
 			children = (
+				7E02CDAC2C3B00780084389F /* lAInguage.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -877,6 +879,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = lAInguage/lAInguage.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4FQMZNQJKK;
 				ENABLE_BITCODE = NO;
@@ -893,7 +896,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sanakama.lAInguage;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sanakama.lexify;
 				PRODUCT_NAME = lAInguage;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -907,6 +910,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = lAInguage/lAInguage.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4FQMZNQJKK;
 				INFOPLIST_FILE = lAInguage/Info.plist;
@@ -922,7 +926,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sanakama.lAInguage;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sanakama.lexify;
 				PRODUCT_NAME = lAInguage;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1013,10 +1017,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -1099,10 +1100,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

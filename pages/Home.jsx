@@ -1,4 +1,4 @@
-import { View, Text, Pressable, SafeAreaView, StyleSheet, Image, Dimensions, FlatList } from 'react-native'
+import { View, Text, Pressable, SafeAreaView, StyleSheet, Image, Dimensions, FlatList, Button } from 'react-native'
 // import React from 'react'
 import auth from '@react-native-firebase/auth';
 import React, { useEffect, useRef, useState } from 'react'
@@ -12,6 +12,7 @@ import database from '@react-native-firebase/database';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient';
 import * as DropdownMenu from 'zeego/dropdown-menu'
+import notifee from '@notifee/react-native';
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
@@ -304,6 +305,18 @@ export default function HomePage({ navigation }) {
   const [words, setWords] = useState(null)
 
 
+  async function onDisplayNotification() {
+    await notifee.displayNotification({
+      title: `Practice!`,
+      body: `Your streak is waiting.`,
+    });
+  }
+
+  // Request perms for notifcations
+  useEffect(() => {
+    notifee.requestPermission()
+  }, [])
+
   // Subscribe to changes in database
   useEffect(() => {
     let uid = auth().currentUser.uid;
@@ -454,6 +467,7 @@ export default function HomePage({ navigation }) {
             }}>
               <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: dictionaryPage ? 1 : 0.21 }} />
             </Pressable>
+            <Button title="notif" style={{position: "absolute", top: screenHeight * 0.5, zIndex: 100}} onPress={() => { onDisplayNotification() }} />
           </View>
 
           {!cameraPage
