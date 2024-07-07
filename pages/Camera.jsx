@@ -24,6 +24,7 @@ const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
 import Svg, { Circle } from "react-native-svg"
+import { launchImageLibrary } from 'react-native-image-picker';
 
 
 
@@ -48,7 +49,7 @@ export default function CameraPage({language, translations}) {
           words.push(obj)
         }
         setWords(words)
-        console.log(words)
+        // console.log(words)
       })
   }
 
@@ -115,7 +116,7 @@ export default function CameraPage({language, translations}) {
 
   const define = async (imageData) => {
 
-    console.log(Config.API_KEY)
+    // console.log(Config.API_KEY)
 
     const prompt = `
     Determine the root word of the highlighted word in the image (ex. leaving -> leave).
@@ -131,8 +132,8 @@ export default function CameraPage({language, translations}) {
     const result = await model.generateContent([prompt, { inlineData: { data: imageData, mimeType: 'image/png' } }]);
     const response = result.response;
     const text = JSON.parse(response.text());
-    console.log(text)
-    console.log("response")
+    // console.log(text)
+    // console.log("response")
     setOriginalWord(text.originalWord)
     setOriginalDefinition(text.originalDefinition)
     setTranslatedWord(text.translatedWord)
@@ -159,14 +160,17 @@ export default function CameraPage({language, translations}) {
   const [currentPosition, setCurrentPosition] = useState(-1)
 
   const saveMarkedUpImage = async () => {
-    console.log("sup")
     setLoading(true)
     const image = await canvasRef.current.makeImageSnapshotAsync();
     const bytes = image.encodeToBase64();
-    // console.log(bytes)
     define(bytes)
 
   };
+
+  useEffect(() => {
+    // setPaths([]);
+    console.log("imagechnaged")
+  }, [image])
 
   const pan = Gesture.Pan()
     .onStart((g) => {
@@ -200,14 +204,14 @@ export default function CameraPage({language, translations}) {
 
           {cameraOpen ?
             <>
-              <Camera
+              {/* <Camera
                 ref={camera}
                 style={{ width: screenWidth, height: screenHeight, position: "absolute"}}
                 device={device}
                 isActive={true}
                 photo={true}
               >
-              </Camera>
+              </Camera> */}
               <View style={{ flex: 1, }}>
                 <View style={styles.buttonContainer}>
                   <Pressable style={{ ...styles.actionButton, opacity: 0 }}>
@@ -230,7 +234,16 @@ export default function CameraPage({language, translations}) {
                       <Circle cx={36} cy={36} r={34.5} stroke="#F0E8DD" strokeWidth={3} />
                     </Svg>
                   </Pressable>
-                  <Pressable style={styles.actionButton}>
+                  <Pressable style={styles.actionButton} onPress={() => {
+                    launchImageLibrary({mediaType: "photo", }, (result) => {
+                      if (!result?.didCancel) {
+                        console.log("WJHOHG")
+                        setCameraOpen(false)
+                        setImage(result.assets[0].uri)
+                      }
+
+                    })
+                  }}>
                     <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
                   </Pressable>
                 </View>
@@ -265,6 +278,7 @@ export default function CameraPage({language, translations}) {
                       </Pressable>
                       <Pressable onPress={() => {
                         setCameraOpen(true);
+                        setImage(null)
                       }}>
                         <Text style={{ fontSize: 20, position: "absolute", top: screenHeight * 0.08, color: "white", right: 0, paddingRight: 20, textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.retake[language]}</Text>
                       </Pressable>
@@ -301,7 +315,7 @@ export default function CameraPage({language, translations}) {
               data={words}
               contentContainerStyle={{ gap: 10, paddingBottom: 30, alignSelf: "center" }}
               renderItem={({ item }) => {
-                console.log(item)
+                // console.log(item)
                 return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />)
               }}
               ListHeaderComponent={

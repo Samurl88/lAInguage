@@ -106,8 +106,8 @@ export default function Dictionary({ language, translations, terms }) {
                         />
                     </View>
 
-                    {/* Filter buttons */}
-                    <View style={{ gap: 10, flexDirection: "row", width: screenWidth * 0.9, flexWrap: 'wrap', height: screenHeight * 0.036 }}>
+                    {/* Filter buttons height: screenHeight * 0.036*/}
+                    <View style={{ gap: 10, flexDirection: "row", width: screenWidth * 0.9, flexWrap: 'wrap',  }}>
                         {wordCounts?.unfamiliar > 0
                             ? <Pressable style={onlyUnfamiliar ? styles.categoryBtnSelected : styles.categoryBtn} onPress={() => {
                                     if (onlyUnfamiliar) {
