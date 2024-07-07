@@ -26,6 +26,8 @@ const screenWidth = Dimensions.get("screen").width;
 import Svg, { Circle } from "react-native-svg"
 import { launchImageLibrary } from 'react-native-image-picker';
 
+import RNFS from 'react-native-fs'
+
 
 
 export default function CameraPage({language, translations}) {
@@ -153,7 +155,7 @@ export default function CameraPage({language, translations}) {
   const camera = useRef(null);
   const [cameraOpen, setCameraOpen] = useState(true);
   const [image, setImage] = useState(null);
-  const loadedImage = useImage(image);
+  const [loadedImage, setLoadedImage] = useState(image)
   const device = useCameraDevice('back')
   const { hasPermission, requestPermission } = useCameraPermission()
 
@@ -163,14 +165,10 @@ export default function CameraPage({language, translations}) {
     setLoading(true)
     const image = await canvasRef.current.makeImageSnapshotAsync();
     const bytes = image.encodeToBase64();
+    // console.log(bytes)
     define(bytes)
 
   };
-
-  useEffect(() => {
-    // setPaths([]);
-    console.log("imagechnaged")
-  }, [image])
 
   const pan = Gesture.Pan()
     .onStart((g) => {
@@ -196,6 +194,15 @@ export default function CameraPage({language, translations}) {
       requestPermission()
   }, [])
 
+  useEffect(() => {
+    if (image) {
+      const data = Skia.Data.fromBase64(image);
+      const newImage = Skia.Image.MakeImageFromEncoded(data);
+
+      setLoadedImage(newImage)
+    }
+  }, [image])
+
 
   if (hasPermission)
     return (
@@ -219,9 +226,11 @@ export default function CameraPage({language, translations}) {
                   </Pressable>
                   <Pressable onPress={async () => {
                     const photo = await camera.current.takePhoto();
-                    console.log(photo.path)
                     setCameraOpen(false)
-                    setImage(photo.path)
+                    RNFS.readFile(photo.path, 'base64').then(result => {
+                      console.log(result)
+                      setImage(result)
+                    })
                   }}>
                     <Svg
                       width={80}
@@ -235,11 +244,11 @@ export default function CameraPage({language, translations}) {
                     </Svg>
                   </Pressable>
                   <Pressable style={styles.actionButton} onPress={() => {
-                    launchImageLibrary({mediaType: "photo", }, (result) => {
+                    launchImageLibrary({mediaType: "photo", includeBase64: true}, (result) => {
                       if (!result?.didCancel) {
-                        console.log("WJHOHG")
                         setCameraOpen(false)
-                        setImage(result.assets[0].uri)
+                        let image = result.assets[0].base64
+                        setImage(image)
                       }
 
                     })
@@ -272,13 +281,12 @@ export default function CameraPage({language, translations}) {
                     <View style={{ ...StyleSheet.absoluteFill, position: "absolute", zIndex: 100 }}>
                       <Pressable onPress={() => {
                         setPaths([]);
-                        console.log(loadedImage)
+                        // console.log(loadedImage)
                       }}>
                         <Text style={{ fontSize: 20, position: "absolute", top: screenHeight * 0.08, color: "white", paddingLeft: 20, textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.clear[language]}</Text>
                       </Pressable>
                       <Pressable onPress={() => {
                         setCameraOpen(true);
-                        setImage(null)
                       }}>
                         <Text style={{ fontSize: 20, position: "absolute", top: screenHeight * 0.08, color: "white", right: 0, paddingRight: 20, textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.retake[language]}</Text>
                       </Pressable>
