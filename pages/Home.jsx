@@ -304,7 +304,7 @@ const scheduleRepeatingReminder = async (timestamp) => {
   const week = new Array(7).fill('');
 
   for await (const [index, _day] of week.entries()) {
-    const dayTimestamp = dayjs(timestamp).add(index, 'day').hour(20).minute(8).second(30).valueOf();
+    const dayTimestamp = dayjs(timestamp).add(index, 'day').hour(12).minute(0).second(0).valueOf();
     const validTimestamp =
       dayTimestamp > new Date().getTime()
         ? dayTimestamp
@@ -323,21 +323,11 @@ const scheduleRepeatingReminder = async (timestamp) => {
         repeatFrequency: RepeatFrequency.WEEKLY
       }
     )
-    // console.log(dayjs(validTimestamp).format('ddd'),)
   }
 };
 
 
 export default function HomePage({ navigation }) {
-  useEffect(() => {
-    notifee.cancelAllNotifications().then(() => {
-      scheduleRepeatingReminder(new Date);
-    }
-
-    )
-  }, [])
-
-
   const [cameraPage, setCameraPage] = useState(false)
   const [studyPage, setStudyPage] = useState(true)
   const [dictionaryPage, setDictionaryPage] = useState(false)
@@ -348,25 +338,21 @@ export default function HomePage({ navigation }) {
   const [words, setWords] = useState(null)
 
 
-  // async function onDisplayNotification() {
-  //   await notifee.displayNotification({
-  //     title: `Practice!`,
-  //     body: `Your streak is waiting.`,
-  //   });
-  // }
-
-  // Request perms for notifcations
+  // Sets up daily notifications
   useEffect(() => {
-    notifee.requestPermission()
+    notifee.requestPermission().then(
+      notifee.cancelAllNotifications().then(() => {
+        scheduleRepeatingReminder(new Date);
+      }
+    ))
   }, [])
 
-  // Subscribe to changes in database
+  // Subscribe to changes in profile
   useEffect(() => {
     let uid = auth().currentUser.uid;
     const onValueChange = database()
       .ref(`${uid}/profile`)
       .on('value', snapshot => {
-        // console.log("something changed!")
         let data = snapshot.val()
         let lang = data.language
         setUserLanguage(lang)
@@ -385,11 +371,8 @@ export default function HomePage({ navigation }) {
     const onValueChange = database()
       .ref(`${uid}/words`)
       .on('value', snapshot => {
-        // console.log("something changed!")
         let data = snapshot.val()
-
         setWords(data)
-
         return () => database().ref(`${uid}/words`).off('value', onValueChange);
       })
   }, [])

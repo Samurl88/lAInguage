@@ -11,7 +11,6 @@ const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
 
-
 export default function Dictionary({ language, translations, terms }) {
     const [words, setWords] = useState();
     const [searchValue, setSearchValue] = useState(null);
@@ -71,11 +70,6 @@ export default function Dictionary({ language, translations, terms }) {
             search(words);
     }, [searchValue]);
 
-    // useEffect(() => {
-    //     if (words)
-    //         search(words);
-    // }, [onlyUnfamiliar, onlyFamiliar, onlyMastered]);
-
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F5EEE5", alignItems: "center", }}>
             <View style={styles.container}>
@@ -96,8 +90,8 @@ export default function Dictionary({ language, translations, terms }) {
                 </Pressable> */}
                 <Text style={styles.title}>{translations.dictionary[language]}</Text>
 
-                <View style={{ gap: 10, width: screenWidth * 0.9, }}>
-                    <View style={{ backgroundColor: "rgba(118, 118, 128, 0.12)", height: 35, borderRadius: 10, alignItems: "center", flexDirection: "row" }}>
+                <View style={{ gap: 10, width: screenWidth, alignItems: "center"}}>
+                    <View style={{ backgroundColor: "rgba(118, 118, 128, 0.12)", height: 35, borderRadius: 10, alignItems: "center", flexDirection: "row", width: screenWidth * 0.9 }}>
                         <SFSymbol name="magnifyingglass" size={18} color="grey" style={{ left: screenWidth * 0.05, position: "absolute" }} />
                         <TextInput
                             placeholder={translations.search[language]}
@@ -108,7 +102,7 @@ export default function Dictionary({ language, translations, terms }) {
                     </View>
 
                     {/* Filter buttons height: screenHeight * 0.036*/}
-                    <View style={{ gap: 10, flexDirection: "row", width: screenWidth * 0.9, flexWrap: 'wrap',  }}>
+                    <ScrollView contentContainerStyle={{paddingLeft: screenWidth * 0.05, paddingRight: screenWidth * 0.05, gap: 10}} horizontal style={{ flexDirection: "row", width: screenWidth, height: screenHeight * 0.036 }}>
                         {wordCounts?.unfamiliar > 0
                             ? <Pressable style={onlyUnfamiliar ? styles.categoryBtnSelected : styles.categoryBtn} onPress={() => {
                                     if (onlyUnfamiliar) {
@@ -154,7 +148,7 @@ export default function Dictionary({ language, translations, terms }) {
                             </Pressable>
                             : null
                         }
-                    </View>
+                    </ScrollView>
                 </View>
                 {terms
                     ? <Animated.View key="flatlist" exiting={FadeOut.duration(750)} style={{ width: screenWidth, flex: 1, alignItems: "center", }}>

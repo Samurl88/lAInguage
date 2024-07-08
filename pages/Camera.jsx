@@ -28,9 +28,9 @@ import { launchImageLibrary } from 'react-native-image-picker';
 
 import RNFS from 'react-native-fs'
 
+export default function CameraPage({ language, translations }) {
+  const ReanimatedPressable = Animated.createAnimatedComponent(Pressable)
 
-
-export default function CameraPage({language, translations}) {
 
   const [words, setWords] = useState([])
 
@@ -161,6 +161,8 @@ export default function CameraPage({language, translations}) {
 
   const [currentPosition, setCurrentPosition] = useState(-1)
 
+  const [flash, setFlash] = useState('off')
+
   const saveMarkedUpImage = async () => {
     setLoading(true)
     const image = await canvasRef.current.makeImageSnapshotAsync();
@@ -186,9 +188,11 @@ export default function CameraPage({language, translations}) {
       if (newPaths?.[index]?.segments) {
         newPaths[index].segments.push(`L ${g.x} ${g.y}`);
         runOnJS(setPaths)(newPaths);
+
+        console.log(newPaths)
       }
     }).minDistance(1)
-    
+
   useEffect(() => {
     if (!hasPermission)
       requestPermission()
@@ -211,21 +215,26 @@ export default function CameraPage({language, translations}) {
 
           {cameraOpen ?
             <>
-              {/* <Camera
+              <Camera
                 ref={camera}
-                style={{ width: screenWidth, height: screenHeight, position: "absolute"}}
+                style={{ width: screenWidth, height: screenHeight, position: "absolute" }}
                 device={device}
                 isActive={true}
                 photo={true}
               >
-              </Camera> */}
+              </Camera>
               <View style={{ flex: 1, }}>
                 <View style={styles.buttonContainer}>
-                  <Pressable style={{ ...styles.actionButton, opacity: 0 }}>
-                    <Text style={styles.languageText}>EN</Text>
+                  <Pressable style={{ ...styles.actionButton, }} onPress={() => {
+                    if (flash == "on") setFlash("off")
+                    else setFlash("on")
+                  }}>
+                    <SFSymbol name={flash == "on" ? "bolt.fill" : "bolt.slash.fill"} size={25} color="white" />
                   </Pressable>
                   <Pressable onPress={async () => {
-                    const photo = await camera.current.takePhoto();
+                    const photo = await camera.current.takePhoto({
+                      flash: flash
+                    });
                     RNFS.readFile(photo.path, 'base64').then(result => {
                       setCameraOpen(false)
                       setImage(result)
@@ -243,7 +252,7 @@ export default function CameraPage({language, translations}) {
                     </Svg>
                   </Pressable>
                   <Pressable style={styles.actionButton} onPress={() => {
-                    launchImageLibrary({mediaType: "photo", includeBase64: true}, (result) => {
+                    launchImageLibrary({ mediaType: "photo", includeBase64: true }, (result) => {
                       if (!result?.didCancel) {
                         setCameraOpen(false)
                         let image = result.assets[0].base64
@@ -278,28 +287,27 @@ export default function CameraPage({language, translations}) {
                       ))}
                     </Canvas>
                     <View style={{ ...StyleSheet.absoluteFill, position: "absolute", zIndex: 100 }}>
-                      <Pressable onPress={() => {
-                        setPaths([]);
-                        // console.log(loadedImage)
-                      }}>
-                        <Text style={{ fontSize: 20, position: "absolute", top: screenHeight * 0.08, color: "white", paddingLeft: 20, textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.clear[language]}</Text>
-                      </Pressable>
-                      <Pressable onPress={() => {
-                        setCameraOpen(true);
-                        setImage(null)
-                        setLoadedImage(null)
-                        
-                      }}>
-                        <Text style={{ fontSize: 20, position: "absolute", top: screenHeight * 0.08, color: "white", right: 0, paddingRight: 20, textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.retake[language]}</Text>
-                      </Pressable>
-                      <View style={styles.buttonContainer}>
+
+                      <Animated.View style={styles.buttonContainer}>
+                        <Pressable style={{ ...styles.actionButton, }} onPress={() => {
+                          setCameraOpen(true);
+                          setImage(null);
+                          setLoadedImage(null);
+                        }}>
+                          <Animated.View key="newBtn" entering={FadeIn}>
+                            <SFSymbol name="arrow.triangle.2.circlepath.camera.fill" size={24} color="white" />
+                          </Animated.View>
+                        </Pressable>
                         <Pressable onPress={() => { if (!loading) saveMarkedUpImage() }} style={styles.bigActionButton}>
                           {!loading
-                            ? <SFSymbol name="checkmark" size={32} color="black" />
+                            ? <SFSymbol name="doc.text.magnifyingglass" size={32} color="black" />
                             : <ActivityIndicator />
                           }
                         </Pressable>
-                      </View>
+                        <Pressable style={{ ...styles.actionButton, }} onPress={() => { setPaths([]) }}>
+                          <SFSymbol name="eraser.fill" size={25} color="white" />
+                        </Pressable>
+                      </Animated.View>
                       <Text style={{ fontSize: 18, position: "absolute", top: screenHeight * 0.75, alignSelf: "center", color: "white", textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.highlight_text_to_translate[language]}</Text>
                     </View>
                   </View>
@@ -316,8 +324,8 @@ export default function CameraPage({language, translations}) {
           backgroundStyle={{ backgroundColor: "#F5EEE5" }}
           enablePanDownToClose={true}
           onChange={index => {
-              setCurrentPosition(index)
-            }}
+            setCurrentPosition(index)
+          }}
         >
           <BottomSheetView style={styles.contentContainer}>
             <Text style={styles.title}>{translations.definitions[language]}</Text>
@@ -330,20 +338,20 @@ export default function CameraPage({language, translations}) {
               }}
               ListHeaderComponent={
                 currentPosition !== -1 ?
-                <Animated.View entering={FadeIn.duration(750)} style={{ ...styles.termContainer, alignSelf: "center",}}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-                    <Text style={styles.termTitle}>{originalWord}</Text>
-                    <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+                  <Animated.View entering={FadeIn.duration(750)} style={{ ...styles.termContainer, alignSelf: "center", }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+                      <Text style={styles.termTitle}>{originalWord}</Text>
+                      <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+                    </View>
+                    <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
+                  </Animated.View>
+                  : <View style={{ ...styles.termContainer, alignSelf: "center", opacity: 0 }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+                      <Text style={styles.termTitle}>{originalWord}</Text>
+                      <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+                    </View>
+                    <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
                   </View>
-                  <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-                </Animated.View>
-                : <View style={{ ...styles.termContainer, alignSelf: "center", opacity: 0}}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-                  <Text style={styles.termTitle}>{originalWord}</Text>
-                  <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
-                </View>
-                <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-              </View>
               }
               // scrollEnabled={false}
               style={{ paddingBottom: 50 }}
@@ -465,7 +473,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-evenly",
     alignItems: "center",
-    width: "100%"
+    width: "100%",
+    zIndex: 100000
   },
 })
 
