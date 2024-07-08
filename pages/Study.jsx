@@ -11,35 +11,10 @@ import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient
 import MaskedView from '@react-native-masked-view/masked-view';
 import notifee, { RepeatFrequency, TimestampTrigger, TriggerType } from '@notifee/react-native';
 
+const dayjs = require('dayjs')
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
-
-
-
-async function onCreateTriggerNotification() {
-  const date = new Date(Date.now());
-  date.setHours(10);
-  date.setMinutes(1);
-
-  // Create a time-based trigger
-  const trigger = {
-    type: TriggerType.TIMESTAMP,
-    timestamp: date.getTime(), 
-    repeatFrequency: RepeatFrequency.DAILY,
-  };
-
-  // Create a trigger notification
-  await notifee.createTriggerNotification(
-    {
-      title: `Practice!`,
-      body: `Your streak is waiting.`,
-    },
-    trigger,
-  );
-  console.log("DONE")
-}
-
 
 
 // Initializing model
@@ -69,10 +44,6 @@ const safetySetting = [
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
 export default function StudyPage({ language, stars, translations }) {
-
-  useEffect(() => {
-    onCreateTriggerNotification()
-  }, [])
   
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
@@ -91,15 +62,24 @@ export default function StudyPage({ language, stars, translations }) {
   }, [flashcards, MCQs])
 
 
-  // Add star
-  const onComplete = () => {
+  // Handle backend completion + notifications
+  const onComplete = async () => {
     let uid = auth().currentUser.uid;
     setComplete(true);
+
     database()
       .ref(`${uid}/profile`)
       .update({
         stars: stars + 1
       })
+
+    // If it's not 12 yet, then cancel notification for the day
+    let hour = dayjs().hour()
+    // console.log(hour)
+    if (hour < 12) {
+      const reminderId = dayjs().format('ddd');
+      notifee.cancelTriggerNotification(reminderId)
+    }
   }
 
   // Creating question flatlist

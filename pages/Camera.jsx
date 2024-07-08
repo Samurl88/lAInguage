@@ -155,7 +155,7 @@ export default function CameraPage({language, translations}) {
   const camera = useRef(null);
   const [cameraOpen, setCameraOpen] = useState(true);
   const [image, setImage] = useState(null);
-  const [loadedImage, setLoadedImage] = useState(image)
+  const [loadedImage, setLoadedImage] = useState(null)
   const device = useCameraDevice('back')
   const { hasPermission, requestPermission } = useCameraPermission()
 
@@ -226,9 +226,8 @@ export default function CameraPage({language, translations}) {
                   </Pressable>
                   <Pressable onPress={async () => {
                     const photo = await camera.current.takePhoto();
-                    setCameraOpen(false)
                     RNFS.readFile(photo.path, 'base64').then(result => {
-                      console.log(result)
+                      setCameraOpen(false)
                       setImage(result)
                     })
                   }}>
@@ -287,6 +286,9 @@ export default function CameraPage({language, translations}) {
                       </Pressable>
                       <Pressable onPress={() => {
                         setCameraOpen(true);
+                        setImage(null)
+                        setLoadedImage(null)
+                        
                       }}>
                         <Text style={{ fontSize: 20, position: "absolute", top: screenHeight * 0.08, color: "white", right: 0, paddingRight: 20, textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.retake[language]}</Text>
                       </Pressable>

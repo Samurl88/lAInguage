@@ -12,7 +12,10 @@ import database from '@react-native-firebase/database';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient';
 import * as DropdownMenu from 'zeego/dropdown-menu'
-import notifee from '@notifee/react-native';
+import notifee, { RepeatFrequency, TriggerType } from '@notifee/react-native';
+import { FunctionDeclarationSchemaType } from '@google/generative-ai';
+
+const dayjs = require('dayjs')
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
@@ -294,7 +297,47 @@ const translations = {
 }
 
 
+
+// https://blog.teamairship.com/creating-reminders-with-notifee -> workaround for notifee scheduling bug
+
+const scheduleRepeatingReminder = async (timestamp) => {
+  const week = new Array(7).fill('');
+
+  for await (const [index, _day] of week.entries()) {
+    const dayTimestamp = dayjs(timestamp).add(index, 'day').hour(20).minute(8).second(30).valueOf();
+    const validTimestamp =
+      dayTimestamp > new Date().getTime()
+        ? dayTimestamp
+        : dayjs(dayTimestamp).add(1, 'week').valueOf();
+
+
+    await notifee.createTriggerNotification(
+      {
+        id: dayjs(validTimestamp).format('ddd'),
+        title: 'Practice!',
+        body: `Don't lose your streak!`
+      },
+      { 
+        type: TriggerType.TIMESTAMP,
+        timestamp: validTimestamp,
+        repeatFrequency: RepeatFrequency.WEEKLY
+      }
+    )
+    // console.log(dayjs(validTimestamp).format('ddd'),)
+  }
+};
+
+
 export default function HomePage({ navigation }) {
+  useEffect(() => {
+    notifee.cancelAllNotifications().then(() => {
+      scheduleRepeatingReminder(new Date);
+    }
+
+    )
+  }, [])
+
+
   const [cameraPage, setCameraPage] = useState(false)
   const [studyPage, setStudyPage] = useState(true)
   const [dictionaryPage, setDictionaryPage] = useState(false)
@@ -323,7 +366,7 @@ export default function HomePage({ navigation }) {
     const onValueChange = database()
       .ref(`${uid}/profile`)
       .on('value', snapshot => {
-        console.log("something changed!")
+        // console.log("something changed!")
         let data = snapshot.val()
         let lang = data.language
         setUserLanguage(lang)
@@ -342,7 +385,7 @@ export default function HomePage({ navigation }) {
     const onValueChange = database()
       .ref(`${uid}/words`)
       .on('value', snapshot => {
-        console.log("something changed!")
+        // console.log("something changed!")
         let data = snapshot.val()
 
         setWords(data)
