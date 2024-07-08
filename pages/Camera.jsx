@@ -11,7 +11,7 @@ import {
 } from "react-native-gesture-handler";
 
 import { Canvas, Path, useCanvasRef, Picture } from "@shopify/react-native-skia";
-import { FadeIn, runOnJS } from 'react-native-reanimated';
+import { FadeIn, FadeOut, interpolate, runOnJS, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { SFSymbol } from 'react-native-sfsymbols';
 import Config from 'react-native-config';
 import Animated from 'react-native-reanimated';
@@ -172,12 +172,16 @@ export default function CameraPage({ language, translations }) {
 
   };
 
+  // onBegin will allow only one stroke
   const pan = Gesture.Pan()
     .onStart((g) => {
-      const newPaths = [...paths];
+      console.log("start")
+      // const newPaths = [];
+      const newPaths = [...paths]
+      // console.log(newPaths)
       newPaths[paths.length] = {
         segments: [],
-        color: "yellow",
+        color: "#77bee9",
       };
       newPaths[paths.length].segments.push(`M ${g.x} ${g.y}`);
       runOnJS(setPaths)(newPaths);
@@ -188,24 +192,33 @@ export default function CameraPage({ language, translations }) {
       if (newPaths?.[index]?.segments) {
         newPaths[index].segments.push(`L ${g.x} ${g.y}`);
         runOnJS(setPaths)(newPaths);
-
-        console.log(newPaths)
       }
-    }).minDistance(1)
+    })
+    .onEnd((g) => {
+      console.log("Done")
+    }
+    )
+    .minDistance(1)
 
   useEffect(() => {
     if (!hasPermission)
       requestPermission()
   }, [])
 
+
   useEffect(() => {
     if (image) {
       const data = Skia.Data.fromBase64(image);
       const newImage = Skia.Image.MakeImageFromEncoded(data);
 
+      console.log(newImage)
       setLoadedImage(newImage)
+      console.log("AAAA")
+      setCameraOpen(false)
     }
   }, [image])
+
+
 
 
   if (hasPermission)
@@ -213,7 +226,7 @@ export default function CameraPage({ language, translations }) {
       <>
         <View style={{ backgroundColor: "black", flex: 1 }}>
 
-          {cameraOpen ?
+          {!loadedImage ?
             <>
               <Camera
                 ref={camera}
@@ -224,7 +237,7 @@ export default function CameraPage({ language, translations }) {
               >
               </Camera>
               <View style={{ flex: 1, }}>
-                <View style={styles.buttonContainer}>
+                <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(500)}>
                   <Pressable style={{ ...styles.actionButton, }} onPress={() => {
                     if (flash == "on") setFlash("off")
                     else setFlash("on")
@@ -236,7 +249,6 @@ export default function CameraPage({ language, translations }) {
                       flash: flash
                     });
                     RNFS.readFile(photo.path, 'base64').then(result => {
-                      setCameraOpen(false)
                       setImage(result)
                     })
                   }}>
@@ -254,7 +266,6 @@ export default function CameraPage({ language, translations }) {
                   <Pressable style={styles.actionButton} onPress={() => {
                     launchImageLibrary({ mediaType: "photo", includeBase64: true }, (result) => {
                       if (!result?.didCancel) {
-                        setCameraOpen(false)
                         let image = result.assets[0].base64
                         setImage(image)
                       }
@@ -263,52 +274,56 @@ export default function CameraPage({ language, translations }) {
                   }}>
                     <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
                   </Pressable>
-                </View>
+                </Animated.View>
               </View>
             </>
             : <>
+              {/* entering={FadeIn.duration(500).delay(500)} */}
+              <Animated.View style={styles.buttonContainer} key="buttonContainer2" exiting={FadeOut.duration(250)}>
+                <Pressable style={{ ...styles.actionButton, }} onPress={() => {
+                  setCameraOpen(true);
+                  setImage(null);
+                  setLoadedImage(null);
+                }}>
+                  <Animated.View>
+                    <SFSymbol name="arrow.triangle.2.circlepath.camera.fill" size={24} color="white" />
+                  </Animated.View>
+                </Pressable>
+                <Pressable onPress={() => {
+                  if (!loading && paths.length) saveMarkedUpImage() }} style={styles.bigActionButton} opacity={paths.length ? 1 : 0.5}>
+                  {!loading
+                    ? <SFSymbol name="doc.text.magnifyingglass" size={32} color="black" />
+                    : <ActivityIndicator />
+                  }
+                </Pressable>
+                <Pressable style={{ ...styles.actionButton, }} onPress={() => { setPaths([]) }}>
+                  <Animated.View>
+                    <SFSymbol name="eraser.fill" size={25} color="white" />
+                  </Animated.View>
+                </Pressable>
+              </Animated.View>
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <GestureDetector gesture={pan}>
-                  <View style={styles.drawingContainer}>
+                  <View style={{ flex: 1, position: 'absolute', width: screenWidth, height: screenHeight }}>
                     <Canvas style={styles.canvas} ref={canvasRef}>
                       <Image image={loadedImage} fit="cover" x={0} y={0} width={screenWidth} height={screenHeight} />
                       {paths.map((p, index) => (
                         <Path
                           key={index}
-                          path={p.segments.join(" ")}
+                          path={p?.segments.join(" ") ? p.segments.join(" ") : " "}
                           strokeWidth={30}
                           style="stroke"
-                          color={p.color}
+                          color={p?.color}
                           opacity={0.5}
-                          borderRadius={30}
+                          strokeCap="round"
                         >
-                          <CornerPathEffect r={64} />
+                          <CornerPathEffect r={600004} />
                         </Path>
                       ))}
                     </Canvas>
-                    <View style={{ ...StyleSheet.absoluteFill, position: "absolute", zIndex: 100 }}>
 
-                      <Animated.View style={styles.buttonContainer}>
-                        <Pressable style={{ ...styles.actionButton, }} onPress={() => {
-                          setCameraOpen(true);
-                          setImage(null);
-                          setLoadedImage(null);
-                        }}>
-                          <Animated.View key="newBtn" entering={FadeIn}>
-                            <SFSymbol name="arrow.triangle.2.circlepath.camera.fill" size={24} color="white" />
-                          </Animated.View>
-                        </Pressable>
-                        <Pressable onPress={() => { if (!loading) saveMarkedUpImage() }} style={styles.bigActionButton}>
-                          {!loading
-                            ? <SFSymbol name="doc.text.magnifyingglass" size={32} color="black" />
-                            : <ActivityIndicator />
-                          }
-                        </Pressable>
-                        <Pressable style={{ ...styles.actionButton, }} onPress={() => { setPaths([]) }}>
-                          <SFSymbol name="eraser.fill" size={25} color="white" />
-                        </Pressable>
-                      </Animated.View>
-                      <Text style={{ fontSize: 18, position: "absolute", top: screenHeight * 0.75, alignSelf: "center", color: "white", textShadowColor: 'rgba(0, 0, 0, 0.85)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 5 }}>{translations.highlight_text_to_translate[language]}</Text>
+                    <View style={{ ...StyleSheet.absoluteFill, position: "absolute", zIndex: 100 }}>
+                      <Text style={{ fontSize: 18, position: "absolute", top: screenHeight * 0.905, alignSelf: "center", color: "white", textShadowColor: 'rgba(0, 0, 0, 1)', textShadowRadius: 10, padding: 10 }}>{translations.highlight_text_to_translate[language]}.</Text>
                     </View>
                   </View>
 
@@ -338,7 +353,7 @@ export default function CameraPage({ language, translations }) {
               }}
               ListHeaderComponent={
                 currentPosition !== -1 ?
-                  <Animated.View entering={FadeIn.duration(750)} style={{ ...styles.termContainer, alignSelf: "center", }}>
+                  <Animated.View key="lists" entering={FadeIn.duration(750)} style={{ ...styles.termContainer, alignSelf: "center", }}>
                     <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
                       <Text style={styles.termTitle}>{originalWord}</Text>
                       <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
@@ -464,7 +479,7 @@ const styles = StyleSheet.create({
     height: 80,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F0E8DD",
+    backgroundColor: "#77bee9",
     borderRadius: 40,
   },
   buttonContainer: {
