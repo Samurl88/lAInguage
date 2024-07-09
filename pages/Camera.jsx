@@ -11,7 +11,7 @@ import {
 } from "react-native-gesture-handler";
 
 import { Canvas, Path, useCanvasRef, Picture } from "@shopify/react-native-skia";
-import { FadeIn, FadeOut, interpolate, runOnJS, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import { Extrapolation, FadeIn, FadeOut, interpolate, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { SFSymbol } from 'react-native-sfsymbols';
 import Config from 'react-native-config';
 import Animated from 'react-native-reanimated';
@@ -29,14 +29,40 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import RNFS from 'react-native-fs'
 
 export default function CameraPage({ language, translations }) {
-  const ReanimatedPressable = Animated.createAnimatedComponent(Pressable)
+  Animated.addWhitelistedNativeProps({
+    zoom: true,
+  })
+  const ReanimatedCamera = Animated.createAnimatedComponent(Camera)
 
+  const device = useCameraDevice('back')
+  const zoom = useSharedValue(device.neutralZoom)
+  const zoomOffset = useSharedValue(0);
+
+  const gesture = Gesture.Pinch()
+    .onBegin(() => {
+      console.log("wooow")
+      zoomOffset.value = zoom.value
+    })
+    .onUpdate(event => {
+      const z = zoomOffset.value * event.scale
+      zoom.value = interpolate(
+        z,
+        [1, 10],
+        [device.minZoom, device.maxZoom],
+        Extrapolation.CLAMP,
+      )
+    })
+
+
+  const animatedProps = useAnimatedProps(
+    () => ({ zoom: zoom.value }),
+    [zoom]
+  )
 
   const [words, setWords] = useState([])
 
   async function getWords() {
     let uid = auth().currentUser.uid;
-    let option = "translatedDefinition"
     database()
       .ref(`${uid}/words`)
       .once('value')
@@ -156,7 +182,6 @@ export default function CameraPage({ language, translations }) {
   const [cameraOpen, setCameraOpen] = useState(true);
   const [image, setImage] = useState(null);
   const [loadedImage, setLoadedImage] = useState(null)
-  const device = useCameraDevice('back')
   const { hasPermission, requestPermission } = useCameraPermission()
 
   const [currentPosition, setCurrentPosition] = useState(-1)
@@ -219,8 +244,7 @@ export default function CameraPage({ language, translations }) {
   }, [image])
 
 
-
-
+  
   if (hasPermission)
     return (
       <>
@@ -228,15 +252,26 @@ export default function CameraPage({ language, translations }) {
 
           {!loadedImage ?
             <>
-              <Camera
+              <GestureHandlerRootView style={{ flex: 1, height: screenHeight, width: screenWidth}}>
+                  <GestureDetector gesture={gesture} style={{ flex: 1, height: screenHeight, width: screenWidth}}>
+                    <Camera
                 ref={camera}
                 style={{ width: screenWidth, height: screenHeight, position: "absolute" }}
                 device={device}
                 isActive={true}
                 photo={true}
-              >
-              </Camera>
-              <View style={{ flex: 1, }}>
+                    />
+                    {/* <ReanimatedCamera
+                ref={camera}
+                style={{ width: screenWidth, height: screenHeight, position: "absolute" }}
+                device={device}
+                isActive={false}
+                photo={true}
+                zoom={zoom.value} /> */}
+
+                  </GestureDetector>
+              </GestureHandlerRootView>
+              {/* <View style={{ flex: 1, }}>
                 <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(500)}>
                   <Pressable style={{ ...styles.actionButton, }} onPress={() => {
                     if (flash == "on") setFlash("off")
@@ -275,7 +310,7 @@ export default function CameraPage({ language, translations }) {
                     <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
                   </Pressable>
                 </Animated.View>
-              </View>
+              </View> */}
             </>
             : <>
               {/* entering={FadeIn.duration(500).delay(500)} */}
@@ -290,7 +325,8 @@ export default function CameraPage({ language, translations }) {
                   </Animated.View>
                 </Pressable>
                 <Pressable onPress={() => {
-                  if (!loading && paths.length) saveMarkedUpImage() }} style={styles.bigActionButton} opacity={paths.length ? 1 : 0.5}>
+                  if (!loading && paths.length) saveMarkedUpImage()
+                }} style={styles.bigActionButton} opacity={paths.length ? 1 : 0.5}>
                   {!loading
                     ? <SFSymbol name="doc.text.magnifyingglass" size={32} color="black" />
                     : <ActivityIndicator />
