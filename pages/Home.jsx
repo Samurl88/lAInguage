@@ -537,7 +537,7 @@ export default function HomePage({ navigation }) {
 
         {cameraPage &&
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
-            <CameraPage language={userLanguage} translations={translations} />
+            <CameraPage language={userLanguage} translations={translations} terms={words} />
           </Animated.View>
         }
         {studyPage &&

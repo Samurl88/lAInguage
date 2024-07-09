@@ -28,36 +28,13 @@ import { launchImageLibrary } from 'react-native-image-picker';
 
 import RNFS from 'react-native-fs'
 
-export default function CameraPage({ language, translations }) {
-  Animated.addWhitelistedNativeProps({
-    zoom: true,
-  })
-  const ReanimatedCamera = Animated.createAnimatedComponent(Camera)
+export default function CameraPage({ language, translations, terms }) {
+  useEffect(() => {
+    console.log(terms)
+  }, [terms])
+  
 
   const device = useCameraDevice('back')
-  const zoom = useSharedValue(device.neutralZoom)
-  const zoomOffset = useSharedValue(0);
-
-  const gesture = Gesture.Pinch()
-    .onBegin(() => {
-      console.log("wooow")
-      zoomOffset.value = zoom.value
-    })
-    .onUpdate(event => {
-      const z = zoomOffset.value * event.scale
-      zoom.value = interpolate(
-        z,
-        [1, 10],
-        [device.minZoom, device.maxZoom],
-        Extrapolation.CLAMP,
-      )
-    })
-
-
-  const animatedProps = useAnimatedProps(
-    () => ({ zoom: zoom.value }),
-    [zoom]
-  )
 
   const [words, setWords] = useState([])
 
@@ -77,6 +54,7 @@ export default function CameraPage({ language, translations }) {
           words.push(obj)
         }
         setWords(words)
+        console.log(words)
         // console.log(words)
       })
   }
@@ -244,7 +222,7 @@ export default function CameraPage({ language, translations }) {
   }, [image])
 
 
-  
+
   if (hasPermission)
     return (
       <>
@@ -252,26 +230,15 @@ export default function CameraPage({ language, translations }) {
 
           {!loadedImage ?
             <>
-              <GestureHandlerRootView style={{ flex: 1, height: screenHeight, width: screenWidth}}>
-                  <GestureDetector gesture={gesture} style={{ flex: 1, height: screenHeight, width: screenWidth}}>
-                    <Camera
+              <Camera
                 ref={camera}
                 style={{ width: screenWidth, height: screenHeight, position: "absolute" }}
                 device={device}
                 isActive={true}
                 photo={true}
-                    />
-                    {/* <ReanimatedCamera
-                ref={camera}
-                style={{ width: screenWidth, height: screenHeight, position: "absolute" }}
-                device={device}
-                isActive={false}
-                photo={true}
-                zoom={zoom.value} /> */}
+                enableZoomGesture={true}
+              />
 
-                  </GestureDetector>
-              </GestureHandlerRootView>
-              {/* <View style={{ flex: 1, }}>
                 <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(500)}>
                   <Pressable style={{ ...styles.actionButton, }} onPress={() => {
                     if (flash == "on") setFlash("off")
@@ -310,7 +277,7 @@ export default function CameraPage({ language, translations }) {
                     <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
                   </Pressable>
                 </Animated.View>
-              </View> */}
+
             </>
             : <>
               {/* entering={FadeIn.duration(500).delay(500)} */}
@@ -376,16 +343,23 @@ export default function CameraPage({ language, translations }) {
           enablePanDownToClose={true}
           onChange={index => {
             setCurrentPosition(index)
+
+            // If closed, add latest word to words
+            if (index == -1) {
+              let newWords = words
+              newWords.unshift({ word: originalWord, definition: originalDefinition, translatedWord: translatedWord, translatedDefinition, translatedDefinition, score: 0 })
+              setWords(newWords)
+            }
           }}
         >
           <BottomSheetView style={styles.contentContainer}>
             <Text style={styles.title}>{translations.definitions[language]}</Text>
             <FlatList
               data={words}
-              contentContainerStyle={{ gap: 10, paddingBottom: 30, alignSelf: "center" }}
+              contentContainerStyle={{ paddingBottom: 30, alignSelf: "center" }}
               renderItem={({ item }) => {
                 // console.log(item)
-                return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />)
+                return (<Term originalWord={originalWord} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />)
               }}
               ListHeaderComponent={
                 currentPosition !== -1 ?
@@ -414,16 +388,18 @@ export default function CameraPage({ language, translations }) {
     )
 }
 
-function Term({ word, translatedWord, translatedDefinition }) {
-  return (
-    <View style={styles.termContainer}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-        <Text style={styles.termTitle}>{word}</Text>
-        <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+function Term({ originalWord, word, translatedWord, translatedDefinition }) {
+  // Show term if it hasn't been replaced by a new scan
+  if (word != originalWord)
+    return (
+      <View style={styles.termContainer}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+          <Text style={styles.termTitle}>{word}</Text>
+          <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+        </View>
+        <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
       </View>
-      <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-    </View>
-  )
+    )
 }
 
 const styles = StyleSheet.create({
@@ -432,7 +408,8 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     padding: 20,
     width: screenWidth * 0.9,
-    height: screenHeight * 0.16
+    height: screenHeight * 0.16,
+    marginBottom: 10
 
   },
   termTitle: {
