@@ -28,41 +28,34 @@ import { launchImageLibrary } from 'react-native-image-picker';
 
 import RNFS from 'react-native-fs'
 
+const dayjs = require('dayjs')
+
 export default function CameraPage({ language, translations, terms }) {
+
+  const [words, setWords] = useState([])
+
+  // Sort terms on update
   useEffect(() => {
-    console.log(terms)
+    let words = []
+    for (const word in terms) {
+      let obj = terms[word]
+      obj.word = word
+      words.push(obj)
+    }
+
+    // Sort terms by date
+    words = words.sort((a, b) => {
+      return dayjs(JSON.parse(a.date)).isAfter(dayjs(JSON.parse(b.date))) ? -1 : 1
+    })
+    
+    // Remove most recent word (to be animated in header instead)
+    words.shift()
+
+    setWords(words)
   }, [terms])
   
 
   const device = useCameraDevice('back')
-
-  const [words, setWords] = useState([])
-
-  async function getWords() {
-    let uid = auth().currentUser.uid;
-    database()
-      .ref(`${uid}/words`)
-      .once('value')
-      .then(snapshot => {
-        let data = snapshot.val()
-
-        let words = []
-        for (const word in data) {
-          // console.log(data[word])
-          let obj = data[word]
-          obj.word = word
-          words.push(obj)
-        }
-        setWords(words)
-        console.log(words)
-        // console.log(words)
-      })
-  }
-
-  useEffect(() => {
-    getWords()
-  }, [])
-
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
   const [originalWord, setOriginalWord] = useState(null)
@@ -105,7 +98,8 @@ export default function CameraPage({ language, translations, terms }) {
           translatedWord: translatedWord,
           definition: originalDefinition,
           translatedDefinition: translatedDefinition,
-          score: 0
+          score: 0,
+          date: JSON.stringify(dayjs())
         }
       })
       .then(() => console.log("Done!")).catch(error => {
@@ -213,10 +207,7 @@ export default function CameraPage({ language, translations, terms }) {
     if (image) {
       const data = Skia.Data.fromBase64(image);
       const newImage = Skia.Image.MakeImageFromEncoded(data);
-
-      console.log(newImage)
       setLoadedImage(newImage)
-      console.log("AAAA")
       setCameraOpen(false)
     }
   }, [image])
@@ -239,7 +230,7 @@ export default function CameraPage({ language, translations, terms }) {
                 enableZoomGesture={true}
               />
 
-                <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(500)}>
+                <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)}>
                   <Pressable style={{ ...styles.actionButton, }} onPress={() => {
                     if (flash == "on") setFlash("off")
                     else setFlash("on")
@@ -283,6 +274,7 @@ export default function CameraPage({ language, translations, terms }) {
               {/* entering={FadeIn.duration(500).delay(500)} */}
               <Animated.View style={styles.buttonContainer} key="buttonContainer2" exiting={FadeOut.duration(250)}>
                 <Pressable style={{ ...styles.actionButton, }} onPress={() => {
+                  setPaths([])
                   setCameraOpen(true);
                   setImage(null);
                   setLoadedImage(null);
@@ -356,10 +348,10 @@ export default function CameraPage({ language, translations, terms }) {
             <Text style={styles.title}>{translations.definitions[language]}</Text>
             <FlatList
               data={words}
-              contentContainerStyle={{ paddingBottom: 30, alignSelf: "center" }}
+              contentContainerStyle={{ gap: 10, paddingBottom: 30, alignSelf: "center" }}
               renderItem={({ item }) => {
                 // console.log(item)
-                return (<Term originalWord={originalWord} word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />)
+                return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />)
               }}
               ListHeaderComponent={
                 currentPosition !== -1 ?
@@ -388,18 +380,16 @@ export default function CameraPage({ language, translations, terms }) {
     )
 }
 
-function Term({ originalWord, word, translatedWord, translatedDefinition }) {
-  // Show term if it hasn't been replaced by a new scan
-  if (word != originalWord)
-    return (
-      <View style={styles.termContainer}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-          <Text style={styles.termTitle}>{word}</Text>
-          <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
-        </View>
-        <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
+function Term({ word, translatedWord, translatedDefinition }) {
+  return (
+    <View style={styles.termContainer}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+        <Text style={styles.termTitle}>{word}</Text>
+        <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
       </View>
-    )
+      <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -409,8 +399,6 @@ const styles = StyleSheet.create({
     padding: 20,
     width: screenWidth * 0.9,
     height: screenHeight * 0.16,
-    marginBottom: 10
-
   },
   termTitle: {
     fontFamily: "NewYorkLarge-Regular",
