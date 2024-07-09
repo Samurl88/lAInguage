@@ -423,6 +423,13 @@ export default function HomePage({ navigation }) {
   const tabBarWidth = useSharedValue(0.5 * screenWidth)
   const edgeOpacity = useSharedValue(0)
 
+  
+  function toDictionaryPage() {
+    setCameraPage(false)
+    setDictionaryPage(true)
+    tabBarWidth.value = withTiming(0.85 * screenWidth)
+    edgeOpacity.value = withTiming(1)
+  }
 
   if (userLanguage && stars != null)
     return (
@@ -537,7 +544,7 @@ export default function HomePage({ navigation }) {
 
         {cameraPage &&
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
-            <CameraPage language={userLanguage} translations={translations} terms={words} />
+            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage}/>
           </Animated.View>
         }
         {studyPage &&

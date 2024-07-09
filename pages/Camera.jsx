@@ -11,7 +11,7 @@ import {
 } from "react-native-gesture-handler";
 
 import { Canvas, Path, useCanvasRef, Picture } from "@shopify/react-native-skia";
-import { Extrapolation, FadeIn, FadeOut, interpolate, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import { Extrapolation, FadeIn, FadeOut, interpolate, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
 import { SFSymbol } from 'react-native-sfsymbols';
 import Config from 'react-native-config';
 import Animated from 'react-native-reanimated';
@@ -31,7 +31,7 @@ import ContextMenu from 'react-native-context-menu-view';
 
 const dayjs = require('dayjs')
 
-export default function CameraPage({ language, translations, terms }) {
+export default function CameraPage({ language, translations, terms, toDictionaryPage }) {
   const device = useCameraDevice('back')
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
@@ -207,14 +207,6 @@ export default function CameraPage({ language, translations, terms }) {
       requestPermission()
   }, [])
 
-
-
-
-  // useEffect(() => {
-  //   console.log(originalWord)
-  // }, [originalWord])
-
-
   useEffect(() => {
     if (image) {
       const data = Skia.Data.fromBase64(image);
@@ -344,7 +336,7 @@ export default function CameraPage({ language, translations, terms }) {
         </View>
         <BottomSheet
           ref={bottomSheetRef}
-          snapPoints={["30%", "80%"]}
+          snapPoints={["33%", "80%"]}
           index={-1}
           backgroundStyle={{ backgroundColor: "#F5EEE5" }}
           enablePanDownToClose={true}
@@ -360,17 +352,22 @@ export default function CameraPage({ language, translations, terms }) {
           }}
           onAnimate={(fromIndex, toIndex) => {
             if (fromIndex == -1) {
-              firstTermOpacity.value = 1
-              firstTermHeight.value = screenHeight * 0.16
-              firstMarginTop.value = 12
+              firstTermOpacity.value = withSequence(withTiming(0, {duration: 0}), withDelay(750, withTiming(1, {duration: 500})))
+              firstTermHeight.value = withSequence(withTiming(0, {duration: 0}), withTiming(screenHeight * 0.16, {duration: 750}))
+              firstMarginTop.value = withSequence(withTiming(0, {duration: 0}), withTiming(12, {duration: 750}))
             } else if (toIndex == -1) {
               sortTerms();
-              console.log('termssorted')
             }
           }}
         >
           <BottomSheetView style={styles.contentContainer}>
-            <Text style={styles.title}>{translations.definitions[language]}</Text>
+            <View style={{flexDirection: "row", paddingTop: 15, width: "90%", alignItems: "center", justifyContent: "space-between", alignSelf: "center"}}>
+              <Text style={styles.title}>{translations.definitions[language]}</Text>
+              <Pressable style={{flexDirection: "row", gap: 10, backgroundColor: "#77BEE9", padding: 10, justifyContent: "center", alignItems: "center", borderRadius: 10, shadowColor: "#77BEE9", shadowOpacity: 0.7, shadowRadius: 5, }} onPress={toDictionaryPage}>
+                <SFSymbol name="character.book.closed.fill" size={20} color="white" height={20} width={20} />
+                <SFSymbol name="chevron.right" size={20} color="white" height={20} width={20} />
+              </Pressable>
+            </View>
             <FlatList
               data={words}
               contentContainerStyle={{ paddingBottom: 30, alignSelf: "center", marginTop: 20 }}
@@ -486,8 +483,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 25,
     fontFamily: "NewYorkLarge-Semibold",
-    paddingTop: 15,
-    paddingLeft: 30,
   },
   tabBar: {
     backgroundColor: "rgba(255, 255, 255, 0.7)",
