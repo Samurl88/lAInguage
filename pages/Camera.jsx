@@ -27,34 +27,11 @@ import Svg, { Circle } from "react-native-svg"
 import { launchImageLibrary } from 'react-native-image-picker';
 
 import RNFS from 'react-native-fs'
+import ContextMenu from 'react-native-context-menu-view';
 
 const dayjs = require('dayjs')
 
 export default function CameraPage({ language, translations, terms }) {
-
-  const [words, setWords] = useState([])
-
-  // Sort terms on update
-  useEffect(() => {
-    let words = []
-    for (const word in terms) {
-      let obj = terms[word]
-      obj.word = word
-      words.push(obj)
-    }
-
-    // Sort terms by date
-    words = words.sort((a, b) => {
-      return dayjs(JSON.parse(a.date)).isAfter(dayjs(JSON.parse(b.date))) ? -1 : 1
-    })
-    
-    // Remove most recent word (to be animated in header instead)
-    words.shift()
-
-    setWords(words)
-  }, [terms])
-  
-
   const device = useCameraDevice('back')
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
@@ -107,13 +84,6 @@ export default function CameraPage({ language, translations, terms }) {
       });
   }
 
-  const bottomSheetRef = useRef(null)
-
-
-  function openTextSheet() {
-    bottomSheetRef.current.snapToIndex(0);
-  }
-
   const define = async (imageData) => {
 
     // console.log(Config.API_KEY)
@@ -144,6 +114,41 @@ export default function CameraPage({ language, translations, terms }) {
 
     // setResponse(JSON.stringify(text))
   }
+
+  const [words, setWords] = useState([])
+
+  function sortTerms() {
+    let words = []
+    for (const word in terms) {
+      let obj = terms[word]
+      obj.word = word
+      words.push(obj)
+    }
+
+    // Sort terms by date
+    words = words.sort((a, b) => {
+      return dayjs(JSON.parse(a.date)).isAfter(dayjs(JSON.parse(b.date))) ? -1 : 1
+    })
+
+    // Remove most recent word (to be animated in header instead)
+    words.shift()
+
+    setWords(words)
+  }
+
+  // Sort terms on start
+  useEffect(() => {
+    sortTerms()
+  }, [])
+
+  const bottomSheetRef = useRef(null)
+
+
+  function openTextSheet() {
+    bottomSheetRef.current.snapToIndex(0);
+  }
+
+
 
 
   const [paths, setPaths] = useState([]);
@@ -203,6 +208,13 @@ export default function CameraPage({ language, translations, terms }) {
   }, [])
 
 
+
+
+  // useEffect(() => {
+  //   console.log(originalWord)
+  // }, [originalWord])
+
+
   useEffect(() => {
     if (image) {
       const data = Skia.Data.fromBase64(image);
@@ -213,6 +225,9 @@ export default function CameraPage({ language, translations, terms }) {
   }, [image])
 
 
+  const firstTermOpacity = useSharedValue(1)
+  const firstTermHeight = useSharedValue(screenHeight * 0.16)
+  const firstMarginTop = useSharedValue(12)
 
   if (hasPermission)
     return (
@@ -230,44 +245,44 @@ export default function CameraPage({ language, translations, terms }) {
                 enableZoomGesture={true}
               />
 
-                <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)}>
-                  <Pressable style={{ ...styles.actionButton, }} onPress={() => {
-                    if (flash == "on") setFlash("off")
-                    else setFlash("on")
-                  }}>
-                    <SFSymbol name={flash == "on" ? "bolt.fill" : "bolt.slash.fill"} size={25} color="white" />
-                  </Pressable>
-                  <Pressable onPress={async () => {
-                    const photo = await camera.current.takePhoto({
-                      flash: flash
-                    });
-                    RNFS.readFile(photo.path, 'base64').then(result => {
-                      setImage(result)
-                    })
-                  }}>
-                    <Svg
-                      width={80}
-                      height={80}
-                      viewBox="0 0 72 72"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <Circle cx={36} cy={36} r={30} fill="#F0E8DD" />
-                      <Circle cx={36} cy={36} r={34.5} stroke="#F0E8DD" strokeWidth={3} />
-                    </Svg>
-                  </Pressable>
-                  <Pressable style={styles.actionButton} onPress={() => {
-                    launchImageLibrary({ mediaType: "photo", includeBase64: true }, (result) => {
-                      if (!result?.didCancel) {
-                        let image = result.assets[0].base64
-                        setImage(image)
-                      }
+              <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)}>
+                <Pressable style={{ ...styles.actionButton, }} onPress={() => {
+                  if (flash == "on") setFlash("off")
+                  else setFlash("on")
+                }}>
+                  <SFSymbol name={flash == "on" ? "bolt.fill" : "bolt.slash.fill"} size={25} color="white" />
+                </Pressable>
+                <Pressable onPress={async () => {
+                  const photo = await camera.current.takePhoto({
+                    flash: flash
+                  });
+                  RNFS.readFile(photo.path, 'base64').then(result => {
+                    setImage(result)
+                  })
+                }}>
+                  <Svg
+                    width={80}
+                    height={80}
+                    viewBox="0 0 72 72"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <Circle cx={36} cy={36} r={30} fill="#F0E8DD" />
+                    <Circle cx={36} cy={36} r={34.5} stroke="#F0E8DD" strokeWidth={3} />
+                  </Svg>
+                </Pressable>
+                <Pressable style={styles.actionButton} onPress={() => {
+                  launchImageLibrary({ mediaType: "photo", includeBase64: true }, (result) => {
+                    if (!result?.didCancel) {
+                      let image = result.assets[0].base64
+                      setImage(image)
+                    }
 
-                    })
-                  }}>
-                    <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
-                  </Pressable>
-                </Animated.View>
+                  })
+                }}>
+                  <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
+                </Pressable>
+              </Animated.View>
 
             </>
             : <>
@@ -343,34 +358,28 @@ export default function CameraPage({ language, translations, terms }) {
               setWords(newWords)
             }
           }}
+          onAnimate={(fromIndex, toIndex) => {
+            if (fromIndex == -1) {
+              firstTermOpacity.value = 1
+              firstTermHeight.value = screenHeight * 0.16
+              firstMarginTop.value = 12
+            } else if (toIndex == -1) {
+              sortTerms();
+              console.log('termssorted')
+            }
+          }}
         >
           <BottomSheetView style={styles.contentContainer}>
             <Text style={styles.title}>{translations.definitions[language]}</Text>
             <FlatList
               data={words}
-              contentContainerStyle={{ gap: 10, paddingBottom: 30, alignSelf: "center" }}
+              contentContainerStyle={{ paddingBottom: 30, alignSelf: "center", marginTop: 20 }}
               renderItem={({ item }) => {
-                // console.log(item)
                 return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />)
               }}
               ListHeaderComponent={
-                currentPosition !== -1 ?
-                  <Animated.View key="lists" entering={FadeIn.duration(750)} style={{ ...styles.termContainer, alignSelf: "center", }}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-                      <Text style={styles.termTitle}>{originalWord}</Text>
-                      <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
-                    </View>
-                    <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-                  </Animated.View>
-                  : <View style={{ ...styles.termContainer, alignSelf: "center", opacity: 0 }}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-                      <Text style={styles.termTitle}>{originalWord}</Text>
-                      <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
-                    </View>
-                    <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-                  </View>
+                <FirstTerm word={originalWord} translatedWord={translatedWord} translatedDefinition={translatedDefinition} firstTermOpacity={firstTermOpacity} firstTermHeight={firstTermHeight} firstMarginTop={firstMarginTop} />
               }
-              // scrollEnabled={false}
               style={{ paddingBottom: 50 }}
             />
           </BottomSheetView>
@@ -380,15 +389,71 @@ export default function CameraPage({ language, translations, terms }) {
     )
 }
 
-function Term({ word, translatedWord, translatedDefinition }) {
+
+function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacity, firstTermHeight, firstMarginTop }) {
+
   return (
-    <View style={styles.termContainer}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
-        <Text style={styles.termTitle}>{word}</Text>
-        <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
-      </View>
-      <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
-    </View>
+    <Animated.View key={word} style={{ opacity: firstTermOpacity, height: firstTermHeight, marginTop: firstMarginTop }}>
+      <ContextMenu
+        actions={[{ title: "Remove term", destructive: true, systemIcon: "xmark" }]}
+        onPress={async (e) => {
+          if (e.nativeEvent.name == "Remove term") {
+            firstTermOpacity.value = withTiming(0, { duration: 750 })
+            firstTermHeight.value = withDelay(750, withTiming(0, { duration: 750 }))
+            firstMarginTop.value = withDelay(750, withTiming(0, { duration: 750 }))
+
+            let uid = auth().currentUser.uid;
+            database()
+              .ref(`${uid}/words/${word}`)
+              .set(null)
+
+          }
+        }}
+      >
+        <View style={{ ...styles.termContainer, }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+            <Text style={styles.termTitle}>{word}</Text>
+            <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+          </View>
+          <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
+        </View>
+      </ContextMenu>
+    </Animated.View>
+  )
+}
+
+function Term({ word, translatedWord, translatedDefinition }) {
+  const termOpacity = useSharedValue(1)
+  const termHeight = useSharedValue(screenHeight * 0.16)
+  const marginTop = useSharedValue(12)
+
+  return (
+    <Animated.View key={word} style={{ opacity: termOpacity, height: termHeight, marginTop: marginTop }}>
+      <ContextMenu
+        actions={[{ title: "Remove term", destructive: true, systemIcon: "xmark" }]}
+        onPress={async (e) => {
+          if (e.nativeEvent.name == "Remove term") {
+            termOpacity.value = withTiming(0, { duration: 750 })
+            termHeight.value = withDelay(750, withTiming(0, { duration: 750 }))
+            marginTop.value = withDelay(750, withTiming(0, { duration: 750 }))
+
+            let uid = auth().currentUser.uid;
+            database()
+              .ref(`${uid}/words/${word}`)
+              .set(null)
+
+          }
+        }}
+      >
+        <View style={{ ...styles.termContainer, }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+            <Text style={styles.termTitle}>{word}</Text>
+            <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+          </View>
+          <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
+        </View>
+      </ContextMenu>
+    </Animated.View>
   )
 }
 
@@ -399,6 +464,13 @@ const styles = StyleSheet.create({
     padding: 20,
     width: screenWidth * 0.9,
     height: screenHeight * 0.16,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowRadius: 2,
+    shadowColor: "black",
+    shadowOpacity: 0.2,
   },
   termTitle: {
     fontFamily: "NewYorkLarge-Regular",
@@ -414,10 +486,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 25,
     fontFamily: "NewYorkLarge-Semibold",
-    paddingTop: 10,
-    paddingBottom: 20,
+    paddingTop: 15,
     paddingLeft: 30,
-
   },
   tabBar: {
     backgroundColor: "rgba(255, 255, 255, 0.7)",
