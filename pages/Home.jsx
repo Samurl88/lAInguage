@@ -358,12 +358,13 @@ export default function HomePage({ navigation }) {
 
   // Sets up daily notifications
   useEffect(() => {
-    console.log(settingsPage)
-    notifee.requestPermission().then(
-      notifee.cancelAllNotifications().then(() => {
-        scheduleRepeatingReminder(new Date);
-      }
-      ))
+    if (notifications) {
+      notifee.requestPermission().then(
+        notifee.cancelAllNotifications().then(() => {
+          scheduleRepeatingReminder(new Date);
+        }
+        ))
+    }
   }, [])
 
   // Subscribe to changes in profile
@@ -384,10 +385,10 @@ export default function HomePage({ navigation }) {
 
         let termsPerSession = data.termsPerSession;
         setTermsPerSession(termsPerSession)
+        // console.log(termsPerSession)
 
         let notifications = data.notifications;
         setNotifications(notifications)
-        console.log(data)
 
         return () => database().ref(`${uid}/profile`).off('value', onValueChange);
       })
@@ -461,13 +462,22 @@ export default function HomePage({ navigation }) {
     edgeOpacity.value = withTiming(1)
   }
 
+
+  function toPractice() {
+    setCameraPage(false)
+    setStudyPage(true)
+    setDictionaryPage(false)
+    tabBarWidth.value = withTiming(0.85 * screenWidth)
+    edgeOpacity.value = withTiming(1)
+  }
+
   if (userLanguage && stars != null)
     return (
       <View style={{ flex: 1, backgroundColor: "#F0E8DD", }}>
         {settingsPage &&
-                <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{position: "absolute", width: screenWidth, height: screenHeight, zIndex: 1000}}>
-                  <Settings language={userLanguage} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)} logout={logOut} />
-                </Animated.View>
+          <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{ position: "absolute", width: screenWidth, height: screenHeight, zIndex: 1000 }}>
+            <Settings language={userLanguage} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)} logout={logOut} scheduleRepeatingReminder={scheduleRepeatingReminder} />
+          </Animated.View>
         }
         <Animated.View style={{ ...styles.tabBar, width: tabBarWidth, alignItems: "center", justifyContent: "space-around" }}>
           {!cameraPage
@@ -517,11 +527,7 @@ export default function HomePage({ navigation }) {
               <SFSymbol name="camera.fill" size={18} color="#2F2C2A" style={{ opacity: cameraPage ? 1 : 0.21 }} />
             </Pressable>
             <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }} onPress={() => {
-              setCameraPage(false)
-              setStudyPage(true)
-              setDictionaryPage(false)
-              tabBarWidth.value = withTiming(0.85 * screenWidth)
-              edgeOpacity.value = withTiming(1)
+              toPractice()
             }}>
               <SFSymbol name="rectangle.portrait.on.rectangle.portrait.angled.fill" size={18} color="#2F2C2A" style={{ opacity: studyPage ? 1 : 0.21 }} />
             </Pressable>
@@ -537,10 +543,17 @@ export default function HomePage({ navigation }) {
             </Pressable>
             {/* <Button title="notif" style={{position: "absolute", top: screenHeight * 0.5, zIndex: 100}} onPress={() => { onDisplayNotification() }} /> */}
           </View>
-          
+
 
           {!cameraPage
             ?
+
+            // <Animated.View key={"rightone"} style={{ opacity: edgeOpacity }}>
+            //   <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }} onPress={() => setSettingsPage(true)}>
+            //     <SFSymbol name="person.crop.circle" size={25} color="#2F2C2A" />
+            //   </Pressable>
+            // </Animated.View>
+
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <Animated.View key={"rightone"} style={{ opacity: edgeOpacity }}>
@@ -571,6 +584,7 @@ export default function HomePage({ navigation }) {
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>
+
             : null
           }
 
@@ -579,12 +593,12 @@ export default function HomePage({ navigation }) {
 
         {cameraPage &&
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
-            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage} />
+            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage} toPractice={toPractice} />
           </Animated.View>
         }
         {studyPage &&
           <Animated.View entering={CustomEnteringAnimation} exiting={CustomExitingAnimation} style={{ flex: 1 }}>
-            <StudyPage language={userLanguage} stars={stars} translations={translations} />
+            <StudyPage language={userLanguage} stars={stars} translations={translations} termsPerSession={termsPerSession} />
           </Animated.View>
         }
         {dictionaryPage &&

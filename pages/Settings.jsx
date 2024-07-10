@@ -4,11 +4,13 @@ import { TextInput } from 'react-native-gesture-handler';
 import { SFSymbol } from 'react-native-sfsymbols';
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
+import notifee from '@notifee/react-native';
+
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
-export default function Settings({ language, termsPerSession, notifications, close, logout }) {
+export default function Settings({ language, termsPerSession, notifications, close, logout, scheduleRepeatingReminder }) {
     // Hooks for switch
     const [currentNotifications, setCurrentNotifications] = useState(notifications !== undefined ? notifications : true);
     const toggleSwitch = () => setCurrentNotifications(previousState => !previousState);
@@ -28,6 +30,11 @@ export default function Settings({ language, termsPerSession, notifications, clo
                 })     
         
         
+        if (currentNotifications === false) {
+            notifee.cancelAllNotifications()
+        } else {
+            scheduleRepeatingReminder(new Date)
+        }
                 
         close()
 
@@ -35,7 +42,7 @@ export default function Settings({ language, termsPerSession, notifications, clo
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F5EEE5", alignItems: "center", }}>
-            <View style={{ width: "85%", alignItems: "flex-end", top: 10 }}>
+            <View style={{ width: "85%", alignItems: "flex-end", position: "absolute", top: screenHeight * 0.06 }}>
                 <Pressable onPress={handleClose}>
                     <Text style={{ fontSize: 20, }}>Done</Text>
                 </Pressable>
@@ -79,13 +86,13 @@ export default function Settings({ language, termsPerSession, notifications, clo
                         </View>
                     </View>
                 </View>
-                <Pressable style={styles.logOutBtn} onPress={() => {
+                {/* <Pressable style={styles.logOutBtn} onPress={() => {
                     logout();
                 }}>
                     <Text style={styles.logOutText}>
                         Log Out
                     </Text>
-                </Pressable>
+                </Pressable> */}
             </View>
         </SafeAreaView>
     )
@@ -111,7 +118,8 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     logOutBtn: {
-        backgroundColor: "black",
+        borderColor: "black",
+        borderWidth: 3,
         width: "85%",
         borderRadius: 10, 
         padding: 15,
@@ -121,7 +129,8 @@ const styles = StyleSheet.create({
         top: screenHeight * 0.75
     },
     logOutText: {
-        color: "#F5EEE5",
-        fontSize: 20
+        color: "black",
+        fontSize: 20,
+        fontFamily: "SFPro-Semibold"
     }
 });

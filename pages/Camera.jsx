@@ -2,7 +2,7 @@ import { View, Text, SafeAreaView, StyleSheet, Button, Dimensions, Pressable, Ac
 import { useCameraDevice, useCameraPermission, Camera } from 'react-native-vision-camera'
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useImage, Image, CornerPathEffect } from "@shopify/react-native-skia";
+import { useImage, Image, CornerPathEffect, topRight } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
 import {
   Gesture,
@@ -31,7 +31,7 @@ import ContextMenu from 'react-native-context-menu-view';
 
 const dayjs = require('dayjs')
 
-export default function CameraPage({ language, translations, terms, toDictionaryPage }) {
+export default function CameraPage({ language, translations, terms, toDictionaryPage, toPractice }) {
   const device = useCameraDevice('back')
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
@@ -224,7 +224,12 @@ export default function CameraPage({ language, translations, terms, toDictionary
   if (hasPermission)
     return (
       <>
-        <View style={{ backgroundColor: "black", flex: 1 }}>
+        <View style={{ backgroundColor: "black", flex: 1 }} 
+          onTouchStart={e => this.touchX = e.nativeEvent.pageX}
+          onTouchEnd={e => {
+            if (this.touchX - e.nativeEvent.pageX > 20)
+              toPractice()
+          }}>
 
           {!loadedImage ?
             <>
@@ -352,18 +357,18 @@ export default function CameraPage({ language, translations, terms, toDictionary
           }}
           onAnimate={(fromIndex, toIndex) => {
             if (fromIndex == -1) {
-              firstTermOpacity.value = withSequence(withTiming(0, {duration: 0}), withDelay(750, withTiming(1, {duration: 500})))
-              firstTermHeight.value = withSequence(withTiming(0, {duration: 0}), withTiming(screenHeight * 0.16, {duration: 750}))
-              firstMarginTop.value = withSequence(withTiming(0, {duration: 0}), withTiming(12, {duration: 750}))
+              firstTermOpacity.value = withSequence(withTiming(0, { duration: 0 }), withDelay(750, withTiming(1, { duration: 500 })))
+              firstTermHeight.value = withSequence(withTiming(0, { duration: 0 }), withTiming(screenHeight * 0.16, { duration: 750 }))
+              firstMarginTop.value = withSequence(withTiming(0, { duration: 0 }), withTiming(12, { duration: 750 }))
             } else if (toIndex == -1) {
               sortTerms();
             }
           }}
         >
           <BottomSheetView style={styles.contentContainer}>
-            <View style={{flexDirection: "row", paddingTop: 15, width: "90%", alignItems: "center", justifyContent: "space-between", alignSelf: "center"}}>
+            <View style={{ flexDirection: "row", paddingTop: 15, width: "90%", alignItems: "center", justifyContent: "space-between", alignSelf: "center" }}>
               <Text style={styles.title}>{translations.definitions[language]}</Text>
-              <Pressable style={{flexDirection: "row", gap: 10, backgroundColor: "#77BEE9", padding: 10, justifyContent: "center", alignItems: "center", borderRadius: 10, shadowColor: "#77BEE9", shadowOpacity: 0.7, shadowRadius: 5, }} onPress={toDictionaryPage}>
+              <Pressable style={{ flexDirection: "row", gap: 10, backgroundColor: "#77BEE9", padding: 10, justifyContent: "center", alignItems: "center", borderRadius: 10, shadowColor: "#77BEE9", shadowOpacity: 0.7, shadowRadius: 5, }} onPress={toDictionaryPage}>
                 <SFSymbol name="character.book.closed.fill" size={20} color="white" height={20} width={20} />
                 <SFSymbol name="chevron.right" size={20} color="white" height={20} width={20} />
               </Pressable>

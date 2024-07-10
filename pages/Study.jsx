@@ -43,8 +43,8 @@ const safetySetting = [
 ];
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
-export default function StudyPage({ language, stars, translations }) {
-  
+export default function StudyPage({ language, stars, translations, termsPerSession }) {
+
   const [flashcards, setFlashcards] = useState(null);
   const [MCQs, setMCQs] = useState(null)
   const [numAnswered, setNumAnswered] = useState(0)
@@ -112,7 +112,8 @@ export default function StudyPage({ language, stars, translations }) {
     Words: ${words}
     Question: "What does (word) mean?"
     Given this information, generate two wrong but misleading answers to the 
-    question. Put the correct answer in one of the multiple choices as well. Please output your answer in the following schema, continuing until all words have been included:
+    question. Put the correct answer in one of the multiple choices as well. Each answer must be 10 words or less
+    Please output your answer in the following schema, continuing until all words have been included:
     { "(word1)": 
       {
         "question": "What does (word) mean?",
@@ -164,7 +165,7 @@ export default function StudyPage({ language, stars, translations }) {
         // Get 10 random words, removing words w/ score of 3 (mastered)
         let terms = Object.keys(words).filter(word => words[word].score !== 3);
         const shuffled = terms.sort(() => 0.5 - Math.random());
-        let selectedTerms = shuffled.slice(0, 1);
+        let selectedTerms = shuffled.slice(0, termsPerSession);
         setSelectedTerms(selectedTerms);
 
 
@@ -202,8 +203,9 @@ export default function StudyPage({ language, stars, translations }) {
 
   // Begin when user enters page
   useEffect(() => {
-    sortTerms();
-  }, []);
+    if (termsPerSession)
+      sortTerms()
+  }, [termsPerSession]);
 
   // Resets all values
   function reset() {
@@ -653,10 +655,33 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
             <Pressable style={{ width: "100%", height: "100%", alignItems: "center", padding: 20 }}>
               <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17, position: "absolute", top: screenHeight * 0.03 }}>{translations.choose_the_best_answer[language]}</Text>
               <Text style={{ fontFamily: "NewYorkLarge-Regular", fontSize: 25, textAlign: "center", position: "absolute", top: screenHeight * 0.1 }}>{translations.what_is_the_meaning_of[language]}<Text style={{ fontFamily: "NewYorkLarge-Semibold" }}> {front}</Text>?</Text>
-              <View style={{ position: "absolute", top: screenHeight * 0.2, alignItems: "center", gap: 20 }}>
-                <Text style={styles.smallCardText}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>A.</Text> {mcqs[front].choices.A}</Text>
-                <Text style={styles.smallCardText}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>B.</Text> {mcqs[front].choices.B}</Text>
-                <Text style={styles.smallCardText}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>C.</Text> {mcqs[front].choices.C}</Text>
+              <View style={{ position: "absolute", top: screenHeight * 0.2, gap: 20, width: "95%", }}>
+                <View style={{ flexDirection: "row", gap: 10, alignItems: "center", width: "85%", }}>
+                  <View style={{ backgroundColor: "#E8E1DB", height: 30, width: 30, justifyContent: "center", alignItems: "center", borderRadius: 10, }}>
+                    <Text style={{ color: "#817E80", fontSize: 15, fontFamily: "SFPro-Semibold" }}>A</Text>
+                  </View>
+                  <Text style={{ ...styles.smallCardText, textAlign: 'left' }}>
+                    {mcqs[front]?.choices?.A}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "row", gap: 10, alignItems: "center", width: "85%", }}>
+                  <View style={{ backgroundColor: "#E8E1DB", height: 30, width: 30, justifyContent: "center", alignItems: "center", borderRadius: 10 }}>
+                    <Text style={{ color: "#817E80", fontSize: 15, fontFamily: "SFPro-Semibold" }}>B</Text>
+                  </View>
+                  <Text style={{ ...styles.smallCardText, textAlign: 'left' }}>
+                    {mcqs[front]?.choices?.B}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "row", gap: 10, alignItems: "center", width: "85%", }}>
+                  <View style={{ backgroundColor: "#E8E1DB", height: 30, width: 30, justifyContent: "center", alignItems: "center", borderRadius: 10 }}>
+                    <Text style={{ color: "#817E80", fontSize: 15, fontFamily: "SFPro-Semibold" }}>C</Text>
+                  </View>
+                  <Text style={{ ...styles.smallCardText, textAlign: 'left' }}>
+                    {mcqs[front]?.choices?.C}
+                  </Text>
+                </View>
+                {/* <Text style={styles.smallCardText}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>B.</Text> {mcqs[front].choices.B}</Text>
+                <Text style={styles.smallCardText}><Text style={{ fontFamily: "NewYorkLarge-Semibold" }}>C.</Text> {mcqs[front].choices.C}</Text> */}
               </View>
             </Pressable>
           </View>
@@ -722,10 +747,10 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
           <>
             <View style={styles.btnContainer}>
               {/* if correct answer, turn green. if selected and wrong answer, turn red. else, continue being black */}
-              <Animated.View style={[styles.defaultBtn, mcqs[front].correctAnswer == "A" ? correctColor : answer === "A" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
+              <Animated.View style={[styles.defaultBtn, mcqs[front]?.correctAnswer == "A" ? correctColor : answer === "A" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
                 <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
                   if (!answer) {
-                    if (mcqs[front].correctAnswer == "A")
+                    if (mcqs[front]?.correctAnswer == "A")
                       addScore()
                     else
                       removeScore();
@@ -738,10 +763,10 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
                 </Pressable>
               </Animated.View>
 
-              <Animated.View style={[styles.defaultBtn, mcqs[front].correctAnswer == "B" ? correctColor : answer === "B" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
+              <Animated.View style={[styles.defaultBtn, mcqs[front]?.correctAnswer == "B" ? correctColor : answer === "B" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
                 <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
                   if (!answer) {
-                    if (mcqs[front].correctAnswer == "B")
+                    if (mcqs[front]?.correctAnswer == "B")
                       addScore()
                     else
                       removeScore();
@@ -754,10 +779,10 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
                 </Pressable>
               </Animated.View>
 
-              <Animated.View style={[styles.defaultBtn, mcqs[front].correctAnswer == "C" ? correctColor : answer === "C" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
+              <Animated.View style={[styles.defaultBtn, mcqs[front]?.correctAnswer == "C" ? correctColor : answer === "C" ? wrongColor : { backgroundColor: "#2F2C2A" }]}>
                 <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
                   if (!answer) {
-                    if (mcqs[front].correctAnswer == "C")
+                    if (mcqs[front]?.correctAnswer == "C")
                       addScore()
                     else
                       removeScore();
