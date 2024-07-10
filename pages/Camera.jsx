@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, Button, Dimensions, Pressable, ActivityIndicator, FlatList } from 'react-native'
+import { View, Text, SafeAreaView, StyleSheet, Button, Dimensions, Pressable, ActivityIndicator, FlatList, Alert } from 'react-native'
 import { useCameraDevice, useCameraPermission, Camera } from 'react-native-vision-camera'
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -11,10 +11,12 @@ import {
 } from "react-native-gesture-handler";
 
 import { Canvas, Path, useCanvasRef, Picture } from "@shopify/react-native-skia";
-import { Extrapolation, FadeIn, FadeOut, interpolate, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
+import { Extrapolation, FadeIn, FadeOut, interpolate, runOnJS, useAnimatedProps, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { SFSymbol } from 'react-native-sfsymbols';
 import Config from 'react-native-config';
 import Animated from 'react-native-reanimated';
+import Svg, { Path as PathSvg, Defs, LinearGradient, Stop, Circle } from "react-native-svg"
+
 
 import auth from '@react-native-firebase/auth';
 import database from "@react-native-firebase/database"
@@ -23,7 +25,6 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
-import Svg, { Circle } from "react-native-svg"
 import { launchImageLibrary } from 'react-native-image-picker';
 
 import RNFS from 'react-native-fs'
@@ -89,11 +90,12 @@ export default function CameraPage({ language, translations, terms, toDictionary
     // console.log(Config.API_KEY)
 
     const prompt = `
-    Determine the root word of the highlighted word in the image (ex. leaving -> leave).
-    Provide the word and definition in the original language of the word; additionally, provide the word and definition in ${language}. 
-    Definitions should be 12 words or less. Everything must be lowercase.
-    Use this JSON schema:
-    { "originalWord": "string",
+    Attached is a photo. If there is a word highlighted in blue, determine the root word (infinitive) of the highlighted word in the image (ex. leaving -> leave).
+    Provide the word and definition in the original language of the word as well as the original language; additionally, provide the word and definition in ${language}. 
+    Definitions should be 12 words or less. Everything must be lowercase. 
+    Use the JSON schema below. If you cannot detect a word highlighted in blue, return null for all values.
+    { "originalLanguage": "string",
+      "originalWord": "string",
       "originalDefinition": "string", 
       "translatedWord": "string",
       "translatedDefinition": "string"
@@ -102,17 +104,24 @@ export default function CameraPage({ language, translations, terms, toDictionary
     const result = await model.generateContent([prompt, { inlineData: { data: imageData, mimeType: 'image/png' } }]);
     const response = result.response;
     const text = JSON.parse(response.text());
-    // console.log(text)
-    // console.log("response")
-    setOriginalWord(text.originalWord)
-    setOriginalDefinition(text.originalDefinition)
-    setTranslatedWord(text.translatedWord)
-    setTranslatedDefinition(text.translatedDefinition)
-    addWord(text.originalWord, text.originalDefinition, text.translatedWord, text.translatedDefinition);
-    openTextSheet();
-    setLoading(false)
 
-    // setResponse(JSON.stringify(text))
+    console.log(text)
+    // If word is detected
+    if (!(text.originalDefinition == null || text.originalDefinition == "null")) {
+      setOriginalWord(text.originalWord)
+      setOriginalDefinition(text.originalDefinition)
+      setTranslatedWord(text.translatedWord)
+      setTranslatedDefinition(text.translatedDefinition)
+      addWord(text.originalWord, text.originalDefinition, text.translatedWord, text.translatedDefinition);
+      openTextSheet();
+    } else {
+      Alert.alert("No word was detected!", "Please try again.", [
+        {
+          text: 'OK'
+        }
+      ])
+    }
+    setLoading(false)
   }
 
   const [words, setWords] = useState([])
@@ -221,6 +230,19 @@ export default function CameraPage({ language, translations, terms, toDictionary
   const firstTermHeight = useSharedValue(screenHeight * 0.16)
   const firstMarginTop = useSharedValue(12)
 
+
+  const rotate = useSharedValue("0deg")
+  const opacity = useSharedValue(0)
+  useEffect(() => {
+    if (loading) {
+      rotate.value = withRepeat(withTiming("360deg", { duration: 1000, }), -1)
+      opacity.value = withTiming(1, {duration: 500})
+    } else {
+      rotate.value = "0deg"
+      opacity.value = 0
+    }
+  }, [loading])
+
   if (hasPermission)
     return (
       <>
@@ -274,9 +296,9 @@ export default function CameraPage({ language, translations, terms, toDictionary
                   <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
                 </Pressable>
               </Animated.View>
-              <View style={{backgroundColor: "rgba(0, 0, 0, 0.3)", borderRadius: 10, fontSize: 18, position: "absolute", top: screenHeight * 0.905, alignSelf: "center",}}>
-                        <Animated.Text entering={FadeIn.duration(250).delay(250)} style={{ fontSize: 18, color: "white", textShadowColor: 'rgba(0, 0, 0, 1)', textShadowRadius: 10, padding: 10 }}>{translations.capture_text_to_translate[language]}</Animated.Text>
-                      </View>
+              <View style={{ backgroundColor: "rgba(0, 0, 0, 0.3)", borderRadius: 10, fontSize: 18, position: "absolute", top: screenHeight * 0.905, alignSelf: "center", }}>
+                <Animated.Text entering={FadeIn.duration(250).delay(250)} style={{ fontSize: 18, color: "white", textShadowColor: 'rgba(0, 0, 0, 1)', textShadowRadius: 10, padding: 10 }}>{translations.capture_text_to_translate[language]}</Animated.Text>
+              </View>
             </>
             : <>
               {/* entering={FadeIn.duration(500).delay(500)} */}
@@ -296,7 +318,9 @@ export default function CameraPage({ language, translations, terms, toDictionary
                 }} style={styles.bigActionButton} opacity={paths.length ? 1 : 0.5}>
                   {!loading
                     ? <SFSymbol name="doc.text.magnifyingglass" size={32} color="black" />
-                    : <ActivityIndicator />
+                    : <Animated.View style={{ transform: [{ rotate: rotate }], opacity: opacity }}>
+                      <SFSymbol name="sparkle" size={40} color="gray" />
+                    </Animated.View>
                   }
                 </Pressable>
                 <Pressable style={{ ...styles.actionButton, }} onPress={() => { setPaths([]) }}>
@@ -326,7 +350,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
                     </Canvas>
 
                     <View style={{ ...StyleSheet.absoluteFill, position: "absolute", zIndex: 100 }}>
-                      <View style={{backgroundColor: "rgba(0, 0, 0, 0.3)", borderRadius: 10, fontSize: 18, position: "absolute", top: screenHeight * 0.905, alignSelf: "center",}}>
+                      <View style={{ backgroundColor: "rgba(0, 0, 0, 0.3)", borderRadius: 10, fontSize: 18, position: "absolute", top: screenHeight * 0.905, alignSelf: "center", }}>
                         <Animated.Text exiting={FadeOut.duration(250)} style={{ fontSize: 18, color: "white", textShadowColor: 'rgba(0, 0, 0, 1)', textShadowRadius: 10, padding: 10 }}>{translations.highlight_text_to_translate[language]}.</Animated.Text>
                       </View>
                     </View>

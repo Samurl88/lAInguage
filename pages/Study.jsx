@@ -174,7 +174,7 @@ export default function StudyPage({ language, stars, translations, termsPerSessi
 
         for (const term of selectedTerms) {
           let score = words[term]["score"]
-          let card = { front: term, back: words[term]["translatedDefinition"], frontFacing: true, score: words[term]["score"] };
+          let card = { front: term, back: `${words[term]["translatedWord"]} · ${words[term]["translatedDefinition"]}`, frontFacing: true, score: words[term]["score"] };
           if (score == 2) {
             card.type = "frq"
           } else if (score == 1) {
@@ -457,7 +457,6 @@ export default function StudyPage({ language, stars, translations, termsPerSessi
 
   }
 
-
   // loading
   return (
     <>
@@ -594,10 +593,17 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
     }
   })
 
+  const FRQrotate = useSharedValue("0deg")
+  // const FRQopacity = useSharedValue(0)
 
   // For FRQ: evaluate sentence
   const evaluateFRQ = async () => {
     setLoading(true);
+ 
+    FRQrotate.value = withRepeat(withTiming("360deg", { duration: 1000, }), -1)
+    // FRQopacity.value = withTiming(1, {duration: 500})
+
+
     const prompt = `
     Evaluate whether the following sentence is grammatically correct in the language of the word "${front}". To be correct, the sentence must include the word "${front}" correctly. 
     
@@ -627,6 +633,8 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
       removeScore()
     }
     setLoading(false);
+    FRQrotate.value = "0deg"
+    // FRQopacity.value = 0
   }
 
 
@@ -643,7 +651,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
             </Pressable>
           </Animated.View>
           <Animated.View style={[styles.back, backAnimatedStyle]}>
-            <Pressable style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+            <Pressable style={{ width: "85%", height: "100%", alignItems: "center", justifyContent: "center" }}>
               <Text style={styles.smallCardText}>{back}</Text>
             </Pressable>
           </Animated.View>
@@ -812,7 +820,9 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
                   }
                 }}>
                   {loading
-                    ? <ActivityIndicator />
+                    ? <Animated.View style={{ transform: [{ rotate: FRQrotate }], opacity: 1 }}>
+                    <SFSymbol name="sparkle" size={30} color="gray" />
+                  </Animated.View>
                     : FRQcorrect
                       ? <SFSymbol name="checkmark" size={25} color="white" />
                       : FRQcorrect === false
