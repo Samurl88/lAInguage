@@ -5,6 +5,7 @@ import database from '@react-native-firebase/database';
 import { SFSymbol } from 'react-native-sfsymbols';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
+const dayjs = require('dayjs')
 
 const screenWidth = Dimensions.get("screen").width
 const screenHeight = Dimensions.get("screen").height
@@ -214,7 +215,10 @@ export default function SignUpScreen({ route, navigation }) {
             .ref(`/${uid}/profile`)
             .update({
                 language: chosenLanguage,
-                stars: 0
+                stars: 0,
+                lastCompleted: JSON.stringify(dayjs().year(2000)),
+                notifications: true,
+                termsPerSession: 10
             })
         })
         .catch(error => {

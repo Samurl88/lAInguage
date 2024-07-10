@@ -305,7 +305,7 @@ export default function HomePage({ navigation }) {
   const [cameraPage, setCameraPage] = useState(false)
   const [studyPage, setStudyPage] = useState(true)
   const [dictionaryPage, setDictionaryPage] = useState(false)
-  const [settingsPage, setSettingsPage] = useState(true)
+  const [settingsPage, setSettingsPage] = useState(false)
 
   const [userLanguage, setUserLanguage] = useState(null)
   const [stars, setStars] = useState(null);
@@ -317,9 +317,6 @@ export default function HomePage({ navigation }) {
 
 
   const bottomSheetRef = useRef(null)
-
-
-
 
   // https://blog.teamairship.com/creating-reminders-with-notifee -> workaround for notifee scheduling bug
   const scheduleRepeatingReminder = async (timestamp) => {
@@ -361,6 +358,7 @@ export default function HomePage({ navigation }) {
 
   // Sets up daily notifications
   useEffect(() => {
+    console.log(settingsPage)
     notifee.requestPermission().then(
       notifee.cancelAllNotifications().then(() => {
         scheduleRepeatingReminder(new Date);
@@ -384,11 +382,12 @@ export default function HomePage({ navigation }) {
         let lastCompleted = JSON.parse(data.lastCompleted)
         setLastCompleted(lastCompleted)
 
-        let termsPerSession = data?.termsPerSession || 10;
+        let termsPerSession = data.termsPerSession;
         setTermsPerSession(termsPerSession)
 
-        let notifications = data?.termsPerSession || true;
+        let notifications = data.notifications;
         setNotifications(notifications)
+        console.log(data)
 
         return () => database().ref(`${uid}/profile`).off('value', onValueChange);
       })
@@ -419,6 +418,7 @@ export default function HomePage({ navigation }) {
   }, [stars])
 
   function logOut() {
+    setSettingsPage(false)
     auth()
       .signOut()
   }
@@ -466,7 +466,7 @@ export default function HomePage({ navigation }) {
       <View style={{ flex: 1, backgroundColor: "#F0E8DD", }}>
         {settingsPage &&
                 <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{position: "absolute", width: screenWidth, height: screenHeight, zIndex: 1000}}>
-                  <Settings language={userLanguage} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)}/>
+                  <Settings language={userLanguage} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)} logout={logOut} />
                 </Animated.View>
         }
         <Animated.View style={{ ...styles.tabBar, width: tabBarWidth, alignItems: "center", justifyContent: "space-around" }}>
