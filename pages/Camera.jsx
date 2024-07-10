@@ -31,7 +31,7 @@ import ContextMenu from 'react-native-context-menu-view';
 
 const dayjs = require('dayjs')
 
-export default function CameraPage({ language, translations, terms, toDictionaryPage, toPractice }) {
+export default function CameraPage({ language, translations, terms, toDictionaryPage }) {
   const device = useCameraDevice('back')
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
@@ -224,13 +224,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
   if (hasPermission)
     return (
       <>
-        <View style={{ backgroundColor: "black", flex: 1 }} 
-          onTouchStart={e => this.touchX = e.nativeEvent.pageX}
-          onTouchEnd={e => {
-            if (this.touchX - e.nativeEvent.pageX > 20)
-              toPractice()
-          }}>
-
+        <View style={{ backgroundColor: "black", flex: 1 }}>
           {!loadedImage ?
             <>
               <Camera

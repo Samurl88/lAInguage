@@ -592,17 +592,47 @@ export default function HomePage({ navigation }) {
 
 
         {cameraPage &&
-          <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
-            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage} toPractice={toPractice} />
+          <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}
+          onTouchStart={e => this.touchX = e.nativeEvent.pageX}
+          onTouchEnd={e => {
+            if (this.touchX - e.nativeEvent.pageX > 100)
+              toPractice()
+          }}
+          >
+            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage} />
           </Animated.View>
         }
         {studyPage &&
-          <Animated.View entering={CustomEnteringAnimation} exiting={CustomExitingAnimation} style={{ flex: 1 }}>
+          <Animated.View entering={CustomEnteringAnimation} exiting={CustomExitingAnimation} style={{ flex: 1 }} 
+          onTouchStart={e => this.touchX = e.nativeEvent.pageX}
+          onTouchEnd={e => {
+            if (this.touchX - e.nativeEvent.pageX > 100) {
+              setCameraPage(false)
+              setStudyPage(false)
+              setDictionaryPage(true)
+              exitDirection.value = "left"
+              tabBarWidth.value = withTiming(0.85 * screenWidth)
+              edgeOpacity.value = withTiming(1)
+            } else if (this.touchX - e.nativeEvent.pageX < -100) {
+              setCameraPage(true)
+              setStudyPage(false)
+              setDictionaryPage(false)
+              exitDirection.value = "right"
+              tabBarWidth.value = withTiming(0.5 * screenWidth)
+              edgeOpacity.value = withTiming(0)
+            }}}>
             <StudyPage language={userLanguage} stars={stars} translations={translations} termsPerSession={termsPerSession} />
           </Animated.View>
         }
         {dictionaryPage &&
-          <Animated.View entering={SlideInRight} exiting={SlideOutRight} style={{ flex: 1 }}>
+          <Animated.View entering={SlideInRight} exiting={SlideOutRight} style={{ flex: 1 }}
+        
+          onTouchStart={e => this.touchX = e.nativeEvent.pageX}
+          onTouchEnd={e => {
+            console.log(this.touchX - e.nativeEvent.pageX)
+            if (this.touchX - e.nativeEvent.pageX < -100) {
+              toPractice()
+            }}}>
             <Dictionary language={userLanguage} translations={translations} terms={words} />
           </Animated.View>
         }
