@@ -10,7 +10,7 @@ import notifee from '@notifee/react-native';
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
-export default function Settings({ language, termsPerSession, notifications, close, logout, scheduleRepeatingReminder }) {
+export default function Settings({ language, translations, termsPerSession, notifications, close, scheduleRepeatingReminder }) {
     // Hooks for switch
     const [currentNotifications, setCurrentNotifications] = useState(notifications !== undefined ? notifications : true);
     const toggleSwitch = () => setCurrentNotifications(previousState => !previousState);
@@ -44,17 +44,17 @@ export default function Settings({ language, termsPerSession, notifications, clo
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F5EEE5", alignItems: "center", }}>
             <View style={{ width: "85%", alignItems: "flex-end", position: "absolute", top: screenHeight * 0.06 }}>
                 <Pressable onPress={handleClose}>
-                    <Text style={{ fontSize: 20, }}>Done</Text>
+                    <Text style={{ fontSize: 20, }}>{translations.done[language]}</Text>
                 </Pressable>
 
             </View>
             <View style={styles.container}>
-                <Text style={styles.title}>Settings</Text>
+                <Text style={styles.title}>{translations.settings[language]}</Text>
                 <View style={{ width: "85%", gap: 20 }}>
                     <View style={{ gap: 5 }}>
-                        <Text>Study Options</Text>
+                        <Text>{translations.study_options[language]}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <Text style={styles.option}>Terms Per Session</Text>
+                            <Text style={styles.option}>{translations.terms_per_session[language]}</Text>
                             <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentTPS <= 5 ? 0.4 : 1 }} onPress={() => {
                                     if (currentTPS > 5) 
@@ -74,9 +74,9 @@ export default function Settings({ language, termsPerSession, notifications, clo
                         </View>
                     </View>
                     <View style={{ gap: 5 }}>
-                        <Text>Misc.</Text>
+                        <Text>{translations.misc[language]}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <Text style={styles.option}>Daily Reminders</Text>
+                            <Text style={styles.option}>{translations.daily_reminders[language]}</Text>
                             <Switch
                                 trackColor={{ false: '#767577', true: '#77bee9' }}
                                 ios_backgroundColor="#3e3e3e"

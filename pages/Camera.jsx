@@ -274,7 +274,9 @@ export default function CameraPage({ language, translations, terms, toDictionary
                   <SFSymbol name="photo.on.rectangle.angled" size={25} color="white" />
                 </Pressable>
               </Animated.View>
-
+              <View style={{backgroundColor: "rgba(0, 0, 0, 0.3)", borderRadius: 10, fontSize: 18, position: "absolute", top: screenHeight * 0.905, alignSelf: "center",}}>
+                        <Animated.Text entering={FadeIn.duration(250).delay(250)} style={{ fontSize: 18, color: "white", textShadowColor: 'rgba(0, 0, 0, 1)', textShadowRadius: 10, padding: 10 }}>{translations.capture_text_to_translate[language]}</Animated.Text>
+                      </View>
             </>
             : <>
               {/* entering={FadeIn.duration(500).delay(500)} */}
@@ -324,7 +326,9 @@ export default function CameraPage({ language, translations, terms, toDictionary
                     </Canvas>
 
                     <View style={{ ...StyleSheet.absoluteFill, position: "absolute", zIndex: 100 }}>
-                      <Text style={{ fontSize: 18, position: "absolute", top: screenHeight * 0.905, alignSelf: "center", color: "white", textShadowColor: 'rgba(0, 0, 0, 1)', textShadowRadius: 10, padding: 10 }}>{translations.highlight_text_to_translate[language]}.</Text>
+                      <View style={{backgroundColor: "rgba(0, 0, 0, 0.3)", borderRadius: 10, fontSize: 18, position: "absolute", top: screenHeight * 0.905, alignSelf: "center",}}>
+                        <Animated.Text exiting={FadeOut.duration(250)} style={{ fontSize: 18, color: "white", textShadowColor: 'rgba(0, 0, 0, 1)', textShadowRadius: 10, padding: 10 }}>{translations.highlight_text_to_translate[language]}.</Animated.Text>
+                      </View>
                     </View>
                   </View>
 
@@ -549,7 +553,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     position: "absolute",
-    top: screenHeight * 0.8,
+    top: screenHeight * 0.78,
     flexDirection: "row",
     justifyContent: "space-evenly",
     alignItems: "center",

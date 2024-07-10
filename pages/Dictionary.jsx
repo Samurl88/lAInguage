@@ -164,7 +164,7 @@ export default function Dictionary({ language, translations, terms }) {
                     </Animated.View>
                     : <>
                         <Animated.Text entering={words ? FadeIn.duration(750).delay(750) : null} key="no-terms" style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray", top: screenHeight * 0.2 }}>
-                            View all your terms here!
+                            {translations.view_all_your_terms_here[language]}
                         </Animated.Text>
                     </>
                 }

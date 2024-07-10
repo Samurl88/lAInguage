@@ -296,14 +296,132 @@ const translations = {
     "portuguese": "Escaneie um termo para começar!",
     "hindi": "प्रारंभ करने के लिए एक शब्द स्कैन करें!",
     "english": "Scan a term to get started!"
+  },
+  "settings": {
+    "spanish": "Configuración",
+    "chinese": "设置",
+    "tagalog": "Mga Setting",
+    "vietnamese": "Cài Đặt",
+    "arabic": "إعدادات",
+    "french": "Paramètres",
+    "korean": "설정",
+    "russian": "Настройки",
+    "portuguese": "Configurações",
+    "hindi": "सेटिंग्स",
+    "english": "Settings"
+  },
+  "study_options": {
+    "spanish": "Opciones De Estudio",
+    "chinese": "学习选项",
+    "tagalog": "Mga Pagpipilian Sa Pag-Aaral",
+    "vietnamese": "Tùy Chọn Học Tập",
+    "arabic": "خيارات الدراسة",
+    "french": "Options D'Étude",
+    "korean": "학습 옵션",
+    "russian": "Варианты Обучения",
+    "portuguese": "Opções De Estudo",
+    "hindi": "अध्ययन विकल्प",
+    "english": "Study Options"
+  },
+  "misc": {
+    "spanish": "Varios",
+    "chinese": "杂项",
+    "tagalog": "Iba Pa",
+    "vietnamese": "Linh Tinh",
+    "arabic": "متفرقات",
+    "french": "Divers",
+    "korean": "기타",
+    "russian": "Разное",
+    "portuguese": "Diversos",
+    "hindi": "विविध",
+    "english": "Misc."
+  },
+  "terms_per_session": {
+    "spanish": "Términos Por Sesión",
+    "chinese": "每次会话的术语",
+    "tagalog": "Mga Termino Bawat Sesyon",
+    "vietnamese": "Thuật Ngữ Mỗi Phiên",
+    "arabic": "مصطلحات لكل جلسة",
+    "french": "Termes Par Session",
+    "korean": "세션당 용어",
+    "russian": "Термины На Сессию",
+    "portuguese": "Termos Por Sessão",
+    "hindi": "प्रति सत्र शब्द",
+    "english": "Terms Per Session"
+  },
+  "daily_reminders": {
+    "spanish": "Recordatorios Diarios",
+    "chinese": "每日提醒",
+    "tagalog": "Araw-Araw Na Mga Paalala",
+    "vietnamese": "Nhắc Nhở Hàng Ngày",
+    "arabic": "تذكيرات يومية",
+    "french": "Rappels Quotidiens",
+    "korean": "매일 알림",
+    "russian": "Ежедневные Напоминания",
+    "portuguese": "Lembretes Diários",
+    "hindi": "दैनिक अनुस्मारक",
+    "english": "Daily Reminders"
+  },
+  "done": {
+    "spanish": "Hecho",
+    "chinese": "完成",
+    "tagalog": "Tapos",
+    "vietnamese": "Xong",
+    "arabic": "تم",
+    "french": "Fait",
+    "korean": "완료",
+    "russian": "Готово",
+    "portuguese": "Feito",
+    "hindi": "हो गया",
+    "english": "Done"
+  },
+  "view_all_your_terms_here": {
+    "spanish": "¡Ve todos tus términos aquí!",
+    "chinese": "在这里查看您的所有术语！",
+    "tagalog": "Tingnan ang lahat ng iyong mga termino dito!",
+    "vietnamese": "Xem tất cả các thuật ngữ của bạn ở đây!",
+    "arabic": "اعرض جميع مصطلحاتك هنا!",
+    "french": "Voir tous vos termes ici!",
+    "korean": "여기에서 모든 용어를 확인하세요!",
+    "russian": "Просмотрите все свои термины здесь!",
+    "portuguese": "Veja todos os seus termos aqui!",
+    "hindi": "अपने सभी शब्द यहाँ देखें!",
+    "english": "View all your terms here!"
+  },
+  "log_out": {
+    "spanish": "Cerrar Sesión",
+    "chinese": "登出",
+    "tagalog": "Mag-Logout",
+    "vietnamese": "Đăng Xuất",
+    "arabic": "تسجيل خروج",
+    "french": "Déconnexion",
+    "korean": "로그아웃",
+    "russian": "Выйти",
+    "portuguese": "Sair",
+    "hindi": "लॉग आउट",
+    "english": "Log Out"
+  },
+  "capture_text_to_translate": {
+    "spanish": "Captura texto para traducir.",
+    "chinese": "捕捉要翻译的文本。",
+    "tagalog": "Kuhain ang teksto upang isalin.",
+    "vietnamese": "Chụp văn bản để dịch.",
+    "arabic": "التقط النص للترجمة.",
+    "french": "Capturez le texte à traduire.",
+    "korean": "번역할 텍스트 캡처.",
+    "russian": "Захватите текст для перевода.",
+    "portuguese": "Capture texto para traduzir.",
+    "hindi": "अनुवाद के लिए पाठ को कैप्चर करें।",
+    "english": "Capture text to translate."
   }
+
 }
 
 
 
 export default function HomePage({ navigation }) {
-  const [cameraPage, setCameraPage] = useState(false)
-  const [studyPage, setStudyPage] = useState(true)
+  const [cameraPage, setCameraPage] = useState(true)
+  const [studyPage, setStudyPage] = useState(false)
   const [dictionaryPage, setDictionaryPage] = useState(false)
   const [settingsPage, setSettingsPage] = useState(false)
 
@@ -476,7 +594,7 @@ export default function HomePage({ navigation }) {
       <View style={{ flex: 1, backgroundColor: "#F0E8DD", }}>
         {settingsPage &&
           <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{ position: "absolute", width: screenWidth, height: screenHeight, zIndex: 1000 }}>
-            <Settings language={userLanguage} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)} logout={logOut} scheduleRepeatingReminder={scheduleRepeatingReminder} />
+            <Settings language={userLanguage} translations={translations} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)} logout={logOut} scheduleRepeatingReminder={scheduleRepeatingReminder} />
           </Animated.View>
         }
         <Animated.View style={{ ...styles.tabBar, width: tabBarWidth, alignItems: "center", justifyContent: "space-around" }}>
@@ -565,7 +683,7 @@ export default function HomePage({ navigation }) {
               <DropdownMenu.Content>
                 <DropdownMenu.Label />
                 <DropdownMenu.Item key="settings" onSelect={() => setSettingsPage(true)}>
-                  <DropdownMenu.ItemTitle>Settings</DropdownMenu.ItemTitle>
+                  <DropdownMenu.ItemTitle>{translations.settings[userLanguage]}</DropdownMenu.ItemTitle>
                   <DropdownMenu.ItemIcon ios={{
                     name: 'gear',
                     pointSize: 15,
@@ -574,7 +692,7 @@ export default function HomePage({ navigation }) {
                   }} />
                 </DropdownMenu.Item>
                 <DropdownMenu.Item key="log-out" onSelect={() => logOut()}>
-                  <DropdownMenu.ItemTitle>Log out</DropdownMenu.ItemTitle>
+                  <DropdownMenu.ItemTitle>{translations.log_out[userLanguage]}</DropdownMenu.ItemTitle>
                   <DropdownMenu.ItemIcon ios={{
                     name: 'rectangle.portrait.and.arrow.right',
                     pointSize: 15,
@@ -595,7 +713,7 @@ export default function HomePage({ navigation }) {
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}
           onTouchStart={e => this.touchX = e.nativeEvent.pageX}
           onTouchEnd={e => {
-            if (this.touchX - e.nativeEvent.pageX > 100)
+            if (this.touchX - e.nativeEvent.pageX > 150)
               toPractice()
           }}
           >
@@ -606,14 +724,14 @@ export default function HomePage({ navigation }) {
           <Animated.View entering={CustomEnteringAnimation} exiting={CustomExitingAnimation} style={{ flex: 1 }} 
           onTouchStart={e => this.touchX = e.nativeEvent.pageX}
           onTouchEnd={e => {
-            if (this.touchX - e.nativeEvent.pageX > 100) {
+            if (this.touchX - e.nativeEvent.pageX > 150) {
               setCameraPage(false)
               setStudyPage(false)
               setDictionaryPage(true)
               exitDirection.value = "left"
               tabBarWidth.value = withTiming(0.85 * screenWidth)
               edgeOpacity.value = withTiming(1)
-            } else if (this.touchX - e.nativeEvent.pageX < -100) {
+            } else if (this.touchX - e.nativeEvent.pageX < -150) {
               setCameraPage(true)
               setStudyPage(false)
               setDictionaryPage(false)
@@ -630,7 +748,7 @@ export default function HomePage({ navigation }) {
           onTouchStart={e => this.touchX = e.nativeEvent.pageX}
           onTouchEnd={e => {
             console.log(this.touchX - e.nativeEvent.pageX)
-            if (this.touchX - e.nativeEvent.pageX < -100) {
+            if (this.touchX - e.nativeEvent.pageX < -150) {
               toPractice()
             }}}>
             <Dictionary language={userLanguage} translations={translations} terms={words} />

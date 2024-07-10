@@ -243,7 +243,7 @@ export default function StudyPage({ language, stars, translations, termsPerSessi
           <Text style={styles.title}>{translations.practice[language]}</Text>
           <View style={{ width: screenWidth, justifyContent: "center", alignItems: "center" }}>
             <View style={styles.back}>
-              <Text style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray" }}>{translations.scan_a_term_to_get_started[language]}</Text>
+              <Text style={{ paddingTop: 20, fontSize: 20, fontFamily: "NewYorkLarge-Regular", color: "gray", textAlign: "center" }}>{translations.scan_a_term_to_get_started[language]}</Text>
             </View>
           </View>
         </View>
