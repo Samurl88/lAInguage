@@ -6,7 +6,7 @@ import Dictionary from './Dictionary';
 import { SFSymbol } from 'react-native-sfsymbols';
 import CameraPage from './Camera';
 import StudyPage from './Study';
-import Animated, { FadeOut, FadeOutDown, FadeOutLeft, FadeOutRight, SlideInDown, SlideInLeft, SlideInRight, SlideInUp, SlideOutLeft, SlideOutRight, SlideOutUp, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { FadeOut, FadeOutDown, FadeOutLeft, FadeOutRight, SlideInDown, SlideInLeft, SlideInRight, SlideInUp, SlideOutDown, SlideOutLeft, SlideOutRight, SlideOutUp, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg"
 import database from '@react-native-firebase/database';
 import MaskedView from '@react-native-masked-view/masked-view';
@@ -305,11 +305,13 @@ export default function HomePage({ navigation }) {
   const [cameraPage, setCameraPage] = useState(false)
   const [studyPage, setStudyPage] = useState(true)
   const [dictionaryPage, setDictionaryPage] = useState(false)
-  const [settingsPage, setSettingsPage] = useState(false)
+  const [settingsPage, setSettingsPage] = useState(true)
 
   const [userLanguage, setUserLanguage] = useState(null)
   const [stars, setStars] = useState(null);
   const [lastCompleted, setLastCompleted] = useState(null);
+  const [termsPerSession, setTermsPerSession] = useState(null);
+  const [notifications, setNotifications] = useState(null)
 
   const [words, setWords] = useState(null)
 
@@ -381,6 +383,12 @@ export default function HomePage({ navigation }) {
 
         let lastCompleted = JSON.parse(data.lastCompleted)
         setLastCompleted(lastCompleted)
+
+        let termsPerSession = data?.termsPerSession || 10;
+        setTermsPerSession(termsPerSession)
+
+        let notifications = data?.termsPerSession || true;
+        setNotifications(notifications)
 
         return () => database().ref(`${uid}/profile`).off('value', onValueChange);
       })
@@ -457,8 +465,8 @@ export default function HomePage({ navigation }) {
     return (
       <View style={{ flex: 1, backgroundColor: "#F0E8DD", }}>
         {settingsPage &&
-                <Animated.View entering={SlideInDown} style={{position: "absolute", width: screenWidth, height: screenHeight, zIndex: 1000}}>
-                  <Settings />
+                <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{position: "absolute", width: screenWidth, height: screenHeight, zIndex: 1000}}>
+                  <Settings language={userLanguage} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)}/>
                 </Animated.View>
         }
         <Animated.View style={{ ...styles.tabBar, width: tabBarWidth, alignItems: "center", justifyContent: "space-around" }}>
@@ -536,16 +544,14 @@ export default function HomePage({ navigation }) {
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <Animated.View key={"rightone"} style={{ opacity: edgeOpacity }}>
-                  <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }} onPress={() => {
-                    setSettingsPage(true)
-                  }}>
+                  <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }}>
                     <SFSymbol name="person.crop.circle" size={25} color="#2F2C2A" />
                   </Pressable>
                 </Animated.View>
               </DropdownMenu.Trigger>
               <DropdownMenu.Content>
                 <DropdownMenu.Label />
-                <DropdownMenu.Item key="settings" onSelect={() => console.log("settings")}>
+                <DropdownMenu.Item key="settings" onSelect={() => setSettingsPage(true)}>
                   <DropdownMenu.ItemTitle>Settings</DropdownMenu.ItemTitle>
                   <DropdownMenu.ItemIcon ios={{
                     name: 'gear',
