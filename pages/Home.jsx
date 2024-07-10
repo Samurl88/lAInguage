@@ -14,6 +14,9 @@ import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient
 import * as DropdownMenu from 'zeego/dropdown-menu'
 import notifee, { RepeatFrequency, TriggerType } from '@notifee/react-native';
 import { FunctionDeclarationSchemaType } from '@google/generative-ai';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import Settings from './Settings';
+
 
 const dayjs = require('dayjs')
 
@@ -298,45 +301,61 @@ const translations = {
 
 
 
-// https://blog.teamairship.com/creating-reminders-with-notifee -> workaround for notifee scheduling bug
-
-const scheduleRepeatingReminder = async (timestamp) => {
-  const week = new Array(7).fill('');
-
-  for await (const [index, _day] of week.entries()) {
-    const dayTimestamp = dayjs(timestamp).add(index, 'day').hour(12).minute(0).second(0).valueOf();
-    const validTimestamp =
-      dayTimestamp > new Date().getTime()
-        ? dayTimestamp
-        : dayjs(dayTimestamp).add(1, 'week').valueOf();
-
-
-    await notifee.createTriggerNotification(
-      {
-        id: dayjs(validTimestamp).format('ddd'),
-        title: 'Practice!',
-        body: `Don't lose your streak!`
-      },
-      { 
-        type: TriggerType.TIMESTAMP,
-        timestamp: validTimestamp,
-        repeatFrequency: RepeatFrequency.WEEKLY
-      }
-    )
-  }
-};
-
-
 export default function HomePage({ navigation }) {
   const [cameraPage, setCameraPage] = useState(false)
   const [studyPage, setStudyPage] = useState(true)
   const [dictionaryPage, setDictionaryPage] = useState(false)
+  const [settingsPage, setSettingsPage] = useState(false)
 
   const [userLanguage, setUserLanguage] = useState(null)
   const [stars, setStars] = useState(null);
+  const [lastCompleted, setLastCompleted] = useState(null);
 
   const [words, setWords] = useState(null)
 
+
+  const bottomSheetRef = useRef(null)
+
+
+
+
+  // https://blog.teamairship.com/creating-reminders-with-notifee -> workaround for notifee scheduling bug
+  const scheduleRepeatingReminder = async (timestamp) => {
+    const week = new Array(7).fill('');
+
+    const prev = dayjs(lastCompleted).hour(0).minute(0).second(0).millisecond(0);
+    const now = dayjs().date(10)
+    let difference = now.diff(prev, 'day')
+
+    // console.log(difference)
+
+    for await (const [index, _day] of week.entries()) {
+      // Don't set a reminder if already completed today.
+      if (index === 0 && difference === 0) {
+        continue
+      } else {
+        const dayTimestamp = dayjs(timestamp).add(index, 'day').hour(12).minute(0).second(0).valueOf();
+        const validTimestamp =
+          dayTimestamp > new Date().getTime()
+            ? dayTimestamp
+            : dayjs(dayTimestamp).add(1, 'week').valueOf();
+
+        // console.log(dayjs(validTimestamp).format('ddd'))
+        await notifee.createTriggerNotification(
+          {
+            id: dayjs(validTimestamp).format('ddd'),
+            title: 'Practice!',
+            body: `Don't lose your streak!`
+          },
+          {
+            type: TriggerType.TIMESTAMP,
+            timestamp: validTimestamp,
+            repeatFrequency: RepeatFrequency.WEEKLY
+          }
+        )
+      }
+    }
+  };
 
   // Sets up daily notifications
   useEffect(() => {
@@ -344,7 +363,7 @@ export default function HomePage({ navigation }) {
       notifee.cancelAllNotifications().then(() => {
         scheduleRepeatingReminder(new Date);
       }
-    ))
+      ))
   }, [])
 
   // Subscribe to changes in profile
@@ -359,6 +378,9 @@ export default function HomePage({ navigation }) {
 
         let stars = data?.stars ? data.stars : 0
         setStars(stars)
+
+        let lastCompleted = JSON.parse(data.lastCompleted)
+        setLastCompleted(lastCompleted)
 
         return () => database().ref(`${uid}/profile`).off('value', onValueChange);
       })
@@ -423,7 +445,7 @@ export default function HomePage({ navigation }) {
   const tabBarWidth = useSharedValue(0.5 * screenWidth)
   const edgeOpacity = useSharedValue(0)
 
-  
+
   function toDictionaryPage() {
     setCameraPage(false)
     setDictionaryPage(true)
@@ -434,6 +456,11 @@ export default function HomePage({ navigation }) {
   if (userLanguage && stars != null)
     return (
       <View style={{ flex: 1, backgroundColor: "#F0E8DD", }}>
+        {settingsPage &&
+                <Animated.View entering={SlideInDown} style={{position: "absolute", width: screenWidth, height: screenHeight, zIndex: 1000}}>
+                  <Settings />
+                </Animated.View>
+        }
         <Animated.View style={{ ...styles.tabBar, width: tabBarWidth, alignItems: "center", justifyContent: "space-around" }}>
           {!cameraPage
             ? <Animated.View key={"leftone"} exiting={FadeOut} style={{ opacity: edgeOpacity }}>
@@ -502,6 +529,7 @@ export default function HomePage({ navigation }) {
             </Pressable>
             {/* <Button title="notif" style={{position: "absolute", top: screenHeight * 0.5, zIndex: 100}} onPress={() => { onDisplayNotification() }} /> */}
           </View>
+          
 
           {!cameraPage
             ?
@@ -509,7 +537,7 @@ export default function HomePage({ navigation }) {
               <DropdownMenu.Trigger>
                 <Animated.View key={"rightone"} style={{ opacity: edgeOpacity }}>
                   <Pressable style={{ height: 50, width: 50, justifyContent: "center", alignItems: "center", }} onPress={() => {
-                    // logOut()
+                    setSettingsPage(true)
                   }}>
                     <SFSymbol name="person.crop.circle" size={25} color="#2F2C2A" />
                   </Pressable>
@@ -542,9 +570,10 @@ export default function HomePage({ navigation }) {
 
         </Animated.View>
 
+
         {cameraPage &&
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
-            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage}/>
+            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage} />
           </Animated.View>
         }
         {studyPage &&
@@ -557,6 +586,16 @@ export default function HomePage({ navigation }) {
             <Dictionary language={userLanguage} translations={translations} terms={words} />
           </Animated.View>
         }
+
+        {/* <BottomSheet
+          ref={bottomSheetRef}
+          snapPoints={["100%"]}
+          enablePanDownToClose
+        >
+          <BottomSheetView>
+
+          </BottomSheetView>
+        </BottomSheet> */}
       </View>
     )
 }

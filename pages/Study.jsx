@@ -70,7 +70,8 @@ export default function StudyPage({ language, stars, translations }) {
     database()
       .ref(`${uid}/profile`)
       .update({
-        stars: stars + 1
+        stars: stars + 1,
+        lastCompleted: JSON.stringify(dayjs())
       })
 
     // If it's not 12 yet, then cancel notification for the day
@@ -78,6 +79,7 @@ export default function StudyPage({ language, stars, translations }) {
     // console.log(hour)
     if (hour < 12) {
       const reminderId = dayjs().format('ddd');
+      console.log(reminderId)
       notifee.cancelTriggerNotification(reminderId)
     }
   }
@@ -162,7 +164,7 @@ export default function StudyPage({ language, stars, translations }) {
         // Get 10 random words, removing words w/ score of 3 (mastered)
         let terms = Object.keys(words).filter(word => words[word].score !== 3);
         const shuffled = terms.sort(() => 0.5 - Math.random());
-        let selectedTerms = shuffled.slice(0, 10);
+        let selectedTerms = shuffled.slice(0, 1);
         setSelectedTerms(selectedTerms);
 
 
