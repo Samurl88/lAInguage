@@ -13,8 +13,6 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient as LinearGradientRN } from 'react-native-linear-gradient';
 import * as DropdownMenu from 'zeego/dropdown-menu'
 import notifee, { RepeatFrequency, TriggerType } from '@notifee/react-native';
-import { FunctionDeclarationSchemaType } from '@google/generative-ai';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import Settings from './Settings';
 
 
@@ -434,8 +432,6 @@ export default function HomePage({ navigation }) {
   const [words, setWords] = useState(null)
 
 
-  const bottomSheetRef = useRef(null)
-
   // https://blog.teamairship.com/creating-reminders-with-notifee -> workaround for notifee scheduling bug
   const scheduleRepeatingReminder = async (timestamp) => {
     const week = new Array(7).fill('');
@@ -659,7 +655,6 @@ export default function HomePage({ navigation }) {
             }}>
               <SFSymbol name="character.book.closed.fill" size={18} color="#2F2C2A" style={{ opacity: dictionaryPage ? 1 : 0.21 }} />
             </Pressable>
-            {/* <Button title="notif" style={{position: "absolute", top: screenHeight * 0.5, zIndex: 100}} onPress={() => { onDisplayNotification() }} /> */}
           </View>
 
 

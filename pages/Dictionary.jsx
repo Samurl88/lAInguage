@@ -272,7 +272,7 @@ function Term({ title, color, word, translatedWord, translatedDefinition, score,
                     <View style={{ ...styles.termContainer, }}>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, alignItems: "center" }}>
                             <Text style={styles.termTitle}>{word}</Text>
-                            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30}} onPress={() => {
+                            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30, right: -10}} onPress={() => {
                                 if (!inProgress)
                                     Tts.speak(word, {
                                         iosVoiceId: languageToId[originalLanguage].identifier,

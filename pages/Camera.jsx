@@ -100,6 +100,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
   const addWord = (originalWord, originalDefinition, translatedWord, translatedDefinition, originalLanguage) => {
+    setInitialized(true)
     const uid = auth().currentUser.uid;
     database()
       .ref(`/${uid}/words`)
@@ -121,7 +122,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
   const define = async (imageData) => {
     const prompt = `
     Attached is a photo. If there is a word highlighted in blue, determine the root word/infinitive of the highlighted word in the image (ex. leaving -> leave; vendieron -> vender).
-    Provide the word and definition in the original language of the word as well as the original language; additionally, provide the word and definition in ${language}. 
+    Provide the word and definition in the original language of the word as well as the original language (its name in english, ex. spanish -> spanish); additionally, provide the word and definition in ${language}. 
     Definitions should be 12 words or less. Everything must be lowercase. 
     Use the JSON schema below. If you cannot detect a word highlighted in blue, return null for all values.
     { "originalLanguage": "string",
@@ -135,7 +136,6 @@ export default function CameraPage({ language, translations, terms, toDictionary
     const response = result.response;
     const text = JSON.parse(response.text());
 
-    console.log(text)
     // If word is detected
     if (!(text.originalDefinition == null || text.originalDefinition == "null")) {
       setOriginalWord(text.originalWord)
@@ -143,8 +143,16 @@ export default function CameraPage({ language, translations, terms, toDictionary
       setTranslatedWord(text.translatedWord)
       setTranslatedDefinition(text.translatedDefinition)
       setOriginalLanguage(text.originalLanguage)
-      addWord(text.originalWord, text.originalDefinition, text.translatedWord, text.translatedDefinition, text.originalLanguage);
-      openTextSheet();
+      if (Object.keys(terms).includes(text.originalWord)) {
+        Alert.alert("Word already scanned!", "Please check your dictionary.", [
+          {
+            text: 'OK'
+          }
+        ])
+      } else {
+        addWord(text.originalWord, text.originalDefinition, text.translatedWord, text.translatedDefinition, text.originalLanguage);
+        openTextSheet();
+      }
     } else {
       Alert.alert("No word was detected!", "Please try again.", [
         {
@@ -158,14 +166,11 @@ export default function CameraPage({ language, translations, terms, toDictionary
   const [words, setWords] = useState([])
 
   function sortTerms() {
-    console.log("RUN")
     let words = []
     for (const word in terms) {
       let obj = terms[word]
       obj.word = word
       words.push(obj)
-
-      console.log(obj)
     }
 
     // Sort terms by date
@@ -180,9 +185,13 @@ export default function CameraPage({ language, translations, terms, toDictionary
   }
 
   // Sort terms on start
+  const [initialized, setInitialized] = useState(false)
   useEffect(() => {
-    sortTerms()
-  }, [])
+    if (!initialized && terms) {
+      sortTerms()
+      setInitialized(true)
+    }
+  }, [terms])
 
   const bottomSheetRef = useRef(null)
 
@@ -404,12 +413,6 @@ export default function CameraPage({ language, translations, terms, toDictionary
           onChange={index => {
             setCurrentPosition(index)
 
-            // If closed, add latest word to words
-            if (index == -1) {
-              let newWords = words
-              newWords.unshift({ word: originalWord, definition: originalDefinition, translatedWord: translatedWord, translatedDefinition, translatedDefinition, score: 0 })
-              setWords(newWords)
-            }
           }}
           onAnimate={(fromIndex, toIndex) => {
             if (fromIndex == -1) {
@@ -480,7 +483,7 @@ function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacit
         <View style={{ ...styles.termContainer, }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, alignItems: "center" }}>
             <Text style={styles.termTitle}>{word}</Text>
-            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30 }} onPress={() => {
+            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30, right: -10 }} onPress={() => {
               if (!inProgress)
                 Tts.speak(word, {
                   iosVoiceId: languageToId[originalLanguage].identifier,
@@ -533,7 +536,7 @@ function Term({ word, translatedWord, translatedDefinition, originalLanguage }) 
         <View style={{ ...styles.termContainer, }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, alignItems: "center" }}>
             <Text style={styles.termTitle}>{word}</Text>
-            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30 }} onPress={() => {
+            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30, right: -10 }} onPress={() => {
               if (!inProgress)
                 Tts.speak(word, {
                   iosVoiceId: languageToId[originalLanguage].identifier,

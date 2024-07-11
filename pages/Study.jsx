@@ -56,9 +56,11 @@ export default function StudyPage({ language, stars, translations, termsPerSessi
   // Loading animation
   const rotate = useSharedValue("0deg")
   useEffect(() => {
-    if (!flashcards && !MCQs)
+    if (!flashcards || !MCQs)
       rotate.value = withRepeat(withTiming("360deg", { duration: 1000, }), -1)
-
+    else {
+      rotate.value = "0deg"
+    }
   }, [flashcards, MCQs])
 
 
@@ -203,9 +205,12 @@ export default function StudyPage({ language, stars, translations, termsPerSessi
 
   // Begin when user enters page
   useEffect(() => {
-    if (termsPerSession)
-      sortTerms()
+    if (termsPerSession) {
+      reset();
+    }
   }, [termsPerSession]);
+
+
 
   // Resets all values
   function reset() {
@@ -215,6 +220,8 @@ export default function StudyPage({ language, stars, translations, termsPerSessi
     setNumAnswered(0);
     setComplete(null);
     setCurrentSlideIndex(0)
+    
+    currentProgressCoverWidth.value = screenWidth * 0.7
     sortTerms();
   }
 
