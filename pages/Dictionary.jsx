@@ -5,11 +5,41 @@ import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import { FlatList } from 'react-native-gesture-handler';
 import ContextMenu from "react-native-context-menu-view";
-import Animated, { FadeIn, FadeOut, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
+import Tts from 'react-native-tts';
 
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
+languageToId = {
+    "arabic": {"identifier": "com.apple.ttsbundle.Maged-compact"},
+    "czech": {"identifier": "com.apple.ttsbundle.Zuzana-compact"},
+    "danish": {"identifier": "com.apple.ttsbundle.Sara-compact"},
+    "german": {"identifier": "com.apple.ttsbundle.Anna-compact"},
+    "greek": {"identifier": "com.apple.ttsbundle.Melina-compact"},
+    "english": {"identifier": "com.apple.ttsbundle.Samantha-compact"},
+    "spanish": {"identifier": "com.apple.ttsbundle.Monica-compact"},
+    "finnish": {"identifier": "com.apple.ttsbundle.Satu-compact"},
+    "french": {"identifier": "com.apple.ttsbundle.Thomas-compact"},
+    "hebrew": {"identifier": "com.apple.ttsbundle.Carmit-compact"},
+    "hindi": {"identifier": "com.apple.ttsbundle.Lekha-compact"},
+    "hungarian": {"identifier": "com.apple.ttsbundle.Mariska-compact"},
+    "indonesian": {"identifier": "com.apple.ttsbundle.Damayanti-compact"},
+    "italian": {"identifier": "com.apple.ttsbundle.Alice-compact"},
+    "japanese": {"identifier": "com.apple.ttsbundle.Kyoko-compact"},
+    "korean": {"identifier": "com.apple.ttsbundle.Yuna-compact"},
+    "dutch": {"identifier": "com.apple.ttsbundle.Xander-compact"},
+    "norwegian": {"identifier": "com.apple.ttsbundle.Nora-compact"},
+    "polish": {"identifier": "com.apple.ttsbundle.Zosia-compact"},
+    "portuguese": {"identifier": "com.apple.ttsbundle.Luciana-compact"},
+    "romanian": {"identifier": "com.apple.ttsbundle.Ioana-compact"},
+    "russian": {"identifier": "com.apple.ttsbundle.Milena-compact"},
+    "slovak": {"identifier": "com.apple.ttsbundle.Laura-compact"},
+    "swedish": {"identifier": "com.apple.ttsbundle.Alva-compact"},
+    "thai": {"identifier": "com.apple.ttsbundle.Kanya-compact"},
+    "turkish": {"identifier": "com.apple.ttsbundle.Yelda-compact"},
+    "chinese": {"identifier": "com.apple.ttsbundle.Ting-Ting-compact"}
+}
 
 export default function Dictionary({ language, translations, terms }) {
     const [words, setWords] = useState();
@@ -49,7 +79,6 @@ export default function Dictionary({ language, translations, terms }) {
         setWordCounts({ familiar: tempFamiliar.length - 1, unfamiliar: tempUnfamiliar.length - 1, mastered: tempMastered.length - 1 })
 
         setData(tempUnfamiliar.concat(tempFamiliar).concat(tempMastered))
-
     }
 
     useEffect(() => {
@@ -90,7 +119,7 @@ export default function Dictionary({ language, translations, terms }) {
                 </Pressable> */}
                 <Text style={styles.title}>{translations.dictionary[language]}</Text>
 
-                <View style={{ gap: 10, width: screenWidth, alignItems: "center"}}>
+                <View style={{ gap: 10, width: screenWidth, alignItems: "center" }}>
                     <View style={{ backgroundColor: "rgba(118, 118, 128, 0.12)", height: 35, borderRadius: 10, alignItems: "center", flexDirection: "row", width: screenWidth * 0.9 }}>
                         <SFSymbol name="magnifyingglass" size={18} color="grey" style={{ left: screenWidth * 0.05, position: "absolute" }} />
                         <TextInput
@@ -102,20 +131,20 @@ export default function Dictionary({ language, translations, terms }) {
                     </View>
 
                     {/* Filter buttons height: screenHeight * 0.036*/}
-                    <ScrollView contentContainerStyle={{paddingLeft: screenWidth * 0.05, paddingRight: screenWidth * 0.05, gap: 10}} horizontal style={{ flexDirection: "row", width: screenWidth, height: screenHeight * 0.036 }}>
+                    <ScrollView contentContainerStyle={{ paddingLeft: screenWidth * 0.05, paddingRight: screenWidth * 0.05, gap: 10 }} horizontal style={{ flexDirection: "row", width: screenWidth, height: screenHeight * 0.036 }}>
                         {wordCounts?.unfamiliar > 0
                             ? <Pressable style={onlyUnfamiliar ? styles.categoryBtnSelected : styles.categoryBtn} onPress={() => {
-                                    if (onlyUnfamiliar) {
-                                        setOnlyUnfamiliar(false)
-                                    } else {
-                                        setOnlyUnfamiliar(true)
-                                        setOnlyFamiliar(false)
-                                        setOnlyMastered(false)
-                                    }
-                                }}>
-                                    <View style={{ width: 10, height: 10, backgroundColor: "#77bee9", borderRadius: 5 }} />
-                                    <Text style={styles.categoryText}>Unfamiliar</Text>
-                                </Pressable>
+                                if (onlyUnfamiliar) {
+                                    setOnlyUnfamiliar(false)
+                                } else {
+                                    setOnlyUnfamiliar(true)
+                                    setOnlyFamiliar(false)
+                                    setOnlyMastered(false)
+                                }
+                            }}>
+                                <View style={{ width: 10, height: 10, backgroundColor: "#77bee9", borderRadius: 5 }} />
+                                <Text style={styles.categoryText}>Unfamiliar</Text>
+                            </Pressable>
                             : null
                         }
                         {wordCounts?.familiar > 0
@@ -158,7 +187,7 @@ export default function Dictionary({ language, translations, terms }) {
                             renderItem={({ item }) =>
                                 <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord}
                                     translatedDefinition={item.translatedDefinition} score={item.score} wordCounts={wordCounts} setWordCounts={setWordCounts}
-                                    onlyUnfamiliar={onlyUnfamiliar} onlyFamiliar={onlyFamiliar} onlyMastered={onlyMastered}
+                                    onlyUnfamiliar={onlyUnfamiliar} onlyFamiliar={onlyFamiliar} onlyMastered={onlyMastered} originalLanguage={item.originalLanguage}
                                 />}
                         />
                     </Animated.View>
@@ -175,13 +204,23 @@ export default function Dictionary({ language, translations, terms }) {
 
 
 
-function Term({ title, color, word, translatedWord, translatedDefinition, score, wordCounts, setWordCounts, onlyUnfamiliar, onlyFamiliar, onlyMastered }) {
+function Term({ title, color, word, translatedWord, translatedDefinition, score, wordCounts, setWordCounts, onlyUnfamiliar, onlyFamiliar, onlyMastered, originalLanguage }) {
     const termOpacity = useSharedValue(1)
     const termHeight = useSharedValue(screenHeight * 0.16)
     const marginTop = useSharedValue(12)
 
     const titleOpacity = useSharedValue(1)
     const titleHeight = useSharedValue(screenHeight * 0.055)
+
+    const [inProgress, setInProgress] = useState(false)
+
+    useEffect(() => {
+        Tts.setIgnoreSilentSwitch("ignore");
+        Tts.addEventListener('tts-start', () => {
+            setInProgress(true);
+        });
+        Tts.addEventListener('tts-finish', () => setInProgress(false));
+    }, [])
 
     // Logic for filter buttons
     if ((onlyUnfamiliar && score != 0) || (onlyFamiliar && (score > 2 || score < 1)) || (onlyMastered && score != 3)) return
@@ -231,9 +270,17 @@ function Term({ title, color, word, translatedWord, translatedDefinition, score,
                     }}
                 >
                     <View style={{ ...styles.termContainer, }}>
-                        <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, alignItems: "center" }}>
                             <Text style={styles.termTitle}>{word}</Text>
-                            <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+                            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30}} onPress={() => {
+                                if (!inProgress)
+                                    Tts.speak(word, {
+                                        iosVoiceId: languageToId[originalLanguage].identifier,
+                                        rate: 0.4
+                                    });
+                            }}>
+                                <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" opacity={inProgress ? 0.5 : 1} />
+                            </Pressable>
                         </View>
                         <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
                     </View>

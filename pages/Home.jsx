@@ -710,47 +710,50 @@ export default function HomePage({ navigation }) {
 
 
         {cameraPage &&
-          <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}
-          onTouchStart={e => this.touchX = e.nativeEvent.pageX}
-          onTouchEnd={e => {
-            if (this.touchX - e.nativeEvent.pageX > 150)
-              toPractice()
-          }}
-          >
+          // <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}
+          // onTouchStart={e => this.touchX = e.nativeEvent.pageX}
+          // onTouchEnd={e => {
+          //   if (this.touchX - e.nativeEvent.pageX > 150)
+          //     toPractice()
+          // }}
+          // >
+          <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
             <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage} />
           </Animated.View>
         }
         {studyPage &&
-          <Animated.View entering={CustomEnteringAnimation} exiting={CustomExitingAnimation} style={{ flex: 1 }} 
-          onTouchStart={e => this.touchX = e.nativeEvent.pageX}
-          onTouchEnd={e => {
-            if (this.touchX - e.nativeEvent.pageX > 150) {
-              setCameraPage(false)
-              setStudyPage(false)
-              setDictionaryPage(true)
-              exitDirection.value = "left"
-              tabBarWidth.value = withTiming(0.85 * screenWidth)
-              edgeOpacity.value = withTiming(1)
-            } else if (this.touchX - e.nativeEvent.pageX < -150) {
-              setCameraPage(true)
-              setStudyPage(false)
-              setDictionaryPage(false)
-              exitDirection.value = "right"
-              tabBarWidth.value = withTiming(0.5 * screenWidth)
-              edgeOpacity.value = withTiming(0)
-            }}}>
+          // <Animated.View entering={CustomEnteringAnimation} exiting={CustomExitingAnimation} style={{ flex: 1 }} 
+          // onTouchStart={e => this.touchX = e.nativeEvent.pageX}
+          // onTouchEnd={e => {
+          //   if (this.touchX - e.nativeEvent.pageX > 150) {
+          //     setCameraPage(false)
+          //     setStudyPage(false)
+          //     setDictionaryPage(true)
+          //     exitDirection.value = "left"
+          //     tabBarWidth.value = withTiming(0.85 * screenWidth)
+          //     edgeOpacity.value = withTiming(1)
+          //   } else if (this.touchX - e.nativeEvent.pageX < -150) {
+          //     setCameraPage(true)
+          //     setStudyPage(false)
+          //     setDictionaryPage(false)
+          //     exitDirection.value = "right"
+          //     tabBarWidth.value = withTiming(0.5 * screenWidth)
+          //     edgeOpacity.value = withTiming(0)
+          //   }}}>
+          <Animated.View entering={CustomEnteringAnimation} exiting={CustomExitingAnimation} style={{ flex: 1 }}>
             <StudyPage language={userLanguage} stars={stars} translations={translations} termsPerSession={termsPerSession} />
           </Animated.View>
         }
         {dictionaryPage &&
-          <Animated.View entering={SlideInRight} exiting={SlideOutRight} style={{ flex: 1 }}
+          // <Animated.View entering={SlideInRight} exiting={SlideOutRight} style={{ flex: 1 }}
         
-          onTouchStart={e => this.touchX = e.nativeEvent.pageX}
-          onTouchEnd={e => {
-            console.log(this.touchX - e.nativeEvent.pageX)
-            if (this.touchX - e.nativeEvent.pageX < -150) {
-              toPractice()
-            }}}>
+          // onTouchStart={e => this.touchX = e.nativeEvent.pageX}
+          // onTouchEnd={e => {
+          //   console.log(this.touchX - e.nativeEvent.pageX)
+          //   if (this.touchX - e.nativeEvent.pageX < -150) {
+          //     toPractice()
+          //   }}}>
+          <Animated.View entering={SlideInRight} exiting={SlideOutRight} style={{flex: 1}}>
             <Dictionary language={userLanguage} translations={translations} terms={words} />
           </Animated.View>
         }
@@ -770,7 +773,7 @@ export default function HomePage({ navigation }) {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 255, 255, 1)",
     position: "absolute",
     zIndex: 100,
     top: screenHeight * 0.07,

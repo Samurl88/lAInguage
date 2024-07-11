@@ -29,8 +29,39 @@ import { launchImageLibrary } from 'react-native-image-picker';
 
 import RNFS from 'react-native-fs'
 import ContextMenu from 'react-native-context-menu-view';
+import Tts from 'react-native-tts';
 
 const dayjs = require('dayjs')
+
+languageToId = {
+  "arabic": {"identifier": "com.apple.ttsbundle.Maged-compact"},
+  "czech": {"identifier": "com.apple.ttsbundle.Zuzana-compact"},
+  "danish": {"identifier": "com.apple.ttsbundle.Sara-compact"},
+  "german": {"identifier": "com.apple.ttsbundle.Anna-compact"},
+  "greek": {"identifier": "com.apple.ttsbundle.Melina-compact"},
+  "english": {"identifier": "com.apple.ttsbundle.Samantha-compact"},
+  "spanish": {"identifier": "com.apple.ttsbundle.Monica-compact"},
+  "finnish": {"identifier": "com.apple.ttsbundle.Satu-compact"},
+  "french": {"identifier": "com.apple.ttsbundle.Thomas-compact"},
+  "hebrew": {"identifier": "com.apple.ttsbundle.Carmit-compact"},
+  "hindi": {"identifier": "com.apple.ttsbundle.Lekha-compact"},
+  "hungarian": {"identifier": "com.apple.ttsbundle.Mariska-compact"},
+  "indonesian": {"identifier": "com.apple.ttsbundle.Damayanti-compact"},
+  "italian": {"identifier": "com.apple.ttsbundle.Alice-compact"},
+  "japanese": {"identifier": "com.apple.ttsbundle.Kyoko-compact"},
+  "korean": {"identifier": "com.apple.ttsbundle.Yuna-compact"},
+  "dutch": {"identifier": "com.apple.ttsbundle.Xander-compact"},
+  "norwegian": {"identifier": "com.apple.ttsbundle.Nora-compact"},
+  "polish": {"identifier": "com.apple.ttsbundle.Zosia-compact"},
+  "portuguese": {"identifier": "com.apple.ttsbundle.Luciana-compact"},
+  "romanian": {"identifier": "com.apple.ttsbundle.Ioana-compact"},
+  "russian": {"identifier": "com.apple.ttsbundle.Milena-compact"},
+  "slovak": {"identifier": "com.apple.ttsbundle.Laura-compact"},
+  "swedish": {"identifier": "com.apple.ttsbundle.Alva-compact"},
+  "thai": {"identifier": "com.apple.ttsbundle.Kanya-compact"},
+  "turkish": {"identifier": "com.apple.ttsbundle.Yelda-compact"},
+  "chinese": {"identifier": "com.apple.ttsbundle.Ting-Ting-compact"}
+}
 
 export default function CameraPage({ language, translations, terms, toDictionaryPage }) {
   const device = useCameraDevice('back')
@@ -40,6 +71,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
   const [originalDefinition, setOriginalDefinition] = useState(null)
   const [translatedWord, setTranslatedWord] = useState(null)
   const [translatedDefinition, setTranslatedDefinition] = useState(null)
+  const [originalLanguage, setOriginalLanguage] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const safetySetting = [
@@ -67,7 +99,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
 
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySetting, generationConfig: { responseMimeType: "application/json" } },);
 
-  const addWord = (originalWord, originalDefinition, translatedWord, translatedDefinition) => {
+  const addWord = (originalWord, originalDefinition, translatedWord, translatedDefinition, originalLanguage) => {
     const uid = auth().currentUser.uid;
     database()
       .ref(`/${uid}/words`)
@@ -76,6 +108,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
           translatedWord: translatedWord,
           definition: originalDefinition,
           translatedDefinition: translatedDefinition,
+          originalLanguage: originalLanguage,
           score: 0,
           date: JSON.stringify(dayjs())
         }
@@ -86,11 +119,8 @@ export default function CameraPage({ language, translations, terms, toDictionary
   }
 
   const define = async (imageData) => {
-
-    // console.log(Config.API_KEY)
-
     const prompt = `
-    Attached is a photo. If there is a word highlighted in blue, determine the root word (infinitive) of the highlighted word in the image (ex. leaving -> leave).
+    Attached is a photo. If there is a word highlighted in blue, determine the root word/infinitive of the highlighted word in the image (ex. leaving -> leave; vendieron -> vender).
     Provide the word and definition in the original language of the word as well as the original language; additionally, provide the word and definition in ${language}. 
     Definitions should be 12 words or less. Everything must be lowercase. 
     Use the JSON schema below. If you cannot detect a word highlighted in blue, return null for all values.
@@ -112,7 +142,8 @@ export default function CameraPage({ language, translations, terms, toDictionary
       setOriginalDefinition(text.originalDefinition)
       setTranslatedWord(text.translatedWord)
       setTranslatedDefinition(text.translatedDefinition)
-      addWord(text.originalWord, text.originalDefinition, text.translatedWord, text.translatedDefinition);
+      setOriginalLanguage(text.originalLanguage)
+      addWord(text.originalWord, text.originalDefinition, text.translatedWord, text.translatedDefinition, text.originalLanguage);
       openTextSheet();
     } else {
       Alert.alert("No word was detected!", "Please try again.", [
@@ -127,11 +158,14 @@ export default function CameraPage({ language, translations, terms, toDictionary
   const [words, setWords] = useState([])
 
   function sortTerms() {
+    console.log("RUN")
     let words = []
     for (const word in terms) {
       let obj = terms[word]
       obj.word = word
       words.push(obj)
+
+      console.log(obj)
     }
 
     // Sort terms by date
@@ -140,7 +174,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
     })
 
     // Remove most recent word (to be animated in header instead)
-    words.shift()
+    // words.shift()
 
     setWords(words)
   }
@@ -236,7 +270,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
   useEffect(() => {
     if (loading) {
       rotate.value = withRepeat(withTiming("360deg", { duration: 1000, }), -1)
-      opacity.value = withTiming(1, {duration: 500})
+      opacity.value = withTiming(1, { duration: 500 })
     } else {
       rotate.value = "0deg"
       opacity.value = 0
@@ -399,10 +433,10 @@ export default function CameraPage({ language, translations, terms, toDictionary
               data={words}
               contentContainerStyle={{ paddingBottom: 30, alignSelf: "center", marginTop: 20 }}
               renderItem={({ item }) => {
-                return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} />)
+                return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} originalLanguage={item.originalLanguage} />)
               }}
               ListHeaderComponent={
-                <FirstTerm word={originalWord} translatedWord={translatedWord} translatedDefinition={translatedDefinition} firstTermOpacity={firstTermOpacity} firstTermHeight={firstTermHeight} firstMarginTop={firstMarginTop} />
+                <FirstTerm word={originalWord} translatedWord={translatedWord} translatedDefinition={translatedDefinition} firstTermOpacity={firstTermOpacity} firstTermHeight={firstTermHeight} firstMarginTop={firstMarginTop} originalLanguage={originalLanguage} />
               }
               style={{ paddingBottom: 50 }}
             />
@@ -414,7 +448,17 @@ export default function CameraPage({ language, translations, terms, toDictionary
 }
 
 
-function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacity, firstTermHeight, firstMarginTop }) {
+function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacity, firstTermHeight, firstMarginTop, originalLanguage }) {
+
+  const [inProgress, setInProgress] = useState(false)
+
+  useEffect(() => {
+      Tts.setIgnoreSilentSwitch("ignore");
+      Tts.addEventListener('tts-start', () => {
+          setInProgress(true);
+      });
+      Tts.addEventListener('tts-finish', () => setInProgress(false));
+  }, [])
 
   return (
     <Animated.View key={word} style={{ opacity: firstTermOpacity, height: firstTermHeight, marginTop: firstMarginTop }}>
@@ -430,14 +474,21 @@ function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacit
             database()
               .ref(`${uid}/words/${word}`)
               .set(null)
-
           }
         }}
       >
         <View style={{ ...styles.termContainer, }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, alignItems: "center" }}>
             <Text style={styles.termTitle}>{word}</Text>
-            <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30 }} onPress={() => {
+              if (!inProgress)
+                Tts.speak(word, {
+                  iosVoiceId: languageToId[originalLanguage].identifier,
+                  rate: 0.4
+                });
+            }}>
+              <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" opacity={inProgress ? 0.5 : 1} />
+            </Pressable>
           </View>
           <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
         </View>
@@ -446,10 +497,20 @@ function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacit
   )
 }
 
-function Term({ word, translatedWord, translatedDefinition }) {
+function Term({ word, translatedWord, translatedDefinition, originalLanguage }) {
   const termOpacity = useSharedValue(1)
   const termHeight = useSharedValue(screenHeight * 0.16)
   const marginTop = useSharedValue(12)
+
+  const [inProgress, setInProgress] = useState(false)
+
+  useEffect(() => {
+      Tts.setIgnoreSilentSwitch("ignore");
+      Tts.addEventListener('tts-start', () => {
+          setInProgress(true);
+      });
+      Tts.addEventListener('tts-finish', () => setInProgress(false));
+  }, [])
 
   return (
     <Animated.View key={word} style={{ opacity: termOpacity, height: termHeight, marginTop: marginTop }}>
@@ -470,9 +531,17 @@ function Term({ word, translatedWord, translatedDefinition }) {
         }}
       >
         <View style={{ ...styles.termContainer, }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", width: "95%", paddingBottom: 12, alignItems: "center" }}>
             <Text style={styles.termTitle}>{word}</Text>
-            <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" />
+            <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30 }} onPress={() => {
+              if (!inProgress)
+                Tts.speak(word, {
+                  iosVoiceId: languageToId[originalLanguage].identifier,
+                  rate: 0.4
+                });
+            }}>
+              <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" opacity={inProgress ? 0.5 : 1} />
+            </Pressable>
           </View>
           <Text style={styles.termSubtitle}>{translatedWord} · {translatedDefinition}</Text>
         </View>
