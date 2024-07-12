@@ -747,7 +747,7 @@ function Flashcard({ mcqs, front, back, frontFacing, toggleFacing, score, type, 
           </View>
           : <View style={styles.btnContainer}>
             <Animated.View style={[styles.defaultBtn, { backgroundColor: "#2F2C2A" }]}>
-              <Pressable style={{ ...styles.defaultBtn }} onPress={() => {
+              <Pressable style={({ pressed }) => [styles.defaultBtn, { backgroundColor: pressed ? "#4A4643" : "#2F2C2A" }]} onPress={() => {
                 handlePress()
               }}>
                 <SFSymbol name="arrow.triangle.2.circlepath" size={25} color="white" />

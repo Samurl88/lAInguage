@@ -126,7 +126,7 @@ export default function Onboarding({ navigation }) {
                     />
                 </Animated.View>
                 <Animated.View key="btn1" entering={FadeIn.duration(duration).delay(delay * 3)} exiting={FadeOut.duration(duration).delay(delay * 3)}>
-                    <Pressable style={styles.button} onPress={() => {
+                    <Pressable style={({ pressed }) => [styles.button, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]} onPress={() => {
                         setPage(1)
                         rotate.value = withDelay(duration + delay, withTiming("360deg", { duration: 750 }))
                     }}>
@@ -197,7 +197,7 @@ export default function Onboarding({ navigation }) {
                 <Animated.View key="btn2" entering={FadeIn.duration(duration).delay(7 * delay + duration * 1.5).withCallback(() => {
                     runOnJS(setNextBtnDoneLoading)(true)
                 })} exiting={FadeOut.duration(duration).delay(delay * 3)}>
-                    <Pressable style={styles.button} onPress={() => {if (nextBtnDoneLoading) navigation.navigate("SignUp", { chosenLanguage: chosenLanguage })}}>
+                    <Pressable style={({ pressed }) => [styles.button, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]} onPress={() => {if (nextBtnDoneLoading) navigation.navigate("SignUp", { chosenLanguage: chosenLanguage })}}>
                         <Text style={styles.buttonText}>{translations.next[chosenLanguage]}</Text>
                     </Pressable>
                 </Animated.View>

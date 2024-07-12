@@ -34,33 +34,33 @@ import Tts from 'react-native-tts';
 const dayjs = require('dayjs')
 
 languageToId = {
-  "arabic": {"identifier": "com.apple.ttsbundle.Maged-compact"},
-  "czech": {"identifier": "com.apple.ttsbundle.Zuzana-compact"},
-  "danish": {"identifier": "com.apple.ttsbundle.Sara-compact"},
-  "german": {"identifier": "com.apple.ttsbundle.Anna-compact"},
-  "greek": {"identifier": "com.apple.ttsbundle.Melina-compact"},
-  "english": {"identifier": "com.apple.ttsbundle.Samantha-compact"},
-  "spanish": {"identifier": "com.apple.ttsbundle.Monica-compact"},
-  "finnish": {"identifier": "com.apple.ttsbundle.Satu-compact"},
-  "french": {"identifier": "com.apple.ttsbundle.Thomas-compact"},
-  "hebrew": {"identifier": "com.apple.ttsbundle.Carmit-compact"},
-  "hindi": {"identifier": "com.apple.ttsbundle.Lekha-compact"},
-  "hungarian": {"identifier": "com.apple.ttsbundle.Mariska-compact"},
-  "indonesian": {"identifier": "com.apple.ttsbundle.Damayanti-compact"},
-  "italian": {"identifier": "com.apple.ttsbundle.Alice-compact"},
-  "japanese": {"identifier": "com.apple.ttsbundle.Kyoko-compact"},
-  "korean": {"identifier": "com.apple.ttsbundle.Yuna-compact"},
-  "dutch": {"identifier": "com.apple.ttsbundle.Xander-compact"},
-  "norwegian": {"identifier": "com.apple.ttsbundle.Nora-compact"},
-  "polish": {"identifier": "com.apple.ttsbundle.Zosia-compact"},
-  "portuguese": {"identifier": "com.apple.ttsbundle.Luciana-compact"},
-  "romanian": {"identifier": "com.apple.ttsbundle.Ioana-compact"},
-  "russian": {"identifier": "com.apple.ttsbundle.Milena-compact"},
-  "slovak": {"identifier": "com.apple.ttsbundle.Laura-compact"},
-  "swedish": {"identifier": "com.apple.ttsbundle.Alva-compact"},
-  "thai": {"identifier": "com.apple.ttsbundle.Kanya-compact"},
-  "turkish": {"identifier": "com.apple.ttsbundle.Yelda-compact"},
-  "chinese": {"identifier": "com.apple.ttsbundle.Ting-Ting-compact"}
+  "arabic": { "identifier": "com.apple.ttsbundle.Maged-compact" },
+  "czech": { "identifier": "com.apple.ttsbundle.Zuzana-compact" },
+  "danish": { "identifier": "com.apple.ttsbundle.Sara-compact" },
+  "german": { "identifier": "com.apple.ttsbundle.Anna-compact" },
+  "greek": { "identifier": "com.apple.ttsbundle.Melina-compact" },
+  "english": { "identifier": "com.apple.ttsbundle.Samantha-compact" },
+  "spanish": { "identifier": "com.apple.ttsbundle.Monica-compact" },
+  "finnish": { "identifier": "com.apple.ttsbundle.Satu-compact" },
+  "french": { "identifier": "com.apple.ttsbundle.Thomas-compact" },
+  "hebrew": { "identifier": "com.apple.ttsbundle.Carmit-compact" },
+  "hindi": { "identifier": "com.apple.ttsbundle.Lekha-compact" },
+  "hungarian": { "identifier": "com.apple.ttsbundle.Mariska-compact" },
+  "indonesian": { "identifier": "com.apple.ttsbundle.Damayanti-compact" },
+  "italian": { "identifier": "com.apple.ttsbundle.Alice-compact" },
+  "japanese": { "identifier": "com.apple.ttsbundle.Kyoko-compact" },
+  "korean": { "identifier": "com.apple.ttsbundle.Yuna-compact" },
+  "dutch": { "identifier": "com.apple.ttsbundle.Xander-compact" },
+  "norwegian": { "identifier": "com.apple.ttsbundle.Nora-compact" },
+  "polish": { "identifier": "com.apple.ttsbundle.Zosia-compact" },
+  "portuguese": { "identifier": "com.apple.ttsbundle.Luciana-compact" },
+  "romanian": { "identifier": "com.apple.ttsbundle.Ioana-compact" },
+  "russian": { "identifier": "com.apple.ttsbundle.Milena-compact" },
+  "slovak": { "identifier": "com.apple.ttsbundle.Laura-compact" },
+  "swedish": { "identifier": "com.apple.ttsbundle.Alva-compact" },
+  "thai": { "identifier": "com.apple.ttsbundle.Kanya-compact" },
+  "turkish": { "identifier": "com.apple.ttsbundle.Yelda-compact" },
+  "chinese": { "identifier": "com.apple.ttsbundle.Ting-Ting-compact" }
 }
 
 const speedToRate = [0.2, 0.4, 0.6]
@@ -120,7 +120,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
       .then(() => console.log("Done!")).catch(error => {
         console.error("Failed to add word to database:", error);
       });
-      
+
   }
 
   const define = async (imageData) => {
@@ -305,7 +305,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
               /> */}
 
               <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)}>
-                <Pressable style={{ ...styles.actionButton, }} onPress={() => {
+                <Pressable style={({ pressed }) => [styles.actionButton, { backgroundColor: pressed ? "#4A4643" : "#2F2C2A" }]} onPress={() => {
                   if (flash == "on") setFlash("off")
                   else setFlash("on")
                 }}>
@@ -319,18 +319,20 @@ export default function CameraPage({ language, translations, terms, toDictionary
                     setImage(result)
                   })
                 }}>
-                  <Svg
-                    width={80}
-                    height={80}
-                    viewBox="0 0 72 72"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <Circle cx={36} cy={36} r={30} fill="#F0E8DD" />
-                    <Circle cx={36} cy={36} r={34.5} stroke="#F0E8DD" strokeWidth={3} />
-                  </Svg>
+                  {({ pressed }) => (
+                    <Svg
+                      width={80}
+                      height={80}
+                      viewBox="0 0 72 72"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <Circle cx={36} cy={36} r={30} fill={pressed ? "#C9C3BC" : "#F0E8DD"} />
+                      <Circle cx={36} cy={36} r={34.5} stroke={pressed ? "#C9C3BC" : "#F0E8DD"} strokeWidth={3} />
+                    </Svg>
+                  )}
                 </Pressable>
-                <Pressable style={styles.actionButton} onPress={() => {
+                <Pressable style={({ pressed }) => [styles.actionButton, { backgroundColor: pressed ? "#4A4643" : "#2F2C2A" }]} onPress={() => {
                   launchImageLibrary({ mediaType: "photo", includeBase64: true }, (result) => {
                     if (!result?.didCancel) {
                       let image = result.assets[0].base64
@@ -349,7 +351,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
             : <>
               {/* entering={FadeIn.duration(500).delay(500)} */}
               <Animated.View style={styles.buttonContainer} key="buttonContainer2" exiting={FadeOut.duration(250)}>
-                <Pressable style={{ ...styles.actionButton, }} onPress={() => {
+                <Pressable style={({ pressed }) => [styles.actionButton, { backgroundColor: pressed ? "#4A4643" : "#2F2C2A" }]} onPress={() => {
                   setPaths([])
                   setCameraOpen(true);
                   setImage(null);
@@ -361,7 +363,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
                 </Pressable>
                 <Pressable onPress={() => {
                   if (!loading && paths.length) saveMarkedUpImage()
-                }} style={styles.bigActionButton} opacity={paths.length ? 1 : 0.5}>
+                }} style={({ pressed }) => [styles.bigActionButton, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]} opacity={paths.length ? 1 : 0.5}>
                   {!loading
                     ? <SFSymbol name="doc.text.magnifyingglass" size={32} color="black" />
                     : <Animated.View style={{ transform: [{ rotate: rotate }], opacity: opacity }}>
@@ -369,7 +371,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
                     </Animated.View>
                   }
                 </Pressable>
-                <Pressable style={{ ...styles.actionButton, }} onPress={() => { setPaths([]) }}>
+                <Pressable style={({ pressed }) => [styles.actionButton, { backgroundColor: pressed ? "#4A4643" : "#2F2C2A" }]} onPress={() => { setPaths([]) }}>
                   <Animated.View>
                     <SFSymbol name="eraser.fill" size={25} color="white" />
                   </Animated.View>
@@ -430,7 +432,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
           <BottomSheetView style={styles.contentContainer}>
             <View style={{ flexDirection: "row", paddingTop: 15, width: "90%", alignItems: "center", justifyContent: "space-between", alignSelf: "center" }}>
               <Text style={styles.title}>{translations.definitions[language]}</Text>
-              <Pressable style={{ flexDirection: "row", gap: 10, backgroundColor: "#77BEE9", padding: 10, justifyContent: "center", alignItems: "center", borderRadius: 10, shadowColor: "#77BEE9", shadowOpacity: 0.7, shadowRadius: 5, }} onPress={toDictionaryPage}>
+              <Pressable style={({ pressed }) => [{ flexDirection: "row", gap: 10, backgroundColor: pressed ? "#67A4C9" : "#77BEE9", padding: 10, justifyContent: "center", alignItems: "center", borderRadius: 10, shadowColor: "#77BEE9", shadowOpacity: 0.7, shadowRadius: 5, }]} onPress={toDictionaryPage}>
                 <SFSymbol name="character.book.closed.fill" size={20} color="white" height={20} width={20} />
                 <SFSymbol name="chevron.right" size={20} color="white" height={20} width={20} />
               </Pressable>
@@ -459,11 +461,11 @@ function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacit
   const [inProgress, setInProgress] = useState(false)
 
   useEffect(() => {
-      Tts.setIgnoreSilentSwitch("ignore");
-      Tts.addEventListener('tts-start', () => {
-          setInProgress(true);
-      });
-      Tts.addEventListener('tts-finish', () => setInProgress(false));
+    Tts.setIgnoreSilentSwitch("ignore");
+    Tts.addEventListener('tts-start', () => {
+      setInProgress(true);
+    });
+    Tts.addEventListener('tts-finish', () => setInProgress(false));
   }, [])
 
   return (
@@ -511,11 +513,11 @@ function Term({ word, translatedWord, translatedDefinition, originalLanguage, wo
   const [inProgress, setInProgress] = useState(false)
 
   useEffect(() => {
-      Tts.setIgnoreSilentSwitch("ignore");
-      Tts.addEventListener('tts-start', () => {
-          setInProgress(true);
-      });
-      Tts.addEventListener('tts-finish', () => setInProgress(false));
+    Tts.setIgnoreSilentSwitch("ignore");
+    Tts.addEventListener('tts-start', () => {
+      setInProgress(true);
+    });
+    Tts.addEventListener('tts-finish', () => setInProgress(false));
   }, [])
 
   return (

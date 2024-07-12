@@ -269,7 +269,7 @@ export default function SignUpScreen({ route, navigation }) {
                 <Animated.View key="signup-btn" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ top: screenHeight * 0.35, position: "absolute",}}>
                     {email && password
                         ? <Pressable onPress={async () => { register() }}
-                            style={styles.infoButton}>
+                        style={({ pressed }) => [styles.infoButton, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]}>
                             <Text style={styles.infoButtonText}>{translations.create_an_account[chosenLanguage]}</Text>
                         </Pressable>
                         : <Pressable style={styles.infoButton}>
@@ -321,7 +321,7 @@ export default function SignUpScreen({ route, navigation }) {
                     <Animated.View key="login-btn" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ top: screenHeight * 0.35, position: "absolute",}}>
                         {email && password
                             ? <Pressable onPress={async () => { login() }}
-                                style={styles.infoButton}>
+                            style={({ pressed }) => [styles.infoButton, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]}>
                                 <Text style={styles.infoButtonText}>{translations.sign_in_exclamation[chosenLanguage]}</Text>
                             </Pressable>
                             : <Pressable style={styles.infoButton}>
