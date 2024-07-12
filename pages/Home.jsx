@@ -428,6 +428,7 @@ export default function HomePage({ navigation }) {
   const [lastCompleted, setLastCompleted] = useState(null);
   const [termsPerSession, setTermsPerSession] = useState(null);
   const [notifications, setNotifications] = useState(null)
+  const [wordSpeed, setWordSpeed] = useState(null);
 
   const [words, setWords] = useState(null)
 
@@ -435,7 +436,7 @@ export default function HomePage({ navigation }) {
   // https://blog.teamairship.com/creating-reminders-with-notifee -> workaround for notifee scheduling bug
   const scheduleRepeatingReminder = async (timestamp) => {
     const week = new Array(7).fill('');
-
+    
     const prev = dayjs(lastCompleted).hour(0).minute(0).second(0).millisecond(0);
     const now = dayjs().date(10)
     let difference = now.diff(prev, 'day')
@@ -472,7 +473,7 @@ export default function HomePage({ navigation }) {
 
   // Sets up daily notifications
   useEffect(() => {
-    if (notifications) {
+    if (notifications && lastCompleted) {
       notifee.requestPermission().then(
         notifee.cancelAllNotifications().then(() => {
           scheduleRepeatingReminder(new Date);
@@ -484,25 +485,44 @@ export default function HomePage({ navigation }) {
   // Subscribe to changes in profile
   useEffect(() => {
     let uid = auth().currentUser.uid;
+    console.log(uid)
     const onValueChange = database()
       .ref(`${uid}/profile`)
       .on('value', snapshot => {
         let data = snapshot.val()
-        let lang = data.language
+        let lang = data?.language
         setUserLanguage(lang)
+
+        if (!lang) {
+          // database()
+          // .ref(`/${uid}/profile`)
+          // .update({
+          //     language: 'english',
+          //     stars: 0,
+          //     lastCompleted: JSON.stringify(dayjs().year(2000)),
+          //     notifications: true,
+          //     termsPerSession: 10
+          //     wordSpeed: 1
+          // })
+          auth()
+          .signOut()
+        }
 
         let stars = data?.stars ? data.stars : 0
         setStars(stars)
 
-        let lastCompleted = JSON.parse(data.lastCompleted)
+        let lastCompleted = data?.lastCompleted ? JSON.parse(data.lastCompleted) : null
         setLastCompleted(lastCompleted)
 
-        let termsPerSession = data.termsPerSession;
+        let termsPerSession = data?.termsPerSession;
         setTermsPerSession(termsPerSession)
         // console.log(termsPerSession)
 
-        let notifications = data.notifications;
+        let notifications = data?.notifications;
         setNotifications(notifications)
+
+        let wordSpeed = data?.wordSpeed;
+        setWordSpeed(wordSpeed)
 
         return () => database().ref(`${uid}/profile`).off('value', onValueChange);
       })
@@ -590,7 +610,7 @@ export default function HomePage({ navigation }) {
       <View style={{ flex: 1, backgroundColor: "#F0E8DD", }}>
         {settingsPage &&
           <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{ position: "absolute", width: screenWidth, height: screenHeight, zIndex: 1000 }}>
-            <Settings language={userLanguage} translations={translations} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)} logout={logOut} scheduleRepeatingReminder={scheduleRepeatingReminder} />
+            <Settings language={userLanguage} translations={translations} termsPerSession={termsPerSession} notifications={notifications} close={() => setSettingsPage(false)} logout={logOut} scheduleRepeatingReminder={scheduleRepeatingReminder} wordSpeed={wordSpeed}/>
           </Animated.View>
         }
         <Animated.View style={{ ...styles.tabBar, width: tabBarWidth, alignItems: "center", justifyContent: "space-around" }}>
@@ -713,7 +733,7 @@ export default function HomePage({ navigation }) {
           // }}
           // >
           <Animated.View entering={exitDirection.value ? SlideInLeft : null} exiting={SlideOutLeft} style={{ flex: 1 }}>
-            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage} />
+            <CameraPage language={userLanguage} translations={translations} terms={words} toDictionaryPage={toDictionaryPage} wordSpeed={wordSpeed}/>
           </Animated.View>
         }
         {studyPage &&
@@ -749,7 +769,7 @@ export default function HomePage({ navigation }) {
           //     toPractice()
           //   }}}>
           <Animated.View entering={SlideInRight} exiting={SlideOutRight} style={{flex: 1}}>
-            <Dictionary language={userLanguage} translations={translations} terms={words} />
+            <Dictionary language={userLanguage} translations={translations} terms={words} wordSpeed={wordSpeed} />
           </Animated.View>
         }
 

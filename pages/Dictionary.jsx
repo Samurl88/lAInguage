@@ -41,7 +41,9 @@ languageToId = {
     "chinese": {"identifier": "com.apple.ttsbundle.Ting-Ting-compact"}
 }
 
-export default function Dictionary({ language, translations, terms }) {
+const speedToRate = [0.2, 0.4, 0.6]
+
+export default function Dictionary({ language, translations, terms, wordSpeed }) {
     const [words, setWords] = useState();
     const [searchValue, setSearchValue] = useState(null);
     const [wordCounts, setWordCounts] = useState(null)
@@ -143,7 +145,7 @@ export default function Dictionary({ language, translations, terms }) {
                                 }
                             }}>
                                 <View style={{ width: 10, height: 10, backgroundColor: "#77bee9", borderRadius: 5 }} />
-                                <Text style={styles.categoryText}>Unfamiliar</Text>
+                                <Text style={styles.categoryText}>{translations.unfamiliar[language]}</Text>
                             </Pressable>
                             : null
                         }
@@ -158,7 +160,7 @@ export default function Dictionary({ language, translations, terms }) {
                                 }
                             }}>
                                 <View style={{ width: 10, height: 10, backgroundColor: "green", borderRadius: 5 }} />
-                                <Text style={styles.categoryText}>Familiar</Text>
+                                <Text style={styles.categoryText}>{translations.familiar[language]}</Text>
                             </Pressable>
                             : null
                         }
@@ -173,7 +175,7 @@ export default function Dictionary({ language, translations, terms }) {
                                 }
                             }}>
                                 <View style={{ width: 10, height: 10, backgroundColor: "#FFD12D", borderRadius: 5 }} />
-                                <Text style={styles.categoryText}>Mastered</Text>
+                                <Text style={styles.categoryText}>{translations.mastered[language]}</Text>
                             </Pressable>
                             : null
                         }
@@ -187,7 +189,7 @@ export default function Dictionary({ language, translations, terms }) {
                             renderItem={({ item }) =>
                                 <Term title={item.title} color={item.color} word={item.word} translatedWord={item.translatedWord}
                                     translatedDefinition={item.translatedDefinition} score={item.score} wordCounts={wordCounts} setWordCounts={setWordCounts}
-                                    onlyUnfamiliar={onlyUnfamiliar} onlyFamiliar={onlyFamiliar} onlyMastered={onlyMastered} originalLanguage={item.originalLanguage}
+                                    onlyUnfamiliar={onlyUnfamiliar} onlyFamiliar={onlyFamiliar} onlyMastered={onlyMastered} originalLanguage={item.originalLanguage} wordSpeed={wordSpeed}
                                 />}
                         />
                     </Animated.View>
@@ -204,7 +206,7 @@ export default function Dictionary({ language, translations, terms }) {
 
 
 
-function Term({ title, color, word, translatedWord, translatedDefinition, score, wordCounts, setWordCounts, onlyUnfamiliar, onlyFamiliar, onlyMastered, originalLanguage }) {
+function Term({ title, color, word, translatedWord, translatedDefinition, score, wordCounts, setWordCounts, onlyUnfamiliar, onlyFamiliar, onlyMastered, originalLanguage, wordSpeed }) {
     const termOpacity = useSharedValue(1)
     const termHeight = useSharedValue(screenHeight * 0.16)
     const marginTop = useSharedValue(12)
@@ -275,8 +277,8 @@ function Term({ title, color, word, translatedWord, translatedDefinition, score,
                             <Pressable style={{ justifyContent: "center", alignItems: "center", width: 30, height: 30, right: -10}} onPress={() => {
                                 if (!inProgress)
                                     Tts.speak(word, {
-                                        iosVoiceId: languageToId[originalLanguage].identifier,
-                                        rate: 0.4
+                                        iosVoiceId: languageToId[originalLanguage].identifier || "english",
+                                        rate: wordSpeed != undefined ? speedToRate[wordSpeed] : 0.4
                                     });
                             }}>
                                 <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" opacity={inProgress ? 0.5 : 1} />

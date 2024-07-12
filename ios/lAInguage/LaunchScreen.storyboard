@@ -1,41 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina6_72" orientation="portrait" appearance="light"/>
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <array key="SF-Pro.ttf">
+            <string>SFPro-Semibold</string>
+        </array>
+    </customFonts>
     <scenes>
         <!--View Controller-->
         <scene sceneID="EHf-IW-A2E">
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="launch" translatesAutoresizingMaskIntoConstraints="NO" id="55H-9I-P7Q">
-                                <rect key="frame" x="20" y="0.0" width="390" height="932"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="lexifyicon" translatesAutoresizingMaskIntoConstraints="NO" id="EiI-zo-dUf">
+                                <rect key="frame" x="71.666666666666686" y="159" width="250" height="250"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="250" id="9hv-ou-uad"/>
+                                    <constraint firstAttribute="width" secondItem="EiI-zo-dUf" secondAttribute="height" multiplier="1:1" id="CV2-FE-QyP"/>
+                                    <constraint firstAttribute="height" constant="250" id="lAW-n2-AG9"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L e x i f y" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2zm-Es-caN">
+                                <rect key="frame" x="96.666666666666686" y="459" width="200" height="43"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="IgW-zX-EB0"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SFPro-Semibold" family="SF Pro" pointSize="36"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="sanakama" translatesAutoresizingMaskIntoConstraints="NO" id="pXg-GU-4TP">
+                                <rect key="frame" x="171.66666666666666" y="719" width="50" height="49"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="pXg-GU-4TP" secondAttribute="height" multiplier="44:43" id="0Gw-C9-GK6"/>
+                                    <constraint firstAttribute="width" constant="50" id="88x-IR-h7Z"/>
+                                </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" red="0.96078431372549022" green="0.93333333333333335" blue="0.89803921568627454" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="55H-9I-P7Q" secondAttribute="bottom" id="2Af-KL-Axw"/>
-                            <constraint firstItem="55H-9I-P7Q" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="KuP-gk-7nq"/>
-                            <constraint firstItem="55H-9I-P7Q" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Nm2-MC-g1e"/>
-                            <constraint firstItem="55H-9I-P7Q" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="Nvb-Cb-05A"/>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="bottom" secondItem="pXg-GU-4TP" secondAttribute="bottom" constant="50" id="7vO-Yd-7yD"/>
+                            <constraint firstItem="2zm-Es-caN" firstAttribute="top" secondItem="EiI-zo-dUf" secondAttribute="bottom" constant="50" id="GFX-3e-IbF"/>
+                            <constraint firstItem="EiI-zo-dUf" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="NY4-Pd-W8h"/>
+                            <constraint firstItem="2zm-Es-caN" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Wxs-OM-XOL"/>
+                            <constraint firstItem="EiI-zo-dUf" firstAttribute="top" secondItem="Bcu-3y-fUS" secondAttribute="top" constant="100" id="bKR-Iy-5zf"/>
+                            <constraint firstItem="pXg-GU-4TP" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="cwv-CA-mVp"/>
                         </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="51.627906976744185" y="374.03433476394855"/>
+            <point key="canvasLocation" x="50.232558139534881" y="373.39055793991417"/>
         </scene>
     </scenes>
     <resources>
-        <image name="launch" width="390" height="844"/>
+        <image name="lexifyicon" width="695" height="723"/>
+        <image name="sanakama" width="1024" height="994"/>
     </resources>
 </document>

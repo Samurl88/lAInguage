@@ -218,7 +218,8 @@ export default function SignUpScreen({ route, navigation }) {
                 stars: 0,
                 lastCompleted: JSON.stringify(dayjs().year(2000)),
                 notifications: true,
-                termsPerSession: 10
+                termsPerSession: 10,
+                wordSpeed: 1
             })
         })
         .catch(error => {

@@ -10,12 +10,16 @@ import notifee from '@notifee/react-native';
 const screenHeight = Dimensions.get("screen").height;
 const screenWidth = Dimensions.get("screen").width;
 
-export default function Settings({ language, translations, termsPerSession, notifications, close, scheduleRepeatingReminder }) {
+const speedToName = ["0.5x", "1x", "2x"]
+
+export default function Settings({ language, translations, termsPerSession, notifications, close, scheduleRepeatingReminder, wordSpeed }) {
     // Hooks for switch
     const [currentNotifications, setCurrentNotifications] = useState(notifications !== undefined ? notifications : true);
     const toggleSwitch = () => setCurrentNotifications(previousState => !previousState);
     
     const [currentTPS, setCurrentTPS] = useState(termsPerSession !== undefined ? termsPerSession : 10);
+    console.log(wordSpeed)
+    const [currentWordSpeed, setCurrentWordSpeed] = useState(wordSpeed !== undefined ? wordSpeed : 1)
 
     function handleClose() {
         console.log(currentNotifications)
@@ -26,7 +30,8 @@ export default function Settings({ language, translations, termsPerSession, noti
                 .ref(`${uid}/profile`)
                 .update({
                     notifications: currentNotifications,
-                    termsPerSession: currentTPS
+                    termsPerSession: currentTPS,
+                    wordSpeed: currentWordSpeed
                 })     
         
         
@@ -62,14 +67,34 @@ export default function Settings({ language, translations, termsPerSession, noti
                                 }}>
                                     <SFSymbol name="arrowtriangle.left.circle.fill" size={25} width={30} height={30} color="#77bee9" />
                                 </Pressable>
-                                <Text style={{...styles.option, width: 25, textAlign: "center"}}>{currentTPS}</Text>
+                                <Text style={{...styles.option, width: 50, textAlign: "center"}}>{currentTPS}</Text>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentTPS >= 15 ? 0.4 : 1 }} onPress={() => {
                                     if (currentTPS < 15) 
                                         setCurrentTPS(currentTPS + 1)
                                 }}>
                                     <SFSymbol name="arrowtriangle.right.circle.fill" size={25} width={30} height={30} color="#77bee9" />
                                 </Pressable>
-
+                            </View>
+                        </View>
+                    </View>
+                    <View style={{ gap: 5 }}>
+                        <Text>Dictionary Options</Text>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                            <Text style={styles.option}>Enunciation Speed</Text>
+                            <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentWordSpeed <= 0 ? 0.4 : 1 }} onPress={() => {
+                                    if (currentWordSpeed > 0) 
+                                        setCurrentWordSpeed(currentWordSpeed - 1)
+                                }}>
+                                    <SFSymbol name="arrowtriangle.left.circle.fill" size={25} width={30} height={30} color="#77bee9" />
+                                </Pressable>
+                                <Text style={{...styles.option, width: 50, textAlign: "center"}}>{speedToName[currentWordSpeed]}</Text>
+                                <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentWordSpeed >= 2 ? 0.4 : 1 }} onPress={() => {
+                                    if (currentWordSpeed < 2) 
+                                        setCurrentWordSpeed(currentWordSpeed + 1)
+                                }}>
+                                    <SFSymbol name="arrowtriangle.right.circle.fill" size={25} width={30} height={30} color="#77bee9" />
+                                </Pressable>
                             </View>
                         </View>
                     </View>

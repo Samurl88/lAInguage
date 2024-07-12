@@ -63,10 +63,13 @@ languageToId = {
   "chinese": {"identifier": "com.apple.ttsbundle.Ting-Ting-compact"}
 }
 
-export default function CameraPage({ language, translations, terms, toDictionaryPage }) {
+const speedToRate = [0.2, 0.4, 0.6]
+
+export default function CameraPage({ language, translations, terms, toDictionaryPage, wordSpeed }) {
   const device = useCameraDevice('back')
 
   const genAI = new GoogleGenerativeAI(Config.API_KEY);
+
   const [originalWord, setOriginalWord] = useState(null)
   const [originalDefinition, setOriginalDefinition] = useState(null)
   const [translatedWord, setTranslatedWord] = useState(null)
@@ -117,9 +120,11 @@ export default function CameraPage({ language, translations, terms, toDictionary
       .then(() => console.log("Done!")).catch(error => {
         console.error("Failed to add word to database:", error);
       });
+      
   }
 
   const define = async (imageData) => {
+    console.log("WE GOT TO DEFINE")
     const prompt = `
     Attached is a photo. If there is a word highlighted in blue, determine the root word/infinitive of the highlighted word in the image (ex. leaving -> leave; vendieron -> vender).
     Provide the word and definition in the original language of the word as well as the original language (its name in english, ex. spanish -> spanish); additionally, provide the word and definition in ${language}. 
@@ -143,7 +148,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
       setTranslatedWord(text.translatedWord)
       setTranslatedDefinition(text.translatedDefinition)
       setOriginalLanguage(text.originalLanguage)
-      if (Object.keys(terms).includes(text.originalWord)) {
+      if (terms && Object.keys(terms).includes(text.originalWord)) {
         Alert.alert("Word already scanned!", "Please check your dictionary.", [
           {
             text: 'OK'
@@ -221,7 +226,6 @@ export default function CameraPage({ language, translations, terms, toDictionary
     setLoading(true)
     const image = await canvasRef.current.makeImageSnapshotAsync();
     const bytes = image.encodeToBase64();
-    // console.log(bytes)
     define(bytes)
 
   };
@@ -229,7 +233,6 @@ export default function CameraPage({ language, translations, terms, toDictionary
   // onBegin will allow only one stroke
   const pan = Gesture.Pan()
     .onStart((g) => {
-      console.log("start")
       // const newPaths = [];
       const newPaths = [...paths]
       // console.log(newPaths)
@@ -292,14 +295,14 @@ export default function CameraPage({ language, translations, terms, toDictionary
         <View style={{ backgroundColor: "black", flex: 1 }}>
           {!loadedImage ?
             <>
-              <Camera
+              {/* <Camera
                 ref={camera}
                 style={{ width: screenWidth, height: screenHeight, position: "absolute" }}
                 device={device}
                 isActive={true}
                 photo={true}
                 enableZoomGesture={true}
-              />
+              /> */}
 
               <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)}>
                 <Pressable style={{ ...styles.actionButton, }} onPress={() => {
@@ -436,10 +439,10 @@ export default function CameraPage({ language, translations, terms, toDictionary
               data={words}
               contentContainerStyle={{ paddingBottom: 30, alignSelf: "center", marginTop: 20 }}
               renderItem={({ item }) => {
-                return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} originalLanguage={item.originalLanguage} />)
+                return (<Term word={item.word} translatedWord={item.translatedWord} translatedDefinition={item.translatedDefinition} originalLanguage={item.originalLanguage} wordSpeed={wordSpeed} />)
               }}
               ListHeaderComponent={
-                <FirstTerm word={originalWord} translatedWord={translatedWord} translatedDefinition={translatedDefinition} firstTermOpacity={firstTermOpacity} firstTermHeight={firstTermHeight} firstMarginTop={firstMarginTop} originalLanguage={originalLanguage} />
+                <FirstTerm word={originalWord} translatedWord={translatedWord} translatedDefinition={translatedDefinition} firstTermOpacity={firstTermOpacity} firstTermHeight={firstTermHeight} firstMarginTop={firstMarginTop} originalLanguage={originalLanguage} wordSpeed={wordSpeed} />
               }
               style={{ paddingBottom: 50 }}
             />
@@ -451,7 +454,7 @@ export default function CameraPage({ language, translations, terms, toDictionary
 }
 
 
-function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacity, firstTermHeight, firstMarginTop, originalLanguage }) {
+function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacity, firstTermHeight, firstMarginTop, originalLanguage, wordSpeed }) {
 
   const [inProgress, setInProgress] = useState(false)
 
@@ -487,7 +490,7 @@ function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacit
               if (!inProgress)
                 Tts.speak(word, {
                   iosVoiceId: languageToId[originalLanguage].identifier,
-                  rate: 0.4
+                  rate: wordSpeed != undefined ? speedToRate[wordSpeed] : 0.4
                 });
             }}>
               <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" opacity={inProgress ? 0.5 : 1} />
@@ -500,7 +503,7 @@ function FirstTerm({ word, translatedWord, translatedDefinition, firstTermOpacit
   )
 }
 
-function Term({ word, translatedWord, translatedDefinition, originalLanguage }) {
+function Term({ word, translatedWord, translatedDefinition, originalLanguage, wordSpeed }) {
   const termOpacity = useSharedValue(1)
   const termHeight = useSharedValue(screenHeight * 0.16)
   const marginTop = useSharedValue(12)
@@ -540,7 +543,7 @@ function Term({ word, translatedWord, translatedDefinition, originalLanguage }) 
               if (!inProgress)
                 Tts.speak(word, {
                   iosVoiceId: languageToId[originalLanguage].identifier,
-                  rate: 0.4
+                  rate: wordSpeed != undefined ? speedToRate[wordSpeed] : 0.4
                 });
             }}>
               <SFSymbol name="speaker.wave.2.fill" size={20} color="#77BEE9" opacity={inProgress ? 0.5 : 1} />
