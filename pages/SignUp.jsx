@@ -4,6 +4,8 @@ import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 import { SFSymbol } from 'react-native-sfsymbols';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { AppleButton, appleAuth } from '@invertase/react-native-apple-authentication';
+
 
 const dayjs = require('dayjs')
 
@@ -24,8 +26,8 @@ const translations = {
         "portuguese": "Por favor, insira um email válido.",
         "hindi": "कृपया एक वैध ईमेल दर्ज करें।",
         "english": "Please enter a valid email."
-      },
-      "this_email_is_already_associated_with_an_account": {
+    },
+    "this_email_is_already_associated_with_an_account": {
         "spanish": "Este correo electrónico ya está asociado con una cuenta.",
         "chinese": "此电子邮件已与一个帐户关联。",
         "tagalog": "Ang email na ito ay nauugnay na sa isang account.",
@@ -37,8 +39,8 @@ const translations = {
         "portuguese": "Este email já está associado a uma conta.",
         "hindi": "यह ईमेल पहले से ही एक खाते से जुड़ा हुआ है।",
         "english": "This email is already associated with an account."
-      },
-      "your_password_must_include_at_least_6_characters": {
+    },
+    "your_password_must_include_at_least_6_characters": {
         "spanish": "Su contraseña debe incluir al menos 6 caracteres.",
         "chinese": "您的密码必须包含至少6个字符。",
         "tagalog": "Ang iyong password ay dapat maglaman ng hindi bababa sa 6 na character.",
@@ -50,8 +52,8 @@ const translations = {
         "portuguese": "Sua senha deve incluir pelo menos 6 caracteres.",
         "hindi": "आपका पासवर्ड कम से कम 6 अक्षर शामिल होना चाहिए।",
         "english": "Your password must include at least 6 characters."
-      },
-      "your_email_or_password_is_incorrect": {
+    },
+    "your_email_or_password_is_incorrect": {
         "spanish": "Su correo electrónico o contraseña es incorrecto.",
         "chinese": "您的电子邮件或密码不正确。",
         "tagalog": "Mali ang iyong email o password.",
@@ -63,8 +65,8 @@ const translations = {
         "portuguese": "Seu email ou senha está incorreto.",
         "hindi": "आपका ईमेल या पासवर्ड गलत है।",
         "english": "Your email or password is incorrect."
-      },
-      "email": {
+    },
+    "email": {
         "spanish": "Correo Electrónico",
         "chinese": "电子邮件",
         "tagalog": "Email",
@@ -76,8 +78,8 @@ const translations = {
         "portuguese": "Email",
         "hindi": "ईमेल",
         "english": "Email"
-      },
-      "password": {
+    },
+    "password": {
         "spanish": "Contraseña",
         "chinese": "密码",
         "tagalog": "Password",
@@ -89,8 +91,8 @@ const translations = {
         "portuguese": "Senha",
         "hindi": "पासवर्ड",
         "english": "Password",
-      },
-      "sign_up": {
+    },
+    "sign_up": {
         "spanish": "Regístrate",
         "chinese": "注册",
         "tagalog": "Mag-Sign Up",
@@ -102,8 +104,8 @@ const translations = {
         "portuguese": "Inscrever-Se",
         "hindi": "साइन अप करें",
         "english": "Sign Up"
-      },
-      "log_in": {
+    },
+    "log_in": {
         "spanish": "Iniciar Sesión",
         "chinese": "登录",
         "tagalog": "Mag-Log In",
@@ -115,8 +117,8 @@ const translations = {
         "portuguese": "Entrar",
         "hindi": "लॉग इन करें",
         "english": "Log In"
-      },
-      "create_an_account": {
+    },
+    "create_an_account": {
         "spanish": "Crea una cuenta!",
         "chinese": "创建一个账户！",
         "tagalog": "Lumikha ng isang account!",
@@ -128,47 +130,47 @@ const translations = {
         "portuguese": "Crie uma conta!",
         "hindi": "एक खाता बनाएँ!",
         "english": "Create an account!"
-      },
-      "no_account": {
-    "spanish": "¿No tienes cuenta?",
-    "chinese": "没有账户吗？",
-    "tagalog": "Walang account?",
-    "vietnamese": "Không có tài khoản?",
-    "arabic": "لا حساب؟",
-    "french": "Pas de compte ?",
-    "korean": "계정이 없나요?",
-    "russian": "Нет аккаунта?",
-    "portuguese": "Não tem conta?",
-    "hindi": "कोई खाता नहीं?",
-    "english": "No account?"
-  },
-  "sign_in_exclamation": {
-    "spanish": "¡Inicia sesión!",
-    "chinese": "登录！",
-    "tagalog": "Mag-sign in!",
-    "vietnamese": "Đăng nhập!",
-    "arabic": "سجّل الدخول!",
-    "french": "Connectez-vous !",
-    "korean": "로그인하세요!",
-    "russian": "Войти!",
-    "portuguese": "Faça login!",
-    "hindi": "साइन इन करें!",
-    "english": "Sign in!"
-  },
-  "already_have_an_account": {
-    "spanish": "¿Ya tienes una cuenta?",
-    "chinese": "已经有账户了？",
-    "tagalog": "May account na?",
-    "vietnamese": "Đã có tài khoản?",
-    "arabic": "هل لديك حساب؟",
-    "french": "Vous avez déjà un compte ?",
-    "korean": "이미 계정이 있습니까?",
-    "russian": "Уже есть аккаунт?",
-    "portuguese": "Já tem uma conta?",
-    "hindi": "पहले से ही एक खाता है?",
-    "english": "Already have an account?"
-  }
-  }
+    },
+    "no_account": {
+        "spanish": "¿No tienes cuenta?",
+        "chinese": "没有账户吗？",
+        "tagalog": "Walang account?",
+        "vietnamese": "Không có tài khoản?",
+        "arabic": "لا حساب؟",
+        "french": "Pas de compte ?",
+        "korean": "계정이 없나요?",
+        "russian": "Нет аккаунта?",
+        "portuguese": "Não tem conta?",
+        "hindi": "कोई खाता नहीं?",
+        "english": "No account?"
+    },
+    "sign_in_exclamation": {
+        "spanish": "¡Inicia sesión!",
+        "chinese": "登录！",
+        "tagalog": "Mag-sign in!",
+        "vietnamese": "Đăng nhập!",
+        "arabic": "سجّل الدخول!",
+        "french": "Connectez-vous !",
+        "korean": "로그인하세요!",
+        "russian": "Войти!",
+        "portuguese": "Faça login!",
+        "hindi": "साइन इन करें!",
+        "english": "Sign in!"
+    },
+    "already_have_an_account": {
+        "spanish": "¿Ya tienes una cuenta?",
+        "chinese": "已经有账户了？",
+        "tagalog": "May account na?",
+        "vietnamese": "Đã có tài khoản?",
+        "arabic": "هل لديك حساب؟",
+        "french": "Vous avez déjà un compte ?",
+        "korean": "이미 계정이 있습니까?",
+        "russian": "Уже есть аккаунт?",
+        "portuguese": "Já tem uma conta?",
+        "hindi": "पहले से ही एक खाता है?",
+        "english": "Already have an account?"
+    }
+}
 
 const data = [
     { "language": "english", "emoji": "🇺🇸" },
@@ -205,13 +207,9 @@ export default function SignUpScreen({ route, navigation }) {
         "auth/invalid-credential": translations.your_email_or_password_is_incorrect[chosenLanguage]
     }
 
-    async function register() {
-        setLoading(true);
-        auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then(() => {
-            let uid = auth().currentUser.uid
-            database()
+    async function createProfile() {
+        let uid = auth().currentUser.uid;
+        database()
             .ref(`/${uid}/profile`)
             .update({
                 language: chosenLanguage,
@@ -221,85 +219,62 @@ export default function SignUpScreen({ route, navigation }) {
                 termsPerSession: 10,
                 wordSpeed: 1
             })
-        })
-        .catch(error => {
-            console.log(errors[error.code])
+    }
 
-            setError(errors[error.code] ? errors[error.code] : "Something went wrong!");
-            // console.log(error.code)
-        })
+    async function register() {
+        setLoading(true);
+        auth()
+            .createUserWithEmailAndPassword(email, password)
+            .then(() => {
+                createProfile();
+            })
+            .catch(error => {
+                console.log(errors[error.code])
+
+                setError(errors[error.code] ? errors[error.code] : "Something went wrong!");
+                // console.log(error.code)
+            })
     }
 
     async function login() {
         setLoading(true);
         auth()
-        .signInWithEmailAndPassword(email, password)
-        .catch(error => {
-            setError(errors[error.code] ? errors[error.code] : "Something went wrong!");
-            console.log(error)
-        })
+            .signInWithEmailAndPassword(email, password)
+            .catch(error => {
+                setError(errors[error.code] ? errors[error.code] : "Something went wrong!");
+                console.log(error)
+            })
     }
 
+    async function appleSignIn() {
+        // Start the sign-in request
+        const appleAuthRequestResponse = await appleAuth.performRequest({
+            requestedOperation: appleAuth.Operation.LOGIN,
+            requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
+        });
+
+        // Ensure Apple returned a user identityToken
+        if (!appleAuthRequestResponse.identityToken) {
+            throw new Error('Apple Sign-In failed - no identify token returned');
+        }
+
+        // Create a Firebase credential from the response
+        const { identityToken, nonce } = appleAuthRequestResponse;
+        const appleCredential = auth.AppleAuthProvider.credential(identityToken, nonce);
+
+        // Sign the user in with the credential
+        return auth().signInWithCredential(appleCredential);
+    }
+
+
     if (signUp)
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", }}>
-            <View style={styles.container}>
-                <Pressable onPress={() => { navigation.goBack() }} style={{ position: "absolute", left: 20,  width: 24, height: 24, justifyContent: "center", alignItems: 'center' }}>
-                    <SFSymbol name="chevron.left" color="#000" size={24} />
-                </Pressable>
-                <Animated.Text key="signup-title" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={styles.title}>{translations.sign_up[chosenLanguage] }</Animated.Text>
-                <View style={{ position: "absolute", top: screenHeight * 0.15, width: "100%" }}>
-                    <View style={{ ...styles.inputContainer, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
-                        <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
-                            <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
-                                <Text style={styles.inputLabel}>{translations.email[chosenLanguage]}</Text>
-                            </View>
-                            <TextInput value={email} style={styles.input} placeholder='email@example.com' onChangeText={(text) => setEmail(text)} autoCapitalize='none' />
-                        </View>
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
-                                <Text style={styles.inputLabel}>{translations.password[chosenLanguage]}</Text>
-                            </View>
-                            <TextInput value={password} style={styles.input} placeholder={translations.password[chosenLanguage]} secureTextEntry={true} onChangeText={(text) => setPassword(text)} autoCapitalize='none' />
-                        </View>
-                    </View>
-                    <Text style={styles.error}>{error}</Text>
-                </View>
-
-                <Animated.View key="signup-btn" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ top: screenHeight * 0.35, position: "absolute",}}>
-                    {email && password
-                        ? <Pressable onPress={async () => { register() }}
-                        style={({ pressed }) => [styles.infoButton, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]}>
-                            <Text style={styles.infoButtonText}>{translations.create_an_account[chosenLanguage]}</Text>
-                        </Pressable>
-                        : <Pressable style={styles.infoButton}>
-                            <Text style={styles.infoButtonDisabledText}>{translations.create_an_account[chosenLanguage]}</Text>
-                        </Pressable>
-                    }
-                </Animated.View>
-
-
-            </View>
-
-            <Animated.View key="change-sign-in" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
-                <Text style={styles.swapPage}>{translations.already_have_an_account[chosenLanguage]} </Text>
-                <Pressable onPress={() => { 
-                    setSignUp(false) 
-                    setChange(true)
-                    }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>{translations.log_in[chosenLanguage]}!</Text></Pressable>
-            </Animated.View>
-        </SafeAreaView>
-    );
-
-    if (!signUp)
         return (
             <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", }}>
                 <View style={styles.container}>
-                    <Pressable onPress={() => { navigation.goBack() }} style={{ position: "absolute", left: 20,  width: 24, height: 24, justifyContent: "center", alignItems: 'center' }}>
+                    <Pressable onPress={() => { navigation.goBack() }} style={{ position: "absolute", left: 20, width: 24, height: 24, justifyContent: "center", alignItems: 'center' }}>
                         <SFSymbol name="chevron.left" color="#000" size={24} />
                     </Pressable>
-                    <Animated.Text key="login-title" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={styles.title}>{translations.log_in[chosenLanguage]}</Animated.Text>
-    
+                    <Animated.Text key="signup-title" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={styles.title}>{translations.sign_up[chosenLanguage]}</Animated.Text>
                     <View style={{ position: "absolute", top: screenHeight * 0.15, width: "100%" }}>
                         <View style={{ ...styles.inputContainer, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
                             <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
@@ -317,11 +292,74 @@ export default function SignUpScreen({ route, navigation }) {
                         </View>
                         <Text style={styles.error}>{error}</Text>
                     </View>
-    
-                    <Animated.View key="login-btn" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ top: screenHeight * 0.35, position: "absolute",}}>
+
+                    <Animated.View key="signup-btn" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ top: screenHeight * 0.35, position: "absolute", }}>
+                        {email && password
+                            ? <Pressable onPress={async () => { register() }}
+                                style={({ pressed }) => [styles.infoButton, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]}>
+                                <Text style={styles.infoButtonText}>{translations.create_an_account[chosenLanguage]}</Text>
+                            </Pressable>
+                            : <Pressable style={styles.infoButton}>
+                                <Text style={styles.infoButtonDisabledText}>{translations.create_an_account[chosenLanguage]}</Text>
+                            </Pressable>
+                        }
+                    </Animated.View>
+
+
+                </View>
+
+                <Animated.View key="change-sign-in" entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
+                    <Text style={styles.swapPage}>{translations.already_have_an_account[chosenLanguage]} </Text>
+                    <Pressable onPress={() => {
+                        setSignUp(false)
+                        setChange(true)
+                    }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>{translations.log_in[chosenLanguage]}!</Text></Pressable>
+                </Animated.View>
+                <Animated.View entering={change && FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} key="thirdpartysignup" style={styles.thirdPartyButtonContainer}>
+                    <AppleButton
+                        buttonStyle={AppleButton.Style.BLACK}
+                        buttonType={AppleButton.Type.SIGN_UP}
+                        style={{
+                            width: screenWidth * 0.7,
+                            height: 45,
+                        }}
+                        onPress={() => appleSignIn().then(() => createProfile())}
+                    />
+                </Animated.View>
+            </SafeAreaView>
+        );
+
+    if (!signUp)
+        return (
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F0E7", }}>
+                <View style={styles.container}>
+                    <Pressable onPress={() => { navigation.goBack() }} style={{ position: "absolute", left: 20, width: 24, height: 24, justifyContent: "center", alignItems: 'center' }}>
+                        <SFSymbol name="chevron.left" color="#000" size={24} />
+                    </Pressable>
+                    <Animated.Text key="login-title" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={styles.title}>{translations.log_in[chosenLanguage]}</Animated.Text>
+
+                    <View style={{ position: "absolute", top: screenHeight * 0.15, width: "100%" }}>
+                        <View style={{ ...styles.inputContainer, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
+                            <View style={{ flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderColor: error ? "#D41111" : "rgba(60, 60, 67, 0.4)" }}>
+                                <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
+                                    <Text style={styles.inputLabel}>{translations.email[chosenLanguage]}</Text>
+                                </View>
+                                <TextInput value={email} style={styles.input} placeholder='email@example.com' onChangeText={(text) => setEmail(text)} autoCapitalize='none' />
+                            </View>
+                            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <View style={{ alignItems: "center", justifyContent: "center", height: 50, backgroundColor: "white", }}>
+                                    <Text style={styles.inputLabel}>{translations.password[chosenLanguage]}</Text>
+                                </View>
+                                <TextInput value={password} style={styles.input} placeholder={translations.password[chosenLanguage]} secureTextEntry={true} onChangeText={(text) => setPassword(text)} autoCapitalize='none' />
+                            </View>
+                        </View>
+                        <Text style={styles.error}>{error}</Text>
+                    </View>
+
+                    <Animated.View key="login-btn" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ top: screenHeight * 0.35, position: "absolute", }}>
                         {email && password
                             ? <Pressable onPress={async () => { login() }}
-                            style={({ pressed }) => [styles.infoButton, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]}>
+                                style={({ pressed }) => [styles.infoButton, { backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]}>
                                 <Text style={styles.infoButtonText}>{translations.sign_in_exclamation[chosenLanguage]}</Text>
                             </Pressable>
                             : <Pressable style={styles.infoButton}>
@@ -329,13 +367,25 @@ export default function SignUpScreen({ route, navigation }) {
                             </Pressable>
                         }
                     </Animated.View>
-    
-    
+
+
                 </View>
-    
+
                 <Animated.View key="change-sign-up" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", position: "absolute", top: screenHeight * 0.9, alignSelf: "center" }}>
                     <Text style={styles.swapPage}>{translations.no_account[chosenLanguage]} </Text>
                     <Pressable onPress={() => { setSignUp(true) }}><Text style={{ ...styles.swapPage, textDecorationLine: "underline" }}>{translations.create_an_account[chosenLanguage]}</Text></Pressable>
+                </Animated.View>
+
+                <Animated.View key="thirdpartysignin" entering={FadeIn.duration(250).delay(250)} exiting={FadeOut.duration(250)} style={styles.thirdPartyButtonContainer}>
+                    <AppleButton
+                        buttonStyle={AppleButton.Style.BLACK}
+                        buttonType={AppleButton.Type.SIGN_IN}
+                        style={{
+                            width: screenWidth * 0.7,
+                            height: 45,
+                        }}
+                        onPress={() => appleSignIn()}
+                    />
                 </Animated.View>
             </SafeAreaView>
         );
@@ -417,13 +467,14 @@ const styles = StyleSheet.create({
         color: "rgba(0, 0, 0, 0.4)"
     },
     thirdPartyButtonContainer: {
-        top: screenHeight * 0.5,
+        top: screenHeight * 0.55,
         position: "absolute",
         flexDirection: "column",
         gap: 20,
         alignItems: "center",
         justifyContent: "center",
-        width: 300
+        width: 300,
+        alignSelf: "center"
     },
     iconButton: {
         padding: 10,

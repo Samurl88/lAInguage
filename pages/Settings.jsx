@@ -5,6 +5,7 @@ import { SFSymbol } from 'react-native-sfsymbols';
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import notifee from '@notifee/react-native';
+import { appleAuth } from '@invertase/react-native-apple-authentication';
 
 
 const screenHeight = Dimensions.get("screen").height;
@@ -16,10 +17,27 @@ export default function Settings({ language, translations, termsPerSession, noti
     // Hooks for switch
     const [currentNotifications, setCurrentNotifications] = useState(notifications !== undefined ? notifications : true);
     const toggleSwitch = () => setCurrentNotifications(previousState => !previousState);
-    
+
     const [currentTPS, setCurrentTPS] = useState(termsPerSession !== undefined ? termsPerSession : 10);
     console.log(wordSpeed)
     const [currentWordSpeed, setCurrentWordSpeed] = useState(wordSpeed !== undefined ? wordSpeed : 1)
+
+
+    // Add later when deleting account
+    async function revokeSignInWithAppleToken() {
+        // Get an authorizationCode from Apple
+        const { authorizationCode } = await appleAuth.performRequest({
+            requestedOperation: appleAuth.Operation.REFRESH,
+        });
+
+        // Ensure Apple returned an authorizationCode
+        if (!authorizationCode) {
+            throw new Error('Apple Revocation failed - no authorizationCode returned');
+        }
+
+        // Revoke the token
+        return auth().revokeToken(authorizationCode);
+    }
 
     function handleClose() {
         console.log(currentNotifications)
@@ -32,15 +50,15 @@ export default function Settings({ language, translations, termsPerSession, noti
                     notifications: currentNotifications,
                     termsPerSession: currentTPS,
                     wordSpeed: currentWordSpeed
-                })     
-        
-        
+                })
+
+
         if (currentNotifications === false) {
             notifee.cancelAllNotifications()
         } else {
             scheduleRepeatingReminder(new Date)
         }
-                
+
         close()
 
     }
@@ -62,14 +80,14 @@ export default function Settings({ language, translations, termsPerSession, noti
                             <Text style={styles.option}>{translations.terms_per_session[language]}</Text>
                             <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentTPS <= 5 ? 0.4 : 1 }} onPress={() => {
-                                    if (currentTPS > 5) 
+                                    if (currentTPS > 5)
                                         setCurrentTPS(currentTPS - 1)
                                 }}>
                                     <SFSymbol name="arrowtriangle.left.circle.fill" size={25} width={30} height={30} color="#77bee9" />
                                 </Pressable>
-                                <Text style={{...styles.option, width: 50, textAlign: "center"}}>{currentTPS}</Text>
+                                <Text style={{ ...styles.option, width: 50, textAlign: "center" }}>{currentTPS}</Text>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentTPS >= 15 ? 0.4 : 1 }} onPress={() => {
-                                    if (currentTPS < 15) 
+                                    if (currentTPS < 15)
                                         setCurrentTPS(currentTPS + 1)
                                 }}>
                                     <SFSymbol name="arrowtriangle.right.circle.fill" size={25} width={30} height={30} color="#77bee9" />
@@ -83,14 +101,14 @@ export default function Settings({ language, translations, termsPerSession, noti
                             <Text style={styles.option}>Enunciation Speed</Text>
                             <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentWordSpeed <= 0 ? 0.4 : 1 }} onPress={() => {
-                                    if (currentWordSpeed > 0) 
+                                    if (currentWordSpeed > 0)
                                         setCurrentWordSpeed(currentWordSpeed - 1)
                                 }}>
                                     <SFSymbol name="arrowtriangle.left.circle.fill" size={25} width={30} height={30} color="#77bee9" />
                                 </Pressable>
-                                <Text style={{...styles.option, width: 50, textAlign: "center"}}>{speedToName[currentWordSpeed]}</Text>
+                                <Text style={{ ...styles.option, width: 50, textAlign: "center" }}>{speedToName[currentWordSpeed]}</Text>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentWordSpeed >= 2 ? 0.4 : 1 }} onPress={() => {
-                                    if (currentWordSpeed < 2) 
+                                    if (currentWordSpeed < 2)
                                         setCurrentWordSpeed(currentWordSpeed + 1)
                                 }}>
                                     <SFSymbol name="arrowtriangle.right.circle.fill" size={25} width={30} height={30} color="#77bee9" />
@@ -146,11 +164,11 @@ const styles = StyleSheet.create({
         borderColor: "black",
         borderWidth: 3,
         width: "85%",
-        borderRadius: 10, 
+        borderRadius: 10,
         padding: 15,
         justifyContent: "center",
         alignItems: "center",
-        position: "absolute", 
+        position: "absolute",
         top: screenHeight * 0.75
     },
     logOutText: {
