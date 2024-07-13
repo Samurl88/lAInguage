@@ -78,7 +78,7 @@ export default function Settings({ language, translations, termsPerSession, noti
                         </View>
                     </View>
                     <View style={{ gap: 5 }}>
-                        <Text>Dictionary Options</Text>
+                        <Text>{translations.dictionary_options[language]}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                             <Text style={styles.option}>Enunciation Speed</Text>
                             <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>

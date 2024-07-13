@@ -411,8 +411,85 @@ const translations = {
     "portuguese": "Capture texto para traduzir.",
     "hindi": "अनुवाद के लिए पाठ को कैप्चर करें।",
     "english": "Capture text to translate."
+  },
+  "word_already_scanned": {
+    "spanish": "¡Palabra ya escaneada!",
+    "chinese": "词语已扫描！",
+    "tagalog": "Na-scan na ang salita!",
+    "vietnamese": "Từ đã được quét!",
+    "arabic": "تم مسح الكلمة بالفعل!",
+    "french": "Mot déjà scanné !",
+    "korean": "이미 스캔된 단어!",
+    "russian": "Слово уже отсканировано!",
+    "portuguese": "Palavra já escaneada!",
+    "hindi": "शब्द पहले ही स्कैन किया जा चुका है!",
+    "english": "Word already scanned!"
+  },
+  "please_check_your_dictionary": {
+    "spanish": "Por favor, revisa tu diccionario.",
+    "chinese": "请检查您的词典。",
+    "tagalog": "Paki-check ang iyong diksyunaryo.",
+    "vietnamese": "Vui lòng kiểm tra từ điển của bạn.",
+    "arabic": "يرجى التحقق من قاموسك.",
+    "french": "Veuillez vérifier votre dictionnaire.",
+    "korean": "사전을 확인해 주세요.",
+    "russian": "Пожалуйста, проверьте свой словарь.",
+    "portuguese": "Por favor, verifique seu dicionário.",
+    "hindi": "कृपया अपना शब्दकोश जांचें।",
+    "english": "Please check your dictionary."
+  },
+  "no_word_was_detected": {
+    "spanish": "¡No se detectó ninguna palabra!",
+    "chinese": "未检测到任何词语！",
+    "tagalog": "Walang salita ang natagpuan!",
+    "vietnamese": "Không phát hiện thấy từ nào!",
+    "arabic": "لم يتم اكتشاف أي كلمة!",
+    "french": "Aucun mot n'a été détecté!",
+    "korean": "단어가 감지되지 않았습니다!",
+    "russian": "Слово не было обнаружено!",
+    "portuguese": "Nenhuma palavra foi detectada!",
+    "hindi": "कोई शब्द नहीं मिला!",
+    "english": "No word was detected!"
+  },
+  "please_try_again": {
+    "spanish": "Por favor, inténtalo de nuevo.",
+    "chinese": "请再试一次。",
+    "tagalog": "Paki-subukan ulit.",
+    "vietnamese": "Vui lòng thử lại.",
+    "arabic": "يرجى المحاولة مرة أخرى.",
+    "french": "Veuillez réessayer.",
+    "korean": "다시 시도해 주세요.",
+    "russian": "Пожалуйста, попробуйте снова.",
+    "portuguese": "Por favor, tente novamente.",
+    "hindi": "कृपया पुन: प्रयास करें।",
+    "english": "Please try again."
+  },
+  "ok": {
+    "spanish": "Vale",
+    "chinese": "好",
+    "tagalog": "OK",
+    "vietnamese": "Đồng ý",
+    "arabic": "حسنًا",
+    "french": "D'accord",
+    "korean": "확인",
+    "russian": "Хорошо",
+    "portuguese": "OK",
+    "hindi": "ठीक है",
+    "english": "OK"
+  },
+  "dictionary_options": {
+    "spanish": "Opciones De Diccionario",
+    "chinese": "词典选项",
+    "tagalog": "Mga Pagpipilian Sa Diksyunaryo",
+    "vietnamese": "Tùy Chọn Từ Điển",
+    "arabic": "خيارات القاموس",
+    "french": "Options De Dictionnaire",
+    "korean": "사전 옵션",
+    "russian": "Варианты Словаря",
+    "portuguese": "Opções De Dicionário",
+    "hindi": "शब्दकोश विकल्प",
+    "english": "Dictionary Options"
   }
-
 }
 
 

@@ -149,9 +149,9 @@ export default function CameraPage({ language, translations, terms, toDictionary
       setTranslatedDefinition(text.translatedDefinition)
       setOriginalLanguage(text.originalLanguage)
       if (terms && Object.keys(terms).includes(text.originalWord)) {
-        Alert.alert("Word already scanned!", "Please check your dictionary.", [
+        Alert.alert(translations.word_already_scanned[language], translations.please_check_your_dictionary[language], [
           {
-            text: 'OK'
+            text: translations.ok[language]
           }
         ])
       } else {
@@ -159,9 +159,9 @@ export default function CameraPage({ language, translations, terms, toDictionary
         openTextSheet();
       }
     } else {
-      Alert.alert("No word was detected!", "Please try again.", [
+      Alert.alert(translations.no_word_was_detected[language], translations.please_try_again[language], [
         {
-          text: 'OK'
+          text: translations.ok[language]
         }
       ])
     }
