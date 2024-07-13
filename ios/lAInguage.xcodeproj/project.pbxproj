@@ -66,7 +66,7 @@
 		7A6B88F82DFE432692C1A4C1 /* NewYorkLarge-SemiboldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 3EC4E9CDFCD94257BF847F6F /* NewYorkLarge-SemiboldItalic.otf */; };
 		7BBBB33AEA2C447099C4EF94 /* SF-Pro-Rounded-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = BCA8B379C6FC4840AA2D24E5 /* SF-Pro-Rounded-Black.otf */; };
 		7DD2BF64C7C34E0C98587A02 /* SF-Pro-Text-SemiboldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 3D2EC276C3964210AE2BF3D2 /* SF-Pro-Text-SemiboldItalic.otf */; };
-		7E89CF872C2FBC8000B5C1CC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7E89CF862C2FBC8000B5C1CC /* GoogleService-Info.plist */; };
+		7E67313A2C426D0800565F11 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7E6731392C426D0800565F11 /* GoogleService-Info.plist */; };
 		7F2DCECB0A3A4F3393E12584 /* SF-Pro-Display-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2624E22D8FB94967974F3107 /* SF-Pro-Display-Light.otf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		886367357B06425086BB4234 /* NewYorkLarge-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = D6800187F9204A3685A39B06 /* NewYorkLarge-Black.otf */; };
@@ -174,7 +174,7 @@
 		78C6A9EC3CF74CF8B1C171B3 /* NewYorkSmall-Heavy.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "NewYorkSmall-Heavy.otf"; path = "../assets/fonts/NewYorkSmall-Heavy.otf"; sourceTree = "<group>"; };
 		7A4DA425AA6D4B2BBE6493D0 /* SF-Pro-Text-Heavy.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SF-Pro-Text-Heavy.otf"; path = "../assets/fonts/SF-Pro-Text-Heavy.otf"; sourceTree = "<group>"; };
 		7E02CDAC2C3B00780084389F /* lAInguage.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = lAInguage.entitlements; path = lAInguage/lAInguage.entitlements; sourceTree = "<group>"; };
-		7E89CF862C2FBC8000B5C1CC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		7E6731392C426D0800565F11 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		80E7B81C9AC2411188BC95B5 /* NewYorkSmall-BoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "NewYorkSmall-BoldItalic.otf"; path = "../assets/fonts/NewYorkSmall-BoldItalic.otf"; sourceTree = "<group>"; };
 		81286BFC22F04A89911907A7 /* SF-Pro-Text-RegularItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SF-Pro-Text-RegularItalic.otf"; path = "../assets/fonts/SF-Pro-Text-RegularItalic.otf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = lAInguage/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -417,7 +417,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				7E89CF862C2FBC8000B5C1CC /* GoogleService-Info.plist */,
+				7E6731392C426D0800565F11 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* lAInguage */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* lAInguageTests */,
@@ -546,7 +546,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				7E89CF872C2FBC8000B5C1CC /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				F1A4284FCA41654EEC1B9798 /* PrivacyInfo.xcprivacy in Resources */,
 				FDE40D539F964CE8921E30E2 /* NewYorkExtraLarge-Black.otf in Resources */,
@@ -622,6 +621,7 @@
 				A96D1330B2C743409A427A4E /* SF-Pro-Rounded-Medium.otf in Resources */,
 				1A8155D640A24D49BF32EA03 /* SF-Pro-Rounded-Regular.otf in Resources */,
 				98D67725637A4E79A9541110 /* SF-Pro-Rounded-Semibold.otf in Resources */,
+				7E67313A2C426D0800565F11 /* GoogleService-Info.plist in Resources */,
 				7834B57A441E486F8CAECE30 /* SF-Pro-Rounded-Thin.otf in Resources */,
 				27DC2D20E3294D11805E2CF8 /* SF-Pro-Rounded-Ultralight.otf in Resources */,
 				4EB685A4D05D4ECD8B8181AD /* SF-Pro-Text-Black.otf in Resources */,
@@ -1017,10 +1017,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -1103,10 +1100,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

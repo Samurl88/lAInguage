@@ -5,6 +5,12 @@ import database from '@react-native-firebase/database';
 import { SFSymbol } from 'react-native-sfsymbols';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { AppleButton, appleAuth } from '@invertase/react-native-apple-authentication';
+import {
+    GoogleSignin,
+    GoogleSigninButton,
+    statusCodes,
+} from '@react-native-google-signin/google-signin';
+import Config from 'react-native-config';
 
 
 const dayjs = require('dayjs')
@@ -186,7 +192,45 @@ const data = [
     { "language": "hindi", "emoji": "🇮🇳" },
 ]
 
+
+async function onGoogleButtonPress() {
+    try {
+        await GoogleSignin.hasPlayServices();
+        const userInfo = await GoogleSignin.signIn();
+        // setState({ userInfo, error: undefined });
+      } catch (error) {
+        console.log(error)
+        // if (isErrorWithCode(error)) {
+        //   switch (error.code) {
+        //     case statusCodes.SIGN_IN_CANCELLED:
+        //       // user cancelled the login flow
+        //       break;
+        //     case statusCodes.IN_PROGRESS:
+        //       // operation (eg. sign in) already in progress
+        //       break;
+        //     case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+        //       // play services not available or outdated
+        //       break;
+        //     default:
+        //     // some other error happened
+        //   }
+        // } else {
+        //   // an error that's not related to google sign in occurred
+        // }
+      }
+}
+
+
 export default function SignUpScreen({ route, navigation }) {
+
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId: "804964076181-tgulmqpqk1djlvb7s0a3p0amma6lmsgh.apps.googleusercontent.com",
+            scores: ['profile', 'email']
+        })
+        console.log(Config.GOOGLE_IOS_CLIENT_ID)
+    }, [])
+
     const { chosenLanguage } = route.params;
 
     const [email, setEmail] = useState('');
@@ -324,6 +368,12 @@ export default function SignUpScreen({ route, navigation }) {
                             height: 45,
                         }}
                         onPress={() => appleSignIn().then(() => createProfile())}
+                    />
+                    <GoogleSigninButton
+                        size={GoogleSigninButton.Size.Wide}
+                        color={GoogleSigninButton.Color.Light}
+                        onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
+                    // disabled={isInProgress}
                     />
                 </Animated.View>
             </SafeAreaView>
