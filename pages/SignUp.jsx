@@ -12,6 +12,7 @@ import {
 } from '@react-native-google-signin/google-signin';
 import Config from 'react-native-config';
 
+import google from '../assets/google.png'
 
 const dayjs = require('dayjs')
 
@@ -194,30 +195,24 @@ const data = [
 
 
 async function onGoogleButtonPress() {
-    try {
-        await GoogleSignin.hasPlayServices();
-        const userInfo = await GoogleSignin.signIn();
-        // setState({ userInfo, error: undefined });
-      } catch (error) {
-        console.log(error)
-        // if (isErrorWithCode(error)) {
-        //   switch (error.code) {
-        //     case statusCodes.SIGN_IN_CANCELLED:
-        //       // user cancelled the login flow
-        //       break;
-        //     case statusCodes.IN_PROGRESS:
-        //       // operation (eg. sign in) already in progress
-        //       break;
-        //     case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-        //       // play services not available or outdated
-        //       break;
-        //     default:
-        //     // some other error happened
-        //   }
-        // } else {
-        //   // an error that's not related to google sign in occurred
-        // }
-      }
+    // This database get isn't working???
+    database()
+    .ref('/')
+    .once('value')
+    .then(snapshot => {
+      console.log('User data: ', snapshot.val());
+    });
+
+    // Check if your device supports Google Play
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    // Get the users ID token
+    const { idToken } = await GoogleSignin.signIn();
+
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+    // Sign-in the user with the credential
+    return auth().signInWithCredential(googleCredential);
 }
 
 
@@ -225,10 +220,9 @@ export default function SignUpScreen({ route, navigation }) {
 
     useEffect(() => {
         GoogleSignin.configure({
-            webClientId: "804964076181-tgulmqpqk1djlvb7s0a3p0amma6lmsgh.apps.googleusercontent.com",
-            scores: ['profile', 'email']
+            webClientId: Config.GOOGLE_IOS_CLIENT_ID,
+            iosClientId: Config.GOOGLE_IOS_CLIENT_ID,
         })
-        console.log(Config.GOOGLE_IOS_CLIENT_ID)
     }, [])
 
     const { chosenLanguage } = route.params;
@@ -369,13 +363,15 @@ export default function SignUpScreen({ route, navigation }) {
                         }}
                         onPress={() => appleSignIn().then(() => createProfile())}
                     />
-                    <GoogleSigninButton
-                        size={GoogleSigninButton.Size.Wide}
-                        color={GoogleSigninButton.Color.Light}
-                        onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}
-                    // disabled={isInProgress}
-                    />
+                    <Pressable style={({ pressed }) => [{ backgroundColor: pressed ? "#F6F4F1" : "white", width: screenWidth * 0.7, height: 45, alignItems: "center", justifyContent: "center", borderRadius: 7, borderWidth: 1, borderColor: "rgba(0,0,0,0.2)" }]}
+                        onPress={() => onGoogleButtonPress().then(() => createProfile())}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 5, }}>
+                            <Image source={google} style={{ width: 15, height: 15 }} />
+                            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17 }}>Sign up with Google</Text>
+                        </View>
+                    </Pressable>
                 </Animated.View>
+                {/* <Pressable onPress={() => onGoogleButtonPress()}><Text>Sign in with Google</Text></Pressable> */}
             </SafeAreaView>
         );
 
@@ -436,6 +432,13 @@ export default function SignUpScreen({ route, navigation }) {
                         }}
                         onPress={() => appleSignIn()}
                     />
+                    <Pressable style={({ pressed }) => [{ backgroundColor: pressed ? "#F6F4F1" : "white", width: screenWidth * 0.7, height: 45, alignItems: "center", justifyContent: "center", borderRadius: 7, borderWidth: 1, borderColor: "rgba(0,0,0,0.2)" }]}
+                        onPress={() => onGoogleButtonPress()}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 5, }}>
+                            <Image source={google} style={{ width: 15, height: 15 }} />
+                            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17 }}>Sign in with Google</Text>
+                        </View>
+                    </Pressable>
                 </Animated.View>
             </SafeAreaView>
         );

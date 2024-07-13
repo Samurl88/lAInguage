@@ -562,7 +562,6 @@ export default function HomePage({ navigation }) {
   // Subscribe to changes in profile
   useEffect(() => {
     let uid = auth().currentUser.uid;
-    console.log(uid)
     const onValueChange = database()
       .ref(`${uid}/profile`)
       .on('value', snapshot => {
