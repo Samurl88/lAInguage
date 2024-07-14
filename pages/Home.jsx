@@ -557,6 +557,7 @@ export default function HomePage({ navigation }) {
         }
         ))
     }
+
   }, [])
 
   // Subscribe to changes in profile

@@ -195,13 +195,13 @@ const data = [
 
 
 async function onGoogleButtonPress() {
-    // This database get isn't working???
-    database()
-    .ref('/')
-    .once('value')
-    .then(snapshot => {
-      console.log('User data: ', snapshot.val());
-    });
+    // database()
+    // .ref('/')
+    // .once('value')
+    // .then(snapshot => {
+    //   const uids = Object.keys(snapshot.val());
+    //   console.log(uids)
+    // }).catch(e => console.log(e))
 
     // Check if your device supports Google Play
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -249,14 +249,25 @@ export default function SignUpScreen({ route, navigation }) {
         let uid = auth().currentUser.uid;
         database()
             .ref(`/${uid}/profile`)
-            .update({
-                language: chosenLanguage,
-                stars: 0,
-                lastCompleted: JSON.stringify(dayjs().year(2000)),
-                notifications: true,
-                termsPerSession: 10,
-                wordSpeed: 1
+            .once('value')
+            .then(snapshot => {
+                console.log("create profile")
+                console.log(snapshot.val())
+                if (!snapshot.val())
+                    console.log("creating profile!")
+                    database()
+                        .ref(`/${uid}/profile`)
+                        .update({
+                            language: chosenLanguage,
+                            stars: 0,
+                            lastCompleted: JSON.stringify(dayjs().year(2000)),
+                            notifications: true,
+                            termsPerSession: 10,
+                            wordSpeed: 1
+                        })
             })
+
+
     }
 
     async function register() {
@@ -367,7 +378,7 @@ export default function SignUpScreen({ route, navigation }) {
                         onPress={() => onGoogleButtonPress().then(() => createProfile())}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 5, }}>
                             <Image source={google} style={{ width: 15, height: 15 }} />
-                            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17 }}>Sign up with Google</Text>
+                            <Text style={{ fontFamily: "SFPro-Medium", fontSize: 17 }}>Sign up with Google</Text>
                         </View>
                     </Pressable>
                 </Animated.View>
@@ -430,13 +441,13 @@ export default function SignUpScreen({ route, navigation }) {
                             width: screenWidth * 0.7,
                             height: 45,
                         }}
-                        onPress={() => appleSignIn()}
+                        onPress={() => appleSignIn().then(() => createProfile())}
                     />
                     <Pressable style={({ pressed }) => [{ backgroundColor: pressed ? "#F6F4F1" : "white", width: screenWidth * 0.7, height: 45, alignItems: "center", justifyContent: "center", borderRadius: 7, borderWidth: 1, borderColor: "rgba(0,0,0,0.2)" }]}
-                        onPress={() => onGoogleButtonPress()}>
+                        onPress={() => onGoogleButtonPress().then(() => createProfile())}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 5, }}>
                             <Image source={google} style={{ width: 15, height: 15 }} />
-                            <Text style={{ fontFamily: "SFPro-Semibold", fontSize: 17 }}>Sign in with Google</Text>
+                            <Text style={{ fontFamily: "SFPro-Medium", fontSize: 17 }}>Sign in with Google</Text>
                         </View>
                     </Pressable>
                 </Animated.View>
