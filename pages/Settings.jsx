@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, Dimensions, StyleSheet, Switch, Pressable } from 'react-native'
+import { View, Text, SafeAreaView, Dimensions, StyleSheet, Switch, Pressable, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { TextInput } from 'react-native-gesture-handler';
 import { SFSymbol } from 'react-native-sfsymbols';
@@ -13,14 +13,30 @@ const screenWidth = Dimensions.get("screen").width;
 
 const speedToName = ["0.5x", "1x", "2x"]
 
+const data = [
+    { "language": "english", "emoji": "🇺🇸" },
+    { "language": "spanish", "emoji": "🇪🇸" },
+    { "language": "chinese", "emoji": "🇨🇳" },
+    { "language": "tagalog", "emoji": "🇵🇭" },
+    { "language": "vietnamese", "emoji": "🇻🇳" },
+    { "language": "arabic", "emoji": "🇸🇦" },
+    { "language": "french", "emoji": "🇫🇷" },
+    { "language": "korean", "emoji": "🇰🇷" },
+    { "language": "russian", "emoji": "🇷🇺" },
+    { "language": "portuguese", "emoji": "🇵🇹" },
+    { "language": "hindi", "emoji": "🇮🇳" },
+]
+
 export default function Settings({ language, translations, termsPerSession, notifications, close, scheduleRepeatingReminder, wordSpeed }) {
     // Hooks for switch
     const [currentNotifications, setCurrentNotifications] = useState(notifications !== undefined ? notifications : true);
     const toggleSwitch = () => setCurrentNotifications(previousState => !previousState);
 
     const [currentTPS, setCurrentTPS] = useState(termsPerSession !== undefined ? termsPerSession : 10);
-    console.log(wordSpeed)
+
     const [currentWordSpeed, setCurrentWordSpeed] = useState(wordSpeed !== undefined ? wordSpeed : 1)
+
+    const [chosenLanguage, setChosenLanguage] = useState(language)
 
 
     // Add later when deleting account
@@ -49,7 +65,8 @@ export default function Settings({ language, translations, termsPerSession, noti
                 .update({
                     notifications: currentNotifications,
                     termsPerSession: currentTPS,
-                    wordSpeed: currentWordSpeed
+                    wordSpeed: currentWordSpeed,
+                    language: chosenLanguage
                 })
 
 
@@ -63,23 +80,32 @@ export default function Settings({ language, translations, termsPerSession, noti
 
     }
 
+
+    function LanguageIcon({ emoji, language }) {
+        return (
+            <Pressable onPress={() => setChosenLanguage(language)} style={{ backgroundColor: "rgba(118, 118, 128, 0.12)", height: 60, width: 60, justifyContent: "center", alignItems: "center", borderRadius: 30, borderWidth: chosenLanguage === language ? 2 : 0 }}>
+                <Text style={{ fontSize: 40, }}>{emoji}</Text>
+            </Pressable>
+        )
+    }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#F5EEE5", alignItems: "center", }}>
             <View style={{ width: "85%", alignItems: "flex-end", position: "absolute", top: screenHeight * 0.06 }}>
                 <Pressable onPress={handleClose}>
-                    <Text style={{ fontSize: 20, }}>{translations.done[language]}</Text>
+                    <Text style={{ fontSize: 20, }}>{translations.done[chosenLanguage]}</Text>
                 </Pressable>
 
             </View>
             <View style={styles.container}>
-                <Text style={styles.title}>{translations.settings[language]}</Text>
+                <Text style={styles.title}>{translations.settings[chosenLanguage]}</Text>
                 <View style={{ width: "85%", gap: 20 }}>
                     <View style={{ gap: 5 }}>
-                        <Text>{translations.study_options[language]}</Text>
+                        <Text>{translations.study_options[chosenLanguage]}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <Text style={styles.option}>{translations.terms_per_session[language]}</Text>
+                            <Text style={styles.option}>{translations.terms_per_session[chosenLanguage]}</Text>
                             <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-                                <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentTPS <= 5 ? 0.4 : 1 }} onPress={() => {
+                                <Pressable style={({pressed}) => [{ justifyContent: "center", alignItems: "center", opacity: currentTPS <= 5 ? 0.4 : 1, backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]} onPress={() => {
                                     if (currentTPS > 5)
                                         setCurrentTPS(currentTPS - 1)
                                 }}>
@@ -96,7 +122,7 @@ export default function Settings({ language, translations, termsPerSession, noti
                         </View>
                     </View>
                     <View style={{ gap: 5 }}>
-                        <Text>{translations.dictionary_options[language]}</Text>
+                        <Text>{translations.dictionary_options[chosenLanguage]}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                             <Text style={styles.option}>Enunciation Speed</Text>
                             <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
@@ -117,9 +143,9 @@ export default function Settings({ language, translations, termsPerSession, noti
                         </View>
                     </View>
                     <View style={{ gap: 5 }}>
-                        <Text>{translations.misc[language]}</Text>
+                        <Text>{translations.misc[chosenLanguage]}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <Text style={styles.option}>{translations.daily_reminders[language]}</Text>
+                            <Text style={styles.option}>{translations.daily_reminders[chosenLanguage]}</Text>
                             <Switch
                                 trackColor={{ false: '#767577', true: '#77bee9' }}
                                 ios_backgroundColor="#3e3e3e"
@@ -129,6 +155,19 @@ export default function Settings({ language, translations, termsPerSession, noti
                         </View>
                     </View>
                 </View>
+                <View style={{ width: "85%", paddingTop: 20}}>
+                    <Text>{translations.language[chosenLanguage]}</Text>
+                </View>
+                <FlatList
+                    data={data}
+                    renderItem={({ item }) => <LanguageIcon language={item.language} emoji={item.emoji} />}
+                    horizontal
+                    contentContainerStyle={styles.languageList}
+                    showsHorizontalScrollIndicator={false}
+                />
+
+
+
                 {/* <Pressable style={styles.logOutBtn} onPress={() => {
                     logout();
                 }}>
@@ -175,5 +214,11 @@ const styles = StyleSheet.create({
         color: "black",
         fontSize: 20,
         fontFamily: "SFPro-Semibold"
-    }
+    },
+    languageList: {
+        gap: 15,
+        paddingLeft: 30,
+        paddingRight: 30,
+        paddingTop: 10
+    },
 });

@@ -179,30 +179,7 @@ const translations = {
     }
 }
 
-const data = [
-    { "language": "english", "emoji": "🇺🇸" },
-    { "language": "spanish", "emoji": "🇪🇸" },
-    { "language": "chinese", "emoji": "🇨🇳" },
-    { "language": "tagalog", "emoji": "🇵🇭" },
-    { "language": "vietnamese", "emoji": "🇻🇳" },
-    { "language": "arabic", "emoji": "🇸🇦" },
-    { "language": "french", "emoji": "🇫🇷" },
-    { "language": "korean", "emoji": "🇰🇷" },
-    { "language": "russian", "emoji": "🇷🇺" },
-    { "language": "portuguese", "emoji": "🇵🇹" },
-    { "language": "hindi", "emoji": "🇮🇳" },
-]
-
-
 async function onGoogleButtonPress() {
-    // database()
-    // .ref('/')
-    // .once('value')
-    // .then(snapshot => {
-    //   const uids = Object.keys(snapshot.val());
-    //   console.log(uids)
-    // }).catch(e => console.log(e))
-
     // Check if your device supports Google Play
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     // Get the users ID token
@@ -247,12 +224,12 @@ export default function SignUpScreen({ route, navigation }) {
 
     async function createProfile() {
         let uid = auth().currentUser.uid;
+
+        // create profile only when necessary
         database()
             .ref(`/${uid}/profile`)
             .once('value')
             .then(snapshot => {
-                console.log("create profile")
-                console.log(snapshot.val())
                 if (!snapshot.val())
                     console.log("creating profile!")
                     database()
@@ -265,7 +242,9 @@ export default function SignUpScreen({ route, navigation }) {
                             termsPerSession: 10,
                             wordSpeed: 1
                         })
-            })
+            }).catch(e =>
+                console.log(e)
+            )
 
 
     }

@@ -489,6 +489,19 @@ const translations = {
     "portuguese": "Opções De Dicionário",
     "hindi": "शब्दकोश विकल्प",
     "english": "Dictionary Options"
+  },
+  "language": {
+    "spanish": "Idioma",
+    "chinese": "语言",
+    "tagalog": "Wika",
+    "vietnamese": "Ngôn Ngữ",
+    "arabic": "اللغة",
+    "french": "Langue",
+    "korean": "언어",
+    "russian": "Язык",
+    "portuguese": "Idioma",
+    "hindi": "भाषा",
+    "english": "Language"
   }
 }
 
