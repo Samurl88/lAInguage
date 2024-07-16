@@ -502,6 +502,19 @@ const translations = {
     "portuguese": "Idioma",
     "hindi": "भाषा",
     "english": "Language"
+  },
+  "enunciation_speed": {
+    "spanish": "Velocidad De Pronunciación",
+    "chinese": "发音速度",
+    "tagalog": "Bilis Ng Pagbigkas",
+    "vietnamese": "Tốc Độ Phát Âm",
+    "arabic": "سرعة النطق",
+    "french": "Vitesse De Prononciation",
+    "korean": "발음 속도",
+    "russian": "Скорость Произношения",
+    "portuguese": "Velocidade De Pronúncia",
+    "hindi": "उच्चारण गति",
+    "english": "Enunciation Speed"
   }
 }
 

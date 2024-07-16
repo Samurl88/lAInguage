@@ -70,7 +70,7 @@ export default function Settings({ language, translations, termsPerSession, noti
         const { authorizationCode } = await appleAuth.performRequest({
             requestedOperation: appleAuth.Operation.REFRESH,
         });
-        
+
         // Ensure Apple returned an authorizationCode
         if (!authorizationCode) {
             throw new Error('Apple Revocation failed - no authorizationCode returned');
@@ -167,7 +167,7 @@ export default function Settings({ language, translations, termsPerSession, noti
                     <View style={{ gap: 5 }}>
                         <Text>{translations.dictionary_options[chosenLanguage]}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <Text style={styles.option}>Enunciation Speed</Text>
+                            <Text style={styles.option}>{translations.enunciation_speed[chosenLanguage]}</Text>
                             <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentWordSpeed <= 0 ? 0.4 : 1 }} onPress={() => {
                                     if (currentWordSpeed > 0)
