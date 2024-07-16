@@ -224,12 +224,14 @@ export default function SignUpScreen({ route, navigation }) {
 
     async function createProfile() {
         let uid = auth().currentUser.uid;
+        console.log(uid)
 
         // create profile only when necessary
         database()
             .ref(`/${uid}/profile`)
             .once('value')
             .then(snapshot => {
+                console.log(snapshot.val())
                 if (!snapshot.val())
                     console.log("creating profile!")
                     database()

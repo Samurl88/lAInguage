@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, Dimensions, StyleSheet, Switch, Pressable, FlatList } from 'react-native'
+import { View, Text, SafeAreaView, Dimensions, StyleSheet, Switch, Pressable, FlatList, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { TextInput } from 'react-native-gesture-handler';
 import { SFSymbol } from 'react-native-sfsymbols';
@@ -39,22 +39,6 @@ export default function Settings({ language, translations, termsPerSession, noti
     const [chosenLanguage, setChosenLanguage] = useState(language)
 
 
-    // Add later when deleting account
-    async function revokeSignInWithAppleToken() {
-        // Get an authorizationCode from Apple
-        const { authorizationCode } = await appleAuth.performRequest({
-            requestedOperation: appleAuth.Operation.REFRESH,
-        });
-
-        // Ensure Apple returned an authorizationCode
-        if (!authorizationCode) {
-            throw new Error('Apple Revocation failed - no authorizationCode returned');
-        }
-
-        // Revoke the token
-        return auth().revokeToken(authorizationCode);
-    }
-
     function handleClose() {
         console.log(currentNotifications)
         console.log(currentTPS)
@@ -78,6 +62,61 @@ export default function Settings({ language, translations, termsPerSession, noti
 
         close()
 
+    }
+
+    // Add later when deleting account
+    async function deleteAppleAccount() {
+        // Get an authorizationCode from Apple
+        const { authorizationCode } = await appleAuth.performRequest({
+            requestedOperation: appleAuth.Operation.REFRESH,
+        });
+        
+        // Ensure Apple returned an authorizationCode
+        if (!authorizationCode) {
+            throw new Error('Apple Revocation failed - no authorizationCode returned');
+        }
+
+        // Revoke the token
+        auth().revokeToken(authorizationCode)
+
+        // Delete data
+        let uid = auth().currentUser.uid
+        database()
+            .ref(`/${uid}`)
+            .set(null)
+
+        // Delete account
+        auth().currentUser
+            .delete()
+            .then(() => console.log("user deleted!"))
+            .catch(e => console.log(e))
+
+        return;
+    }
+
+    async function deleteAccount() {
+        const provider = auth().currentUser?.providerData[0]?.providerId;
+        console.log(provider)
+
+        // Apple specific - revoke token
+        if (provider == "apple.com") {
+            await deleteAppleAccount();
+        } else {
+            // Delete user data
+            let uid = auth().currentUser.uid
+
+            // Delete data
+            database()
+                .ref(`/${uid}`)
+                .set(null)
+
+            // Delete account
+            auth().currentUser
+                .delete()
+                .then(() => console.log("user deleted!"))
+                .catch(e => console.log(e))
+
+        }
     }
 
 
@@ -105,18 +144,22 @@ export default function Settings({ language, translations, termsPerSession, noti
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                             <Text style={styles.option}>{translations.terms_per_session[chosenLanguage]}</Text>
                             <View style={{ gap: 5, flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-                                <Pressable style={({pressed}) => [{ justifyContent: "center", alignItems: "center", opacity: currentTPS <= 5 ? 0.4 : 1, backgroundColor: pressed ? "#67A4C9" : "#77bee9" }]} onPress={() => {
+                                <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentTPS <= 5 ? 0.4 : 1, }} onPress={() => {
                                     if (currentTPS > 5)
                                         setCurrentTPS(currentTPS - 1)
                                 }}>
-                                    <SFSymbol name="arrowtriangle.left.circle.fill" size={25} width={30} height={30} color="#77bee9" />
+                                    {({ pressed }) => (
+                                        <SFSymbol name="arrowtriangle.left.circle.fill" size={25} width={30} height={30} color={pressed && currentTPS > 5 ? "#67A4C9" : "#77bee9"} />
+                                    )}
                                 </Pressable>
                                 <Text style={{ ...styles.option, width: 50, textAlign: "center" }}>{currentTPS}</Text>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentTPS >= 15 ? 0.4 : 1 }} onPress={() => {
                                     if (currentTPS < 15)
                                         setCurrentTPS(currentTPS + 1)
                                 }}>
-                                    <SFSymbol name="arrowtriangle.right.circle.fill" size={25} width={30} height={30} color="#77bee9" />
+                                    {({ pressed }) => (
+                                        <SFSymbol name="arrowtriangle.right.circle.fill" size={25} width={30} height={30} color={pressed && currentTPS < 15 ? "#67A4C9" : "#77bee9"} />
+                                    )}
                                 </Pressable>
                             </View>
                         </View>
@@ -130,14 +173,18 @@ export default function Settings({ language, translations, termsPerSession, noti
                                     if (currentWordSpeed > 0)
                                         setCurrentWordSpeed(currentWordSpeed - 1)
                                 }}>
-                                    <SFSymbol name="arrowtriangle.left.circle.fill" size={25} width={30} height={30} color="#77bee9" />
+                                    {({ pressed }) => (
+                                        <SFSymbol name="arrowtriangle.left.circle.fill" size={25} width={30} height={30} color={pressed && currentWordSpeed > 0 ? "#67A4C9" : "#77bee9"} />
+                                    )}
                                 </Pressable>
                                 <Text style={{ ...styles.option, width: 50, textAlign: "center" }}>{speedToName[currentWordSpeed]}</Text>
                                 <Pressable style={{ justifyContent: "center", alignItems: "center", opacity: currentWordSpeed >= 2 ? 0.4 : 1 }} onPress={() => {
                                     if (currentWordSpeed < 2)
                                         setCurrentWordSpeed(currentWordSpeed + 1)
                                 }}>
-                                    <SFSymbol name="arrowtriangle.right.circle.fill" size={25} width={30} height={30} color="#77bee9" />
+                                    {({ pressed }) => (
+                                        <SFSymbol name="arrowtriangle.right.circle.fill" size={25} width={30} height={30} color={pressed && currentWordSpeed < 2 ? "#67A4C9" : "#77bee9"} />
+                                    )}
                                 </Pressable>
                             </View>
                         </View>
@@ -155,7 +202,7 @@ export default function Settings({ language, translations, termsPerSession, noti
                         </View>
                     </View>
                 </View>
-                <View style={{ width: "85%", paddingTop: 20}}>
+                <View style={{ width: "85%", paddingTop: 20 }}>
                     <Text>{translations.language[chosenLanguage]}</Text>
                 </View>
                 <FlatList
@@ -168,13 +215,23 @@ export default function Settings({ language, translations, termsPerSession, noti
 
 
 
-                {/* <Pressable style={styles.logOutBtn} onPress={() => {
-                    logout();
+                <Pressable style={styles.logOutBtn} onPress={() => {
+                    Alert.alert('Are you sure?', 'This will irreversibly delete all your terms and preferences.', [
+                        {
+                            text: 'Cancel',
+                            style: 'cancel',
+                        },
+                        {
+                            text: 'Delete',
+                            onPress: () => deleteAccount(),
+                            style: 'destructive',
+                        },
+                    ]);
                 }}>
                     <Text style={styles.logOutText}>
-                        Log Out
+                        Delete Account
                     </Text>
-                </Pressable> */}
+                </Pressable>
             </View>
         </SafeAreaView>
     )
@@ -201,19 +258,19 @@ const styles = StyleSheet.create({
     },
     logOutBtn: {
         borderColor: "black",
-        borderWidth: 3,
+        borderWidth: 1,
         width: "85%",
         borderRadius: 10,
-        padding: 15,
+        padding: 10,
         justifyContent: "center",
         alignItems: "center",
         position: "absolute",
-        top: screenHeight * 0.75
+        top: screenHeight * 0.78
     },
     logOutText: {
         color: "black",
-        fontSize: 20,
-        fontFamily: "SFPro-Semibold"
+        fontSize: 18,
+        fontFamily: "SFPro-Regular"
     },
     languageList: {
         gap: 15,

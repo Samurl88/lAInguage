@@ -583,20 +583,20 @@ export default function HomePage({ navigation }) {
         let lang = data?.language
         setUserLanguage(lang)
 
-        if (!lang) {
-          // database()
-          // .ref(`/${uid}/profile`)
-          // .update({
-          //     language: 'english',
-          //     stars: 0,
-          //     lastCompleted: JSON.stringify(dayjs().year(2000)),
-          //     notifications: true,
-          //     termsPerSession: 10
-          //     wordSpeed: 1
-          // })
-          auth()
-          .signOut()
-        }
+        // if (!lang) {
+        //   // database()
+        //   // .ref(`/${uid}/profile`)
+        //   // .update({
+        //   //     language: 'english',
+        //   //     stars: 0,
+        //   //     lastCompleted: JSON.stringify(dayjs().year(2000)),
+        //   //     notifications: true,
+        //   //     termsPerSession: 10
+        //   //     wordSpeed: 1
+        //   // })
+        //   auth()
+        //   .signOut()
+        // }
 
         let stars = data?.stars ? data.stars : 0
         setStars(stars)
