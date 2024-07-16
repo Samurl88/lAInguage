@@ -295,14 +295,14 @@ export default function CameraPage({ language, translations, terms, toDictionary
         <View style={{ backgroundColor: "black", flex: 1 }}>
           {!loadedImage ?
             <>
-              {/* <Camera
+              <Camera
                 ref={camera}
                 style={{ width: screenWidth, height: screenHeight, position: "absolute" }}
                 device={device}
                 isActive={true}
                 photo={true}
                 enableZoomGesture={true}
-              /> */}
+              />
 
               <Animated.View style={styles.buttonContainer} key="buttonContainer1" entering={FadeIn.duration(250).delay(250)}>
                 <Pressable style={({ pressed }) => [styles.actionButton, { backgroundColor: pressed ? "#4A4643" : "#2F2C2A" }]} onPress={() => {
